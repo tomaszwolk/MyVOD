@@ -8,6 +8,7 @@ import { PlatformsGrid, type PlatformViewModel } from "@/components/onboarding/P
 import { ActionBar } from "@/components/onboarding/ActionBar";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getPlatforms, patchUserPlatforms } from "@/lib/api/platforms";
 import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 
@@ -180,10 +181,14 @@ export function OnboardingPlatformsPage() {
     selected: selectedIds.has(platform.id),
   }));
 
+  const headerActions = (
+    <ThemeToggle key="theme-toggle" />
+  );
+
   // Loading state
   if (isLoading) {
     return (
-      <OnboardingLayout title="Welcome to MyVOD">
+      <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
         <ProgressBar current={1} total={3} />
         <div className="space-y-6">
           <OnboardingHeader
@@ -205,7 +210,7 @@ export function OnboardingPlatformsPage() {
   // Error state for platforms loading
   if (platformsError) {
     return (
-      <OnboardingLayout title="Welcome to MyVOD">
+      <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
         <ProgressBar current={1} total={3} />
         <div className="space-y-6">
           <OnboardingHeader
@@ -231,7 +236,7 @@ export function OnboardingPlatformsPage() {
   }
 
   return (
-    <OnboardingLayout title="Welcome to MyVOD">
+    <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
       <ProgressBar current={1} total={3} />
 
       <OnboardingHeader

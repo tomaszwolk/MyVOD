@@ -5,6 +5,7 @@ import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { WatchedSearchCombobox } from "@/components/onboarding/WatchedSearchCombobox";
 import { SelectedMoviesList } from "@/components/onboarding/SelectedMoviesList";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useOnboardingWatchedController } from "@/hooks/useOnboardingWatchedController";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -38,8 +39,12 @@ export function OnboardingWatchedPage() {
     finish();
   };
 
+  const headerActions = (
+    <ThemeToggle key="theme-toggle" />
+  );
+
   return (
-    <OnboardingLayout title="Oznacz filmy które już widziałeś">
+    <OnboardingLayout title="Oznacz filmy które już widziałeś" headerActions={headerActions}>
       <ProgressBar current={3} total={3} />
 
       <OnboardingHeader

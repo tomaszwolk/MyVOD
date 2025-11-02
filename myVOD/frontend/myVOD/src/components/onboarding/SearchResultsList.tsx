@@ -33,6 +33,7 @@ export function SearchResultsList({
       role="listbox"
       className="max-h-80 overflow-y-auto"
       aria-label="Movie search results"
+      style={{ backgroundColor: 'var(--search-popover-background)' }}
     >
       {items.map((item) => (
         <SearchResultItem

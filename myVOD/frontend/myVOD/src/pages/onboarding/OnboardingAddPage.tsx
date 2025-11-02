@@ -8,6 +8,7 @@ import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { MovieSearchCombobox } from "@/components/onboarding/MovieSearchCombobox";
 import { AddedMoviesGrid } from "@/components/onboarding/AddedMoviesGrid";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAddUserMovie } from "@/hooks/useAddUserMovie";
 import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -192,8 +193,12 @@ export function OnboardingAddPage() {
     navigate(nextPath, { replace: true });
   };
 
+  const headerActions = (
+    <ThemeToggle key="theme-toggle" />
+  );
+
   return (
-    <OnboardingLayout title="Dodaj pierwsze 3 filmy do watchlisty">
+    <OnboardingLayout title="Dodaj pierwsze 3 filmy do watchlisty" headerActions={headerActions}>
       <ProgressBar current={2} total={3} />
 
       <OnboardingHeader

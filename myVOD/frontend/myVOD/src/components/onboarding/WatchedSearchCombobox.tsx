@@ -127,6 +127,7 @@ export function WatchedSearchCombobox({
           className="w-full p-0 bg-popover"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          style={{ backgroundColor: 'var(--search-popover-background)' }}
         >
           {error ? (
             <div className="p-4 text-center text-destructive text-sm">
@@ -137,7 +138,12 @@ export function WatchedSearchCombobox({
               Nie znaleziono filmów
             </div>
           ) : (
-            <ul role="listbox" aria-label="Movie search results" className="max-h-[300px] overflow-y-auto">
+            <ul 
+              role="listbox" 
+              aria-label="Movie search results" 
+              className="max-h-[300px] overflow-y-auto"
+              style={{ backgroundColor: 'var(--search-popover-background)' }}
+            >
               {results.map((movie, index) => {
                 const isSelected = selectedTconsts.has(movie.tconst);
                 const isActive = index === activeIndex;

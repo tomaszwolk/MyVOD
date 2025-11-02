@@ -3,6 +3,7 @@ import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { ActionBar } from "@/components/onboarding/ActionBar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * Onboarding page for selecting first movies.
@@ -22,8 +23,12 @@ export function OnboardingFirstMoviesPage() {
     navigate('/app/watchlist');
   };
 
+  const headerActions = (
+    <ThemeToggle key="theme-toggle" />
+  );
+
   return (
-    <OnboardingLayout title="Welcome to MyVOD">
+    <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
       <ProgressBar current={2} total={3} />
 
       <OnboardingHeader

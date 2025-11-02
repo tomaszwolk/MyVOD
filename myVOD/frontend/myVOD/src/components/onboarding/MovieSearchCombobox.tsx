@@ -123,6 +123,7 @@ export function MovieSearchCombobox({
           className="w-full p-0 bg-popover"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          style={{ backgroundColor: 'var(--search-popover-background)' }}
         >
           {error ? (
             <div className="p-4 text-center text-destructive text-sm">
