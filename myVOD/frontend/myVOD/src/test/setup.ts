@@ -30,11 +30,17 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 }))
 
 // Mock autoUpdate from @floating-ui/dom with proper implementation
+const mockAutoUpdate = vi.fn().mockImplementation(() => {
+  // Return a cleanup function that can be called
+  return vi.fn();
+});
+
 vi.mock('@floating-ui/dom', () => ({
-  autoUpdate: vi.fn().mockImplementation(() => {
-    // Return a cleanup function
-    return vi.fn();
-  }),
+  autoUpdate: mockAutoUpdate,
+  computePosition: vi.fn(),
+  offset: vi.fn(),
+  flip: vi.fn(),
+  shift: vi.fn(),
 }))
 
 // Mock @floating-ui/react-dom
@@ -56,7 +62,7 @@ vi.mock('@floating-ui/react-dom', () => ({
 
 // Mock @radix-ui/react-popper
 vi.mock('@radix-ui/react-popper', () => ({
-  Content: vi.fn(),
-  Root: vi.fn(),
-  whileElementsMounted: vi.fn(),
+  Content: vi.fn(({ children }) => children),
+  Root: vi.fn(({ children }) => children),
+  whileElementsMounted: vi.fn(() => mockAutoUpdate),
 }))

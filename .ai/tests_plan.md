@@ -1093,33 +1093,33 @@ afterAll(() => server.close())
 | **Profile View** | ✅ GOTOWE | 58 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Platforms View** | ✅ GOTOWE | 59 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Add View** | ✅ GOTOWE | 35 testów | 100% | ✅ Produkcyjne |
-| **Onboarding Watched View (Batch 1)** | ✅ W TRAKCIE | 15/50 testów | 88% hook | ✅ Produkcyjne |
+| **Onboarding Watched View** | ✅ W TRAKCIE | 43/50 testów | 86% | ✅ Produkcyjne |
 
-**Razem: 246 testów ✅**
+**Razem: 274 testów ✅**
 
 ### 🔄 **DO ZROBIENIA:**
 
 | Widok | Status | Testy do zrobienia | Priorytet | Szacowany czas |
 |-------|--------|-------------------|-----------|----------------|
-| **Onboarding Watched View** | 🟡 Batch 1 gotowe | ~35 testów (Batch 2-5) | 🔴 WYSOKI | 13-17h |
+| **Onboarding Watched View** | 🟡 Batch 1-3 gotowe | ~7 testów (Batch 4-5) | 🔴 WYSOKI | 5-8h |
 | **Auth Views** | 🔴 Brak testów | ~96 testów | 🔴 WYSOKI | 16-20h |
 
-**Razem do zrobienia: ~131 testów**
+**Razem do zrobienia: ~103 testów**
 
 ---
 
 ### 📈 **PODSUMOWANIE POSTĘPU:**
 
-- **Zaimplementowane:** 246 testów
-- **Pozostałe:** ~131 testów
+- **Zaimplementowane:** 274 testów
+- **Pozostałe:** ~103 testów
 - **Razem:** ~377 testów w całym projekcie
-- **Obecny postęp:** **~65%**
+- **Obecny postęp:** **~73%**
 
 ---
 
 ### 🎯 **REKOMENDOWANA KOLEJNOŚĆ:**
 
-1. **🟡 Onboarding Watched View** - dokończenie Batch 2-5 (13-17h) - Batch 1 ✅ GOTOWE
+1. **🟡 Onboarding Watched View** - dokończenie Batch 4-5 (5-8h) - Batch 1-3 ✅ GOTOWE
 2. **🔴 Auth Views** - krytyczne dla bezpieczeństwa (16-20h)
 
 ---
@@ -2835,69 +2835,35 @@ npm install --save-dev msw
 
 ---
 
-#### 3. 🟡 MEDIUM - Component: `SelectedMoviesList`
+#### ✅ 3. MEDIUM - Component: `SelectedMoviesList` - ZAIMPLEMENTOWANE
 
 **Plik:** `src/components/onboarding/__tests__/SelectedMoviesList.test.tsx`
+**Status:** ✅ ZAIMPLEMENTOWANE (4 testy)
 
-**Testy do zaimplementowania:**
+**Zaimplementowane testy:**
 ```typescript
 ✅ should render empty state when no items
-  - items = []
-  - Sprawdź "Brak oznaczonych filmów"
-  
 ✅ should render movie items
-  - Przekaż 2 filmy
-  - Sprawdź 2x <SelectedMovieItem>
-  
 ✅ should show counter badge
-  - 2 filmy, maxItems=3
-  - Sprawdź Badge "2/3"
-  
 ✅ should call onUndo when undo button clicked
-  - Kliknij X na filmie
-  - Sprawdź że onUndo został wywołany
 ```
 
-**Priority:** 🟡 MEDIUM
-
-**Estymacja:** 1h
-
----
-
-#### 4. 🟡 MEDIUM - Component: `SelectedMovieItem`
+#### ✅ 4. MEDIUM - Component: `SelectedMovieItem` - ZAIMPLEMENTOWANE
 
 **Plik:** `src/components/onboarding/__tests__/SelectedMovieItem.test.tsx`
+**Status:** ✅ ZAIMPLEMENTOWANE (8 testy)
 
-**Testy do zaimplementowania:**
+**Zaimplementowane testy:**
 ```typescript
 ✅ should render movie title and year
-  
-✅ should render poster or placeholder
-  
+✅ should render poster when available
+✅ should render placeholder when poster not available
 ✅ should show loading status
-  - status='loading'
-  - Sprawdź spinner i "Oznaczanie..."
-  
 ✅ should show success status
-  - status='success'
-  - Sprawdź zielony checkmark i "Obejrzany"
-  
 ✅ should show error status
-  - status='error'
-  - Sprawdź czerwony alert i komunikat błędu
-  
 ✅ should disable undo button when loading
-  - status='loading'
-  - Sprawdź disabled=true
-  
 ✅ should call onUndo when X clicked
-  - Kliknij przycisk X
-  - Sprawdź callback
 ```
-
-**Priority:** 🟡 MEDIUM
-
-**Estymacja:** 1-1.5h
 
 ---
 
@@ -3098,7 +3064,7 @@ it('should handle 409 conflict', async () => {
 
 **Data utworzenia:** 29 października 2025
 **Ostatnia aktualizacja:** 2 listopada 2025
-**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched (Batch 1) - testy zaimplementowane | Onboarding Watched (Batch 2-5) + Auth brak testów
-**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add zakończone | Onboarding Watched (Batch 1 ✅, pozostałe batche 🔄) + Auth do przetestowania
-**Postęp:** ~65% (246/377 testów)
+**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched (Batch 1-3) - testy zaimplementowane | Onboarding Watched (Batch 4-5) + Auth brak testów
+**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add zakończone | Onboarding Watched (Batch 1-3 ✅, pozostałe batche 🔄) + Auth do przetestowania
+**Postęp:** ~73% (274/377 testów)
 
