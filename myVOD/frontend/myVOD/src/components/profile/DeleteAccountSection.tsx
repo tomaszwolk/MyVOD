@@ -33,7 +33,9 @@ export function DeleteAccountSection({
 }: DeleteAccountSectionProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent
+        style={{ backgroundColor: 'var(--search-popover-background)' }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Usuń konto na stałe</AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
