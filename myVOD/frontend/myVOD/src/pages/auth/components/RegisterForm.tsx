@@ -40,7 +40,8 @@ export function RegisterForm() {
       password: "",
       confirmPassword: "",
     },
-    mode: "onBlur",
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const passwordValue = form.watch("password");

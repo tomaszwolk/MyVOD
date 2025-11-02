@@ -361,8 +361,8 @@ describe('RegisterForm', () => {
     const confirmPasswordInput = passwordInputs[1];
 
     await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'weak');
-    await user.type(confirmPasswordInput, 'weak');
+    await user.type(passwordInput, 'weakpass1');
+    await user.type(confirmPasswordInput, 'weakpass1');
 
     const submitButton = screen.getByRole('button', { name: /zarejestruj się/i });
     await user.click(submitButton);

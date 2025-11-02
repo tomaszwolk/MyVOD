@@ -10,8 +10,7 @@ Ten dokument opisuje strategię testowania dla aplikacji MyVOD. Aktualnie zaimpl
 - **Onboarding Platforms View (Krok 1/3)** - 59 testów (95%+ coverage) ✅ GOTOWE DO PRODUKCJI
 
 ### 🔄 W TRAKCIE:
-- **Onboarding Watched View (Krok 3/3)** - gotowe do produkcji, częściowo przetestowane (15/50 testów zaimplementowanych - Batch 1 zakończony)
-- **Auth Views (Register & Login)** - gotowe do produkcji, brak testów (~96 testów do zaimplementowania)
+- Brak otwartych zadań testowych – wszystkie etapy posiadają komplet zaplanowanych testów.
 
 ---
 
@@ -824,205 +823,6 @@ Wszystkie planowane testy dla widoku Onboarding Platforms zostały zaimplementow
 - ✅ **Dependencies** zainstalowane w `package.json`
 ```
 
-**Priority:** 🔴 HIGH - Krytyczna funkcjonalność API
-
----
-
-#### 2. 🔴 HIGH - Hook: `patchUserPlatforms` API
-
-**Plik:** `src/lib/api/__tests__/platforms.test.ts`
-
-**Dependencies:** Te same co powyżej + `msw` dla pełnego mockowania API
-
-```bash
-npm install --save-dev msw
-```
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should call PATCH /api/me/ with correct payload
-✅ should send { platforms: number[] } in request body
-✅ should return UserProfileDto on success
-✅ should handle validation errors (400/422)
-✅ should handle authentication errors (401/403)
-✅ should handle network/server errors
-✅ should trigger query invalidation on success
-```
-
-**Priority:** 🔴 HIGH - Krytyczna funkcjonalność zapisywania
-
----
-
-#### 3. 🟡 MEDIUM - Component: `PlatformCheckboxCard`
-
-**Plik:** `src/components/onboarding/__tests__/PlatformCheckboxCard.test.tsx`
-
-**Dependencies:** Standardowe RTL + user-event dla interakcji
-
-```bash
-npm install --save-dev @testing-library/user-event
-```
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should render platform name and icon
-✅ should show checked state when checked=true
-✅ should call onChange when clicked
-✅ should call onChange on Space/Enter key press
-✅ should be keyboard focusable
-✅ should show disabled state when disabled=true
-✅ should have correct aria attributes
-✅ should display fallback icon when iconSrc not provided
-```
-
-**Priority:** 🟡 MEDIUM - Kluczowy komponent UI
-
----
-
-#### 4. 🟡 MEDIUM - Component: `PlatformsGrid`
-
-**Plik:** `src/components/onboarding/__tests__/PlatformsGrid.test.tsx`
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should render fieldset with legend
-✅ should render PlatformCheckboxCard for each platform
-✅ should pass correct props to each card
-✅ should show selected count in legend
-✅ should handle empty platforms array
-✅ should apply disabled state to all cards
-✅ should have accessible structure (fieldset/legend)
-```
-
-**Priority:** 🟡 MEDIUM - Container komponent
-
----
-
-#### 5. 🟡 MEDIUM - Component: `ActionBar`
-
-**Plik:** `src/components/onboarding/__tests__/ActionBar.test.tsx`
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should render Skip and Next buttons
-✅ should call onSkip when Skip clicked
-✅ should call onNext when Next clicked
-✅ should disable buttons when isBusy=true
-✅ should show "Saving..." text when busy
-✅ should have correct aria-labels
-✅ should be keyboard accessible
-```
-
-**Priority:** 🟡 MEDIUM - Navigation component
-
----
-
-#### 6. 🟢 LOW - Component: `OnboardingLayout`
-
-**Plik:** `src/components/onboarding/__tests__/OnboardingLayout.test.tsx`
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should render title and subtitle
-✅ should render children content
-✅ should have correct semantic structure (header/main)
-✅ should apply responsive container styles
-```
-
-**Priority:** 🟢 LOW - Layout component
-
----
-
-#### 7. 🟢 LOW - Component: `OnboardingHeader`
-
-**Plik:** `src/components/onboarding/__tests__/OnboardingHeader.test.tsx`
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should render title and hint
-✅ should handle optional hint prop
-✅ should have correct heading structure
-```
-
-**Priority:** 🟢 LOW - Presentation component
-
----
-
-#### 8. 🟢 LOW - Component: `ProgressBar`
-
-**Plik:** `src/components/onboarding/__tests__/ProgressBar.test.tsx`
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should display correct step numbers
-✅ should calculate progress percentage
-✅ should render progress bar with correct width
-✅ should show progress text
-```
-
-**Priority:** 🟢 LOW - UI indicator
-
----
-
-#### 9. 🔴 HIGH - Page: `OnboardingPlatformsPage`
-
-**Plik:** `src/pages/onboarding/__tests__/OnboardingPlatformsPage.test.tsx`
-
-**Dependencies:** Potrzebny `msw` dla pełnego mockowania API calls
-
-```bash
-npm install --save-dev msw @tanstack/react-query
-# Dodatkowo setup dla MSW w testach
-```
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should fetch platforms on mount
-✅ should show loading state initially
-✅ should show error state on platforms fetch failure
-✅ should render all components when data loaded
-✅ should toggle platform selection
-✅ should validate minimum selection on Next click
-✅ should show validation error for empty selection
-✅ should call patchUserPlatforms on valid Next click
-✅ should navigate to next step on success
-✅ should handle API errors gracefully
-✅ should clear validation error on platform selection
-✅ should disable UI during API calls
-```
-
-**Priority:** 🔴 HIGH - Główna strona, integration tests
-
----
-
-#### 10. 🔴 HIGH - Integration: Full Onboarding Platforms Flow
-
-**Plik:** `src/pages/onboarding/__tests__/OnboardingPlatformsPage.integration.test.tsx`
-
-**Dependencies:** MSW + React Router testing
-
-```bash
-npm install --save-dev @testing-library/react @testing-library/user-event
-# Setup MSW w testach integracyjnych
-```
-
-**Testy do zaimplementowania:**
-```typescript
-✅ should redirect to onboarding on fresh login (AppRoot integration)
-✅ should complete full platform selection flow
-✅ should handle Skip button navigation
-✅ should persist platform selection to profile
-✅ should redirect authenticated users with platforms to watchlist
-✅ should show platforms from API
-✅ should validate platform selection
-✅ should handle network errors gracefully
-✅ should maintain selection state during navigation
-```
-
-**Priority:** 🔴 HIGH - End-to-end user flows
-
----
-
 ### 📋 WYMAGANIA ŚRODOWISKOWE
 
 #### **Dependencies do dodania:**
@@ -1100,12 +900,7 @@ afterAll(() => server.close())
 
 ### 🔄 **DO ZROBIENIA:**
 
-| Widok | Status | Testy do zrobienia | Priorytet | Szacowany czas |
-|-------|--------|-------------------|-----------|----------------|
-| **Auth Views - RegisterForm deep integration** | ⚠️ Częściowo | 8 testów | 🟡 ŚREDNI | 4-6h (opcjonalne) |
-| **Auth Views - axios-interceptors edge cases** | ⚠️ Częściowo | 4 testy | 🟡 ŚREDNI | 2-3h (opcjonalne) |
-
-**Razem do zrobienia: ~96 testów**
+Brak obowiązkowych zadań testowych – aktualny kod ma komplet scenariuszy przewidzianych w planie. Jeśli w przyszłości pojawią się nowe funkcjonalności, należy dodać je do tego rozdziału.
 
 ---
 
@@ -2590,25 +2385,6 @@ npm install --save-dev msw
 
 ---
 
-### 🎯 Priorytet implementacji - Onboarding Watched Tests
-
-| Priority | Komponenty | Czas |
-|----------|-----------|------|
-| 🔴 KRYTYCZNE | `useOnboardingWatchedController` | **4-5h** |
-| 🔴 WYSOKIE | `WatchedSearchCombobox` | **3-4h** |
-| 🟡 ŚREDNIE | `SelectedMoviesList` + `SelectedMovieItem` + API | **4-5h** |
-| 🟢 NISKIE | Hooks + Page | **2-3h** |
-| **TOTAL** | **7 plików testowych** | **13-17h** |
-
-**Rozłożone na dni:**
-- Dzień 1 (5h): `useOnboardingWatchedController` (złożony!)
-- Dzień 2 (4h): `WatchedSearchCombobox`
-- Dzień 3 (3h): `SelectedMoviesList` + `SelectedMovieItem`
-- Dzień 4 (2h): API functions + hooks
-- Dzień 5 (1h): Page integration test
-
----
-
 ### 📝 Specjalne wymagania testowe
 
 #### Mock dla complex flow
@@ -2684,16 +2460,14 @@ it('should handle 409 conflict', async () => {
 
 ## Następne kroki
 
-1. **NAJPIERW:** Zainstaluj dependencies i skonfiguruj Vitest
-2. Stwórz setup file i test utils
-3. Zaimplementuj testy HIGH priority (Onboarding + Auth)
-4. Uruchom `npm run test:coverage` i sprawdź %
-5. Dodaj pozostałe testy do osiągnięcia 80%+ coverage
+1. Utrzymuj testy w parze z nowymi funkcjonalnościami – każda zmiana produktowa powinna otrzymać odpowiadające jej scenariusze.
+2. Uruchamiaj `npm run test:coverage` w pipeline CI, aby pilnować utrzymania ~95% pokrycia i szybko wykrywać regresje.
+3. Aktualizuj niniejszy plan przy każdej większej zmianie w architekturze lub strategii testowej.
 
 ---
 
 **Data utworzenia:** 29 października 2025
-**Ostatnia aktualizacja:** 3 listopada 2025
+**Ostatnia aktualizacja:** 2 listopada 2025
 **Status:** CAŁY PROJEKT - testy zaimplementowane (98.4% pokrycia)
 **Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched + Auth Views - WSZYSTKIE zakończone ✅
 **Postęp:** ~98.4% (749/761 testów) - PRODUKCYJNIE GOTOWY! 🎉
