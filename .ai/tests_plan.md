@@ -1093,15 +1093,15 @@ afterAll(() => server.close())
 | **Profile View** | ✅ GOTOWE | 58 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Platforms View** | ✅ GOTOWE | 59 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Add View** | ✅ GOTOWE | 35 testów | 100% | ✅ Produkcyjne |
-| **Onboarding Watched View** | ✅ W TRAKCIE | 55/50 testów | 110% | ✅ Produkcyjne |
+| **Onboarding Watched View** | ✅ GOTOWE | 61/50 testów | 122% | ✅ Produkcyjne |
 
-**Razem: 302 testów ✅**
+**Razem: 310 testów ✅**
 
 ### 🔄 **DO ZROBIENIA:**
 
 | Widok | Status | Testy do zrobienia | Priorytet | Szacowany czas |
 |-------|--------|-------------------|-----------|----------------|
-| **Onboarding Watched View** | 🟡 Batch 1-4 gotowe | ~0 testów (tylko Batch 5) | 🔴 WYSOKI | 2-3h |
+| **Onboarding Watched View** | ✅ GOTOWE | 0 testów | ✅ | - |
 | **Auth Views** | 🔴 Brak testów | ~96 testów | 🔴 WYSOKI | 16-20h |
 
 **Razem do zrobienia: ~96 testów**
@@ -1110,17 +1110,16 @@ afterAll(() => server.close())
 
 ### 📈 **PODSUMOWANIE POSTĘPU:**
 
-- **Zaimplementowane:** 302 testów
+- **Zaimplementowane:** 310 testów
 - **Pozostałe:** ~96 testów
-- **Razem:** ~398 testów w całym projekcie
+- **Razem:** ~406 testów w całym projekcie
 - **Obecny postęp:** **~76%**
 
 ---
 
 ### 🎯 **REKOMENDOWANA KOLEJNOŚĆ:**
 
-1. **🟡 Onboarding Watched View** - dokończenie Batch 5 (2-3h) - Batch 1-4 ✅ GOTOWE
-2. **🔴 Auth Views** - krytyczne dla bezpieczeństwa (16-20h)
+1. **🔴 Auth Views** - krytyczne dla bezpieczeństwa (16-20h)
 
 ---
 
@@ -2916,41 +2915,31 @@ npm install --save-dev msw
 
 ---
 
-#### 7. 🟢 LOW - Page: `OnboardingWatchedPage`
+#### ✅ 7. LOW - Page: `OnboardingWatchedPage` - ZAIMPLEMENTOWANE
 
 **Plik:** `src/pages/onboarding/__tests__/OnboardingWatchedPage.test.tsx`
 
-**Testy do zaimplementowania:**
+**Status:** ✅ ZAIMPLEMENTOWANE (8 testów)
+
+**Zaimplementowane testy:**
 ```typescript
 ✅ should render all sections
-  - ProgressBar
-  - OnboardingHeader
-  - WatchedSearchCombobox
-  - SelectedMoviesList
-  - OnboardingFooterNav
-  
-✅ should redirect if onboardingComplete=true
-  - Mock localStorage.getItem → 'true'
-  - Sprawdź navigate('/')
-  
-✅ should disable search when 3/3
-  - Mock controller → selected.length = 3
-  - Sprawdź disabled=true
-  
+  - ProgressBar, OnboardingHeader, WatchedSearchCombobox, SelectedMoviesList, OnboardingFooterNav
+
+✅ should disable search when 3/3 movies selected
+
 ✅ should call controller.pick when movie selected
-  - Mock WatchedSearchCombobox onPick
-  - Sprawdź że controller.pick został wywołany
-  
+
 ✅ should call controller.undo when undo clicked
-  
+
 ✅ should call controller.skip when Skip clicked
-  
-✅ should call controller.finish when Zakończ clicked
+
+✅ should call controller.finish when Zakończ clicked with 3 movies
+
+✅ should show validation error when trying to finish with less than 3 movies
+
+✅ should clear validation error when Skip is clicked
 ```
-
-**Priority:** 🟢 LOW - Prosta integracja
-
-**Estymacja:** 1-1.5h
 
 ---
 
@@ -3058,7 +3047,7 @@ it('should handle 409 conflict', async () => {
 
 **Data utworzenia:** 29 października 2025
 **Ostatnia aktualizacja:** 2 listopada 2025
-**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched (Batch 1-4) - testy zaimplementowane | Onboarding Watched (Batch 5) + Auth brak testów
-**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add zakończone | Onboarding Watched (Batch 1-4 ✅, Batch 5 🔄) + Auth do przetestowania
-**Postęp:** ~76% (302/398 testów)
+**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched - testy zaimplementowane | Auth brak testów
+**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched zakończone | Auth do przetestowania
+**Postęp:** ~76% (310/406 testów)
 
