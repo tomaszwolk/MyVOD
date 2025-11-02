@@ -1093,33 +1093,33 @@ afterAll(() => server.close())
 | **Profile View** | ✅ GOTOWE | 58 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Platforms View** | ✅ GOTOWE | 59 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Add View** | ✅ GOTOWE | 35 testów | 100% | ✅ Produkcyjne |
-| **Onboarding Watched View** | ✅ W TRAKCIE | 43/50 testów | 86% | ✅ Produkcyjne |
+| **Onboarding Watched View** | ✅ W TRAKCIE | 55/50 testów | 110% | ✅ Produkcyjne |
 
-**Razem: 274 testów ✅**
+**Razem: 302 testów ✅**
 
 ### 🔄 **DO ZROBIENIA:**
 
 | Widok | Status | Testy do zrobienia | Priorytet | Szacowany czas |
 |-------|--------|-------------------|-----------|----------------|
-| **Onboarding Watched View** | 🟡 Batch 1-3 gotowe | ~7 testów (Batch 4-5) | 🔴 WYSOKI | 5-8h |
+| **Onboarding Watched View** | 🟡 Batch 1-4 gotowe | ~0 testów (tylko Batch 5) | 🔴 WYSOKI | 2-3h |
 | **Auth Views** | 🔴 Brak testów | ~96 testów | 🔴 WYSOKI | 16-20h |
 
-**Razem do zrobienia: ~103 testów**
+**Razem do zrobienia: ~96 testów**
 
 ---
 
 ### 📈 **PODSUMOWANIE POSTĘPU:**
 
-- **Zaimplementowane:** 274 testów
-- **Pozostałe:** ~103 testów
-- **Razem:** ~377 testów w całym projekcie
-- **Obecny postęp:** **~73%**
+- **Zaimplementowane:** 302 testów
+- **Pozostałe:** ~96 testów
+- **Razem:** ~398 testów w całym projekcie
+- **Obecny postęp:** **~76%**
 
 ---
 
 ### 🎯 **REKOMENDOWANA KOLEJNOŚĆ:**
 
-1. **🟡 Onboarding Watched View** - dokończenie Batch 4-5 (5-8h) - Batch 1-3 ✅ GOTOWE
+1. **🟡 Onboarding Watched View** - dokończenie Batch 5 (2-3h) - Batch 1-4 ✅ GOTOWE
 2. **🔴 Auth Views** - krytyczne dla bezpieczeństwa (16-20h)
 
 ---
@@ -2867,27 +2867,27 @@ npm install --save-dev msw
 
 ---
 
-#### 5. 🟡 MEDIUM - API Functions
+#### ✅ 5. MEDIUM - API Functions - ZAIMPLEMENTOWANE
 
-**Plik:** `src/lib/api/__tests__/movies.test.ts`
+**Plik:** `src/lib/api/__tests__/movies.test.tsx`
+**Status:** ✅ ZAIMPLEMENTOWANE (14 testów)
 
-**Nowe funkcje do przetestowania:**
-
+**Zaimplementowane testy:**
 ```typescript
-// patchUserMovie
+// patchUserMovie (5 tests)
 ✅ should call PATCH /api/user-movies/:id
 ✅ should send UpdateUserMovieCommand in body
 ✅ should return UserMovieDto
 ✅ should handle 400 already watched
 ✅ should handle 401 Unauthorized
 
-// deleteUserMovie
+// deleteUserMovie (4 tests)
 ✅ should call DELETE /api/user-movies/:id
 ✅ should return void (204)
 ✅ should handle 404 Not Found
 ✅ should handle 401 Unauthorized
 
-// listUserMovies
+// listUserMovies (5 tests)
 ✅ should call GET /api/user-movies without params
 ✅ should call GET /api/user-movies?status=watchlist
 ✅ should call GET /api/user-movies?status=watched
@@ -2895,30 +2895,24 @@ npm install --save-dev msw
 ✅ should handle errors
 ```
 
-**Priority:** 🟡 MEDIUM
-
-**Estymacja:** 2h
-
 ---
 
-#### 6. 🟢 LOW - Hooks: `usePatchUserMovie`, `useDeleteUserMovie`, `useListUserMovies`
+#### ✅ 6. LOW - Hooks: `usePatchUserMovie`, `useDeleteUserMovie`, `useListUserMovies` - ZAIMPLEMENTOWANE
 
-**Pliki:** 
-- `src/hooks/__tests__/usePatchUserMovie.test.ts`
-- `src/hooks/__tests__/useDeleteUserMovie.test.ts`
-- `src/hooks/__tests__/useListUserMovies.test.ts`
+**Pliki:**
+- `src/hooks/__tests__/usePatchUserMovie.test.tsx` (4 testy)
+- `src/hooks/__tests__/useDeleteUserMovie.test.tsx` (4 testy)
+- `src/hooks/__tests__/useListUserMovies.test.tsx` (4 testy)
 
-**Testy do zaimplementowania (każdy hook):**
+**Status:** ✅ ZAIMPLEMENTOWANE (12 testów)
+
+**Zaimplementowane testy (każdy hook):**
 ```typescript
 ✅ should call API function with correct params
 ✅ should invalidate queries on success
 ✅ should handle errors
 ✅ should return correct mutation/query state
 ```
-
-**Priority:** 🟢 LOW - Proste wrappery
-
-**Estymacja:** 1h (wszystkie 3 razem)
 
 ---
 
@@ -3064,7 +3058,7 @@ it('should handle 409 conflict', async () => {
 
 **Data utworzenia:** 29 października 2025
 **Ostatnia aktualizacja:** 2 listopada 2025
-**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched (Batch 1-3) - testy zaimplementowane | Onboarding Watched (Batch 4-5) + Auth brak testów
-**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add zakończone | Onboarding Watched (Batch 1-3 ✅, pozostałe batche 🔄) + Auth do przetestowania
-**Postęp:** ~73% (274/377 testów)
+**Status:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched (Batch 1-4) - testy zaimplementowane | Onboarding Watched (Batch 5) + Auth brak testów
+**Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add zakończone | Onboarding Watched (Batch 1-4 ✅, Batch 5 🔄) + Auth do przetestowania
+**Postęp:** ~76% (302/398 testów)
 
