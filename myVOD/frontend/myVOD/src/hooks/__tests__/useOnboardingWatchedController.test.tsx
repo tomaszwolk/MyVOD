@@ -4,7 +4,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useOnboardingWatchedController } from '../useOnboardingWatchedController';
 import { addUserMovie, patchUserMovie, deleteUserMovie, listUserMovies } from '@/lib/api/movies';
-import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
+import { getNextOnboardingPath, useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 import { toast } from 'sonner';
 import type { SearchOptionVM, UserMovieDto } from '@/types/api.types';
 
@@ -29,7 +29,7 @@ vi.mock('@/lib/api/movies', () => ({
 
 vi.mock('@/hooks/useOnboardingStatus', () => ({
   useOnboardingStatus: vi.fn(),
-  getNextOnboardingPath: vi.fn(() => '/'),
+  getNextOnboardingPath: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
@@ -45,6 +45,7 @@ const mockPatchUserMovie = vi.mocked(patchUserMovie);
 const mockDeleteUserMovie = vi.mocked(deleteUserMovie);
 const mockListUserMovies = vi.mocked(listUserMovies);
 const mockUseOnboardingStatus = vi.mocked(useOnboardingStatus);
+const mockGetNextOnboardingPath = vi.mocked(getNextOnboardingPath);
 const mockToast = vi.mocked(toast);
 
 // Mock data
@@ -79,7 +80,7 @@ const mockWatchedMovie: UserMovieDto = {
 
 describe('useOnboardingWatchedController', () => {
   let queryClient: QueryClient;
-  let mockNavigate: ReturnType<typeof vi.fn>;
+  let navigateSpy: ReturnType<typeof vi.fn>;
 
   const createWrapper = () => {
     queryClient = new QueryClient({
@@ -115,6 +116,10 @@ describe('useOnboardingWatchedController', () => {
       watchlistMovies: [],
       watchedMovies: [], // Empty by default
     });
+
+    mockGetNextOnboardingPath.mockReturnValue('/app');
+
+    navigateSpy = mockNavigate;
   });
 
   afterEach(() => {
@@ -123,7 +128,7 @@ describe('useOnboardingWatchedController', () => {
 
   describe('initialization', () => {
     it('should initialize with empty state', () => {
-      mockUseOnboardingStatus.mockReturnValue({
+    mockUseOnboardingStatus.mockReturnValue({
         isLoading: false,
         isOnboardingComplete: false,
         requiredStep: null,
@@ -239,7 +244,7 @@ describe('useOnboardingWatchedController', () => {
         availability: [],
       }));
 
-      mockUseOnboardingStatus.mockReturnValue({
+    mockUseOnboardingStatus.mockReturnValue({
         isLoading: false,
         isOnboardingComplete: false,
         requiredStep: null,
@@ -480,17 +485,53 @@ describe('useOnboardingWatchedController', () => {
     });
   });
 
-  describe.skip('finish() & skip()', () => {
-    it('should set onboardingComplete and navigate to next path', () => {
-      // Navigation mocking requires further investigation
-      // This test is skipped due to vi.mock ordering issues with react-router-dom
-      expect(true).toBe(true);
+  describe('finish() & skip()', () => {
+    it('should set onboardingComplete and navigate to next path', async () => {
+      const { Wrapper } = createWrapper();
+
+      const { result } = renderHook(() => useOnboardingWatchedController(), {
+        wrapper: Wrapper,
+      });
+
+      act(() => {
+        result.current.finish();
+      });
+
+      expect(result.current.viewModel.isSubmitting).toBe(true);
+      expect(mockToast.success).toHaveBeenCalledWith('Onboarding zakończony!');
+      expect(mockGetNextOnboardingPath).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasPlatforms: true,
+          hasWatchlistMovies: true,
+          hasWatchedMovies: false,
+        }),
+        { fromStep: 'watched' }
+      );
+      expect(navigateSpy).toHaveBeenCalledWith('/app', { replace: true });
     });
 
-    it('should skip navigate without marking movies', () => {
-      // Navigation mocking requires further investigation
-      // This test is skipped due to vi.mock ordering issues with react-router-dom
-      expect(true).toBe(true);
+    it('should skip navigate without marking movies', async () => {
+      const { Wrapper } = createWrapper();
+
+      const { result } = renderHook(() => useOnboardingWatchedController(), {
+        wrapper: Wrapper,
+      });
+
+      act(() => {
+        result.current.skip();
+      });
+
+      expect(result.current.viewModel.isSubmitting).toBe(true);
+      expect(mockToast.success).not.toHaveBeenCalled();
+      expect(mockGetNextOnboardingPath).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasPlatforms: true,
+          hasWatchlistMovies: true,
+          hasWatchedMovies: false,
+        }),
+        { fromStep: 'watched' }
+      );
+      expect(navigateSpy).toHaveBeenCalledWith('/app', { replace: true });
     });
   });
 
