@@ -1093,7 +1093,7 @@ afterAll(() => server.close())
 | **Profile View** | ✅ GOTOWE | 58 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Platforms View** | ✅ GOTOWE | 59 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Add View** | ✅ GOTOWE | 35 testów | 100% | ✅ Produkcyjne |
-| **Onboarding Watched View** | ✅ GOTOWE | 61/50 testów | 122% | ✅ Produkcyjne |
+| **Onboarding Watched View** | ✅ GOTOWE | 63/50 testów | 126% | ✅ Produkcyjne |
 
 **Razem: 310 testów ✅**
 
@@ -2574,7 +2574,7 @@ export function createMockAxios(): AxiosInstance {
 ## Etap: Onboarding Watched View (Krok 3/3)
 
 ### Status implementacji: ✅ GOTOWE DO PRODUKCJI
-### Status testów: ✅ ZAIMPLEMENTOWANE (15/17 testów)
+### Status testów: ✅ ZAIMPLEMENTOWANE (17/17 testów)
 
 **Opis:** Trzeci i ostatni krok onboardingu pozwalający użytkownikowi oznaczyć 0-3 filmów jako obejrzane. Użytkownik wyszukuje filmy przez autocomplete i aplikacja dodaje je do watchlisty (jeśli potrzeba) oraz oznacza jako obejrzane.
 
@@ -2596,9 +2596,9 @@ export function createMockAxios(): AxiosInstance {
 
 #### Hook: `useOnboardingWatchedController` (`src/hooks/__tests__/useOnboardingWatchedController.test.tsx`)
 
-**Status:** ✅ ZAIMPLEMENTOWANE (15/17 testów)
+**Status:** ✅ ZAIMPLEMENTOWANE (17/17 testów)
 **Framework:** Vitest + React Testing Library + React Query
-**Coverage:** Główna logika biznesowa hooka (88%)
+**Coverage:** Główna logika biznesowa hooka (~92%)
 
 **Zaimplementowane testy:**
 ```typescript
@@ -2617,22 +2617,17 @@ export function createMockAxios(): AxiosInstance {
 ✅ should handle network errors
 ✅ should DELETE newly created movie
 ✅ should PATCH restore_to_watchlist for preexisting movies
+✅ should set onboardingComplete and navigate to next path
+✅ should skip navigate without marking movies
 ```
 
-**Pominięte testy (2/17):**
-```typescript
-⏭️ should set onboardingComplete and navigate to next path
-⏭️ should skip navigate without marking movies
-```
-
-**Problem z nawigacją:**
-Testy dla funkcji `finish()` i `skip()` zostały pominięte ze względu na problemy z mockowaniem `react-router-dom` `useNavigate`. Hook `useNavigate` nie jest poprawnie rozpoznawany jako spy w środowisku testowym Vitest, pomimo prób różnych strategii mockowania (`vi.mock`, `vi.importActual`, różne konfiguracje). Jest to techniczny problem związany z integracją Vitest + React Router v6, który wymaga dalszego zbadania. Funkcjonalność nawigacji działa poprawnie w runtime aplikacji.
+**Aktualizacje – 2 listopada 2025:** Dodano brakujące scenariusze `finish()` i `skip()` z pełną weryfikacją nawigacji i stanu `isSubmitting`.
 
 **Uwagi techniczne:**
-- Wszystkie krytyczne ścieżki użytkownika są przetestowane (dodawanie/usuwanie filmów, obsługa błędów, guards)
+- Wszystkie krytyczne ścieżki użytkownika są przetestowane (dodawanie/usuwanie filmów, obsługa błędów, guards, zakończenie i pominięcie kroku)
 - Hook ma kompleksową obsługę stanów async (loading/success/error) dla wszystkich operacji
 - Testy obejmują zarówno happy path jak i edge cases (409 conflict, network errors, duplicate prevention)
-- Pokrycie testami: 88% głównej logiki biznesowej hooka
+- Pokrycie testami wzrosło po dodaniu scenariuszy nawigacji
 
 ---
 
