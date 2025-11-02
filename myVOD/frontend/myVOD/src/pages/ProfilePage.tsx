@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useUpdateUserPlatforms } from "@/hooks/useUpdateUserPlatforms";
@@ -10,12 +10,12 @@ import { useChangePassword } from "@/hooks/useChangePassword";
 import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
-import { useAISuggestionsHandler } from "@/hooks/useAISuggestionsHandler";
+import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SearchCombobox } from "@/components/watchlist/SearchCombobox";
 import { SuggestAIButton } from "@/components/watchlist/SuggestAIButton";
-import { SuggestionModal } from "@/components/watchlist/SuggestionModal";
+import { AISuggestionsDialog } from "@/components/suggestions/AISuggestionsDialog";
 import { PlatformPreferencesCard } from "@/components/profile/PlatformPreferencesCard";
 import { ChangePasswordCard } from "@/components/profile/ChangePasswordCard";
 import { DangerZoneCard } from "@/components/profile/DangerZoneCard";
@@ -33,6 +33,10 @@ import type { PlatformDto } from "@/types/api.types";
 export function ProfilePage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check if suggestions modal should be open (from URL param)
+  const isSuggestionsModalOpen = searchParams.get('suggestions') === 'true';
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -52,7 +56,11 @@ export function ProfilePage() {
   const changePasswordMutation = useChangePassword();
   const addMovieMutation = useAddMovie();
   const patchUserMovieMutation = usePatchUserMovie();
-  const suggestionsHandler = useAISuggestionsHandler();
+
+  // AI suggestions query for checking rate limit status
+  const suggestionsQuery = useAISuggestions({
+    enabled: false, // Don't fetch automatically, only when modal opens
+  });
 
   // Local state for platform selection
   const [selectedPlatformIds, setSelectedPlatformIds] = useState<number[]>([]);
@@ -129,11 +137,17 @@ export function ProfilePage() {
   };
 
   const handleSuggest = () => {
-    suggestionsHandler.handleSuggestClick();
+    // Open modal by adding URL param
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('suggestions', 'true');
+    setSearchParams(newSearchParams, { replace: false });
   };
 
-  const handleAddFromSuggestion = (tconst: string) => {
-    suggestionsHandler.addFromSuggestion(tconst);
+  const handleCloseSuggestionsModal = () => {
+    // Close modal by removing URL param
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('suggestions');
+    setSearchParams(newSearchParams, { replace: true });
   };
 
   // Handlers for adding movies (from search)
@@ -210,11 +224,39 @@ export function ProfilePage() {
     [watchedEntries]
   );
 
+  // Create watchlist tconst set for suggestions modal
+  const watchlistTconstSet = useMemo(() => {
+    return new Set(existingTconsts);
+  }, [existingTconsts]);
+
   // Loading state
   const isLoading = userProfileQuery.isLoading || platformsQuery.isLoading;
 
   // Error state
   const hasError = userProfileQuery.isError || platformsQuery.isError;
+
+  // Check if suggestions are rate limited for button disabled state
+  const isSuggestDisabled = (suggestionsQuery.error as any)?.response?.status === 429;
+  
+  // Get expires_at for rate limit countdown
+  const nextAvailableAt = useMemo(() => {
+    if (suggestionsQuery.error) {
+      const error = suggestionsQuery.error as any;
+      if (error?.response?.status === 429) {
+        // If we have expires_at in error response, use it; otherwise calculate midnight
+        const expiresAt = error?.response?.data?.expires_at;
+        if (expiresAt) {
+          return expiresAt;
+        }
+        // Fallback to midnight
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+        return midnight.toISOString();
+      }
+    }
+    return suggestionsQuery.data?.expires_at || null;
+  }, [suggestionsQuery.error, suggestionsQuery.data]);
 
   // Prepare tabs for navigation (similar to watchlist/watched)
   const tabs = [
@@ -269,7 +311,8 @@ export function ProfilePage() {
             primaryActionsSlot={
               <SuggestAIButton
                 onClick={handleSuggest}
-                disabled={suggestionsHandler.isSuggestDisabled}
+                disabled={isSuggestDisabled}
+                nextAvailableAt={nextAvailableAt}
               />
             }
             // Other slots left empty - view controls and filters are not needed in profile view
@@ -332,11 +375,10 @@ export function ProfilePage() {
         </div>
       </MediaLibraryLayout>
 
-      <SuggestionModal
-        open={suggestionsHandler.isModalOpen}
-        onOpenChange={suggestionsHandler.closeModal}
-        data={suggestionsHandler.suggestionsData || null}
-        onAdd={handleAddFromSuggestion}
+      <AISuggestionsDialog
+        open={isSuggestionsModalOpen}
+        onClose={handleCloseSuggestionsModal}
+        watchlistTconstSet={watchlistTconstSet}
       />
     </>
   );

@@ -20,6 +20,7 @@ type WatchedToolbarProps = {
   existingWatchedTconsts: string[];
   onSuggest: () => void;
   isSuggestDisabled: boolean;
+  nextAvailableAt?: Date | string | null;
   hideUnavailable: boolean;
   onToggleHideUnavailable: () => void;
   visibleCount: number;
@@ -42,6 +43,7 @@ export function WatchedToolbar({
   existingWatchedTconsts,
   onSuggest,
   isSuggestDisabled,
+  nextAvailableAt,
   hideUnavailable,
   onToggleHideUnavailable,
   visibleCount,
@@ -62,6 +64,7 @@ export function WatchedToolbar({
         <SuggestAIButton
           onClick={onSuggest}
           disabled={isSuggestDisabled}
+          nextAvailableAt={nextAvailableAt}
         />
       }
       viewControlsSlot={
