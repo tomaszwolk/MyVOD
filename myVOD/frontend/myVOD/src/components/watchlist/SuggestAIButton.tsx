@@ -8,13 +8,35 @@ import { Sparkles } from "lucide-react";
 type SuggestAIButtonProps = {
   onClick: () => void;
   disabled: boolean;
+  nextAvailableAt?: Date | string | null;
 };
 
 /**
  * Button for requesting AI-powered movie suggestions.
  * Includes tooltip explaining the feature and disabled state handling.
+ * Shows countdown in tooltip when rate limited.
  */
-export function SuggestAIButton({ onClick, disabled }: SuggestAIButtonProps) {
+export function SuggestAIButton({ onClick, disabled, nextAvailableAt }: SuggestAIButtonProps) {
+  const getTooltipText = () => {
+    if (disabled && nextAvailableAt) {
+      const target = typeof nextAvailableAt === 'string' ? new Date(nextAvailableAt) : nextAvailableAt;
+      if (!isNaN(target.getTime())) {
+        const now = Date.now();
+        const diff = target.getTime() - now;
+        if (diff > 0) {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          return `Możesz otrzymać nowe sugestie za ${hours}h ${minutes}m`;
+        }
+      }
+      return "Limit sugestii AI został osiągnięty. Spróbuj ponownie później.";
+    }
+    if (disabled) {
+      return "Limit sugestii AI został osiągnięty. Spróbuj ponownie później.";
+    }
+    return "Zapytaj AI o spersonalizowane sugestie filmów na podstawie Twojej listy";
+  };
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -31,11 +53,7 @@ export function SuggestAIButton({ onClick, disabled }: SuggestAIButtonProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {disabled ? (
-            <p>Limit sugestii AI został osiągnięty. Spróbuj ponownie później.</p>
-          ) : (
-            <p>Zapytaj AI o spersonalizowane sugestie filmów na podstawie Twojej listy</p>
-          )}
+          <p>{getTooltipText()}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

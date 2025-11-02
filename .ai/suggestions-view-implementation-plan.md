@@ -1,7 +1,7 @@
 ## Plan implementacji widoku Sugestie AI
 
 ## 1. Przegląd
-Widok prezentuje do 5 sugestii filmów wygenerowanych przez AI wraz z krótkim uzasadnieniem i informacją o dostępności na platformach VOD użytkownika. Umożliwia dodanie wybranych sugestii do watchlisty, obsługuje limit 1 żądania na dzień oraz deep link pod ścieżką `/app/suggestions`. Utrzymujemy dwa równoległe warianty UI: modal przysłaniający bieżącą listę (aktualny produktowy wariant) oraz samodzielny widok korzystający ze wspólnego `MediaLibraryLayout`. Oba scenariusze będą rozwijane i testowane UX-owo, zanim zapadnie decyzja o docelowej prezentacji.
+Widok prezentuje do 5 sugestii filmów wygenerowanych przez AI wraz z krótkim uzasadnieniem i informacją o dostępności na platformach VOD użytkownika. Umożliwia dodanie wybranych sugestii do watchlisty, obsługuje limit 1 żądania na dzień. Implementuje modal przysłaniający bieżącą listę watchlisty.
 
 Cele:
 - Szybkie wyświetlenie bieżącej paczki sugestii (o ile istnieje) lub informacja o limicie/danych wejściowych.
@@ -10,10 +10,9 @@ Cele:
 
 
 ## 2. Routing widoku
-- Modal: renderowany w kontekście strony `/app/watchlist`, sterowany stanem `open` oraz nawigacją (obecnie używany w produkcie).
-- Deep link (pełny widok): `/app/suggestions` – wariant wykorzystujący `MediaLibraryLayout` i `MediaToolbar` (spójność z watchlistą/obejrzanymi). Pozostaje w fazie testów A/B.
-- Zalecany wzorzec nawigacyjny (obsługa obu wariantów):
-  - Klik przycisku „Zasugeruj filmy” na `/app/watchlist` wywołuje `navigate('/app/suggestions', { state: { asModal: true } })` i otwiera modal osadzony nad watchlistą.
+- Modal: renderowany w kontekście strony `/app/watchlist`, sterowany stanem `open` oraz nawigacją.
+- Wzorzec nawigacyjny:
+  - Klik przycisku „Zasugeruj filmy” na `/app/watchlist` otwiera modal osadzony nad watchlistą.
   - Zamknięcie modala: `navigate(-1)` (powrót), a gdy brak historii – `navigate('/app/watchlist')`.
 - Parametr `?debug=true` (tylko środowisko testowe/dev) może omijać limit – przekazywany do zapytania.
 
@@ -34,14 +33,13 @@ Cele:
         - AddToWatchlistButton
     - EmptyState (warianty: 404/limit/brak danych)
     - Footer (Zamknij)
-- AISuggestionsRoute (pełnoekranowy wariant treści z dialogu)
 
 
 ## 4. Szczegóły komponentów
 ### SuggestionsTriggerButton
-- Opis: Przycisk w nagłówku watchlisty do uruchomienia widoku sugestii (modal + deep link).
+- Opis: Przycisk w nagłówku watchlisty do uruchomienia widoku sugestii w modalu.
 - Elementy: Button z ikoną „magic/sparkles”, opcjonalny tooltip z informacją o limicie.
-- Zdarzenia: onClick → nawigacja do `/app/suggestions` (modal lub pełny widok).
+- Zdarzenia: onClick → otwarcie modala z sugestiami.
 - Walidacja: Gdy limit obowiązuje (z kontekstu lub wcześniejszej odpowiedzi 429), button disabled i tooltip „Możesz otrzymać nowe sugestie za Xh Ym”.
 - Typy: brak nowych; odbiera flagi stanu limitu.
 - Propsy: `{ disabled?: boolean; nextAvailableAt?: Date | null; }`.
@@ -54,12 +52,6 @@ Cele:
 - Typy: korzysta z VM widoku (sekcja 5).
 - Propsy: `{ open: boolean; onClose: () => void; debug?: boolean }`.
 
-### AISuggestionsRoute
-- Opis: Samodzielny wariant widoku pod `/app/suggestions` (bez tła watchlisty). Treść 1:1 z dialogu.
-- Elementy: Page container z tytułem, listą, stanami pustymi i stopką.
-- Zdarzenia: `onClose` → `navigate('/app/watchlist')`.
-- Walidacja: Brak.
-- Propsy: `{ debug?: boolean }`.
 
 ### AISuggestionsHeader
 - Opis: Pasek nagłówka z tytułem i informacją o limicie/czasie do resetu.
@@ -142,9 +134,9 @@ Nowe typy (ViewModel + pomocnicze):
   - Obsługa stanów: loading, success (200), empty (0 elementów), 404 (no-data), 429 (rate-limited), 500/network (error).
 - Dodawanie do watchlisty: `useAddToWatchlist()` (POST), zarządza stanem `loading` per `tconst`, optimistic disable i toast po sukcesie.
 - Zestaw `addedSet: Set<string>` – trwale blokuje przycisk po sukcesie.
-- Zestaw `watchlistTconstSet: Set<string>` – przekazywany z kontekstu watchlisty; we wariancie deep link, gdy niedostępny – fallback: polegać na 409 i potem blokować.
+- Zestaw `watchlistTconstSet: Set<string>` – przekazywany z kontekstu watchlisty.
 - `useCountdownTo(date)` – hook zwracający `hh:mm:ss` do `RateLimitBadge` (aktualizacja co 1s, cleanup on unmount).
-- Sterowanie modalem: stan kontrolowany przez router (obecność route `/app/suggestions`).
+- Sterowanie modalem: stan kontrolowany przez router.
 
 
 ## 7. Integracja API
@@ -163,7 +155,7 @@ Nowe typy (ViewModel + pomocnicze):
 
 
 ## 8. Interakcje użytkownika
-- Klik „Zasugeruj filmy” na watchliście → otwiera modal (i route) i odpala zapytanie GET.
+- Klik „Zasugeruj filmy” na watchliście → otwiera modal i odpala zapytanie GET.
 - W trakcie ładowania: spinner i tekst „Generuję sugestie…”.
 - Klik „Dodaj do watchlisty” na karcie:
   - Disabled podczas requestu; po 201 – stan „Dodano” i disabled.
@@ -191,7 +183,7 @@ Nowe typy (ViewModel + pomocnicze):
 
 ## 11. Kroki implementacji
 1) Routing i wyzwalacz
-   - Dodać route `/app/suggestions` i wariant modala nad `/app/watchlist`.
+   - Dodać modal nad `/app/watchlist`.
    - Umieścić `SuggestionsTriggerButton` w nagłówku watchlisty; zaszyć disabled + tooltip przy limicie.
 
 2) Hooki i klient API
@@ -201,12 +193,12 @@ Nowe typy (ViewModel + pomocnicze):
    - Zaimplementować `useCountdownTo(date)`.
 
 3) Komponenty UI
-  - `AISuggestionsDialog` i `AISuggestionsRoute` – kontener, nagłówek, lista, stopka, empty states. Wersja routowana bazuje na `MediaLibraryLayout`, re-używając wspólne sloty na nagłówek i toolbar.
+  - `AISuggestionsDialog` – kontener, nagłówek, lista, stopka, empty states.
    - `SuggestionList`, `SuggestionCard`, `AvailabilityIcons`, `AddToWatchlistButton`, `RateLimitBadge`, `EmptyState`.
    - Stylowanie Tailwind + shadcn/ui (Dialog, Button, Badge, Tooltip, Toast).
 
 4) Integracja z watchlistą
-   - Przekazać `watchlistTconstSet` z kontekstu (jeśli dostępny) do widoku; fallback: obsłużyć 409 i blokować kartę.
+   - Przekazać `watchlistTconstSet` z kontekstu do widoku.
    - Po dodaniu (201) – opcjonalnie odświeżyć listę watchlisty (invalidate Query) lub zastosować event bus.
 
 5) Dostępność i UX

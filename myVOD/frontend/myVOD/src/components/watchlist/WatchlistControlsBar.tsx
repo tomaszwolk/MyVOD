@@ -21,6 +21,7 @@ type WatchlistControlsBarProps = {
   hasUserPlatforms: boolean;
   onSuggest: () => void;
   isSuggestDisabled: boolean;
+  nextAvailableAt?: Date | string | null;
   onAddToWatchlist: (tconst: string) => Promise<void> | void;
   onAddToWatched: (tconst: string) => Promise<void> | void;
   existingTconsts: string[];
@@ -43,6 +44,7 @@ export function WatchlistControlsBar({
   hasUserPlatforms,
   onSuggest,
   isSuggestDisabled,
+  nextAvailableAt,
   onAddToWatchlist,
   onAddToWatched,
   existingTconsts,
@@ -62,6 +64,7 @@ export function WatchlistControlsBar({
         <SuggestAIButton
           onClick={onSuggest}
           disabled={isSuggestDisabled}
+          nextAvailableAt={nextAvailableAt}
         />
       }
       viewControlsSlot={

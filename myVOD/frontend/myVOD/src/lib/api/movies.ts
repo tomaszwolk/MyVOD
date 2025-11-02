@@ -95,9 +95,21 @@ export async function restoreUserMovie(id: number): Promise<UserMovieDto> {
 /**
  * Get AI-powered movie suggestions for the user.
  * Corresponds to GET /api/suggestions/
+ * @param options - Optional parameters including debug flag
  * @returns Promise<AISuggestionsDto>
  */
-export async function getAISuggestions(): Promise<AISuggestionsDto> {
-  const response = await http.get<AISuggestionsDto>("/suggestions/");
+type GetAISuggestionsOptions = {
+  debug?: boolean;
+};
+
+export async function getAISuggestions(options: GetAISuggestionsOptions = {}): Promise<AISuggestionsDto> {
+  const params: Record<string, string> = {};
+  if (options.debug) {
+    params.debug = 'true';
+  }
+
+  const response = await http.get<AISuggestionsDto>("/suggestions/", {
+    params: Object.keys(params).length > 0 ? params : undefined,
+  });
   return response.data;
 }

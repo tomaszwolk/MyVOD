@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 // Hooks
@@ -11,7 +11,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useWatchlistSelectors } from "@/hooks/useWatchlistSelectors";
 import { useMarkAsWatched, useDeleteFromWatchlist } from "@/hooks/useWatchlistActions";
-import { useAISuggestionsHandler } from "@/hooks/useAISuggestionsHandler";
+import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
@@ -20,7 +20,7 @@ import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { WatchlistControlsBar } from "@/components/watchlist/WatchlistControlsBar";
 import { WatchlistContent } from "@/components/watchlist/WatchlistContent";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
-import { SuggestionModal } from "@/components/watchlist/SuggestionModal";
+import { AISuggestionsDialog } from "@/components/suggestions/AISuggestionsDialog";
 import { ToastViewport } from "@/components/watchlist/ToastViewport";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,10 @@ import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 export function WatchlistPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check if suggestions modal should be open (from URL param)
+  const isSuggestionsModalOpen = searchParams.get('suggestions') === 'true';
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -70,8 +74,10 @@ export function WatchlistPage() {
   const { mutate: markAsWatched } = useMarkAsWatched();
   const { mutate: deleteFromWatchlist } = useDeleteFromWatchlist();
 
-  // AI suggestions
-  const suggestionsHandler = useAISuggestionsHandler();
+  // AI suggestions query for checking rate limit status
+  const suggestionsQuery = useAISuggestions({
+    enabled: false, // Don't fetch automatically, only when modal opens
+  });
 
   // Add movie from search
   const addMovieMutation = useAddMovie();
@@ -179,11 +185,17 @@ export function WatchlistPage() {
   };
 
   const handleSuggest = () => {
-    suggestionsHandler.handleSuggestClick();
+    // Open modal by adding URL param
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('suggestions', 'true');
+    setSearchParams(newSearchParams, { replace: false });
   };
 
-  const handleAddFromSuggestion = (tconst: string) => {
-    suggestionsHandler.addFromSuggestion(tconst);
+  const handleCloseSuggestionsModal = () => {
+    // Close modal by removing URL param
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('suggestions');
+    setSearchParams(newSearchParams, { replace: true });
   };
 
   // Get existing tconsts for duplicate checking
@@ -201,11 +213,39 @@ export function WatchlistPage() {
     [watchedEntriesByTconst]
   );
 
+  // Create watchlist tconst set for suggestions modal
+  const watchlistTconstSet = useMemo(() => {
+    return new Set(existingTconsts);
+  }, [existingTconsts]);
+
   // Loading states
   const isLoading = watchlistQuery.isLoading || userProfileQuery.isLoading || platformsQuery.isLoading;
 
   // Check if user has selected platforms for availability filtering
   const hasUserPlatforms = (userProfileQuery.data?.platforms?.length || 0) > 0;
+
+  // Check if suggestions are rate limited for button disabled state
+  const isSuggestDisabled = (suggestionsQuery.error as any)?.response?.status === 429;
+  
+  // Get expires_at for rate limit countdown
+  const nextAvailableAt = useMemo(() => {
+    if (suggestionsQuery.error) {
+      const error = suggestionsQuery.error as any;
+      if (error?.response?.status === 429) {
+        // If we have expires_at in error response, use it; otherwise calculate midnight
+        const expiresAt = error?.response?.data?.expires_at;
+        if (expiresAt) {
+          return expiresAt;
+        }
+        // Fallback to midnight
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+        return midnight.toISOString();
+      }
+    }
+    return suggestionsQuery.data?.expires_at || null;
+  }, [suggestionsQuery.error, suggestionsQuery.data]);
 
   const headerActions = (
     <div className="flex items-center gap-3">
@@ -257,7 +297,8 @@ export function WatchlistPage() {
             totalCount={totalCount}
             hasUserPlatforms={hasUserPlatforms}
             onSuggest={handleSuggest}
-            isSuggestDisabled={suggestionsHandler.isSuggestDisabled}
+            isSuggestDisabled={isSuggestDisabled}
+            nextAvailableAt={nextAvailableAt}
             onAddToWatchlist={handleAddToWatchlist}
             onAddToWatched={handleAddToWatched}
             existingTconsts={existingTconsts}
@@ -289,11 +330,10 @@ export function WatchlistPage() {
         onConfirm={confirmDialog.onConfirm}
       />
 
-      <SuggestionModal
-        open={suggestionsHandler.isModalOpen}
-        onOpenChange={suggestionsHandler.closeModal}
-        data={suggestionsHandler.suggestionsData || null}
-        onAdd={handleAddFromSuggestion}
+      <AISuggestionsDialog
+        open={isSuggestionsModalOpen}
+        onClose={handleCloseSuggestionsModal}
+        watchlistTconstSet={watchlistTconstSet}
       />
 
       <ToastViewport />
