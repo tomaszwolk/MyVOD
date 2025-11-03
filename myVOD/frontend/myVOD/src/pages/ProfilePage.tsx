@@ -11,6 +11,7 @@ import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
+import { useIsStaff } from "@/hooks/useIsStaff";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SearchCombobox } from "@/components/watchlist/SearchCombobox";
@@ -49,6 +50,7 @@ export function ProfilePage() {
   const platformsQuery = usePlatforms();
   const watchlistQuery = useListUserMovies('watchlist');
   const watchedQuery = useListUserMovies('watched');
+  const isStaff = useIsStaff();
 
   // Mutations
   const updatePlatformsMutation = useUpdateUserPlatforms();
@@ -278,6 +280,17 @@ export function ProfilePage() {
       isActive: true,
       onSelect: () => {},
     },
+    // Show Admin tab only if user is staff
+    ...(isStaff === true
+      ? [
+          {
+            id: "admin",
+            label: "Admin",
+            isActive: false,
+            onSelect: () => navigate("/app/admin/dashboard"),
+          },
+        ]
+      : []),
   ];
 
   // Header actions

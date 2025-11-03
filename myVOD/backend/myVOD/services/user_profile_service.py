@@ -30,7 +30,8 @@ def get_user_profile(user):
         dict: User profile data with structure:
             {
                 'email': str,
-                'platforms': [PlatformDto, ...]
+                'platforms': [PlatformDto, ...],
+                'is_staff': bool
             }
 
     Raises:
@@ -58,7 +59,8 @@ def get_user_profile(user):
 
         return {
             'email': user.email,
-            'platforms': list(platforms)
+            'platforms': list(platforms),
+            'is_staff': getattr(user, 'is_staff', False),
         }
 
     except DatabaseError as e:
@@ -88,7 +90,8 @@ def update_user_platforms(user, platform_ids: list[int]):
         dict: Updated user profile data with structure:
             {
                 'email': str,
-                'platforms': [PlatformDto, ...]
+                'platforms': [PlatformDto, ...],
+                'is_staff': bool
             }
 
     Raises:
@@ -150,7 +153,8 @@ def update_user_platforms(user, platform_ids: list[int]):
 
             return {
                 'email': user.email,
-                'platforms': list(platforms)
+                'platforms': list(platforms),
+                'is_staff': getattr(user, 'is_staff', False),
             }
 
     except DatabaseError as e:

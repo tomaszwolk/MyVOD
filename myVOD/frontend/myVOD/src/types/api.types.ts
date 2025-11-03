@@ -42,6 +42,7 @@ export type AuthErrorDto = {
 export type UserProfileDto = {
   email: string;
   platforms: PlatformDto[];
+  is_staff: boolean;
 };
 
 export type UpdateUserProfileCommand = {

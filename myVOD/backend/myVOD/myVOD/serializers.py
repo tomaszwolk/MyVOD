@@ -97,12 +97,14 @@ class UserProfileSerializer(serializers.Serializer):
     Serializer for user profile response.
 
     This maps to UserProfileDto on the frontend.
-    Returns authenticated user's email and their selected VOD platforms.
+    Returns authenticated user's email, their selected VOD platforms, and is_staff flag.
+    Staff flag indicates if user has admin dashboard access.
 
     Response for GET /api/me/
     """
     email = serializers.EmailField()
     platforms = PlatformSerializer(many=True, read_only=True)
+    is_staff = serializers.BooleanField()
 
 
 class UpdateUserProfileSerializer(serializers.Serializer):

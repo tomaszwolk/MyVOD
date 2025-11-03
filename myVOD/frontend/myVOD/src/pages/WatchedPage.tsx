@@ -13,6 +13,7 @@ import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
+import { useIsStaff } from "@/hooks/useIsStaff";
 
 // Components
 import { WatchedToolbar } from "@/components/watched/WatchedToolbar";
@@ -57,6 +58,7 @@ export function WatchedPage() {
   // User profile for platform availability
   const userProfileQuery = useUserProfile();
   const platformsQuery = usePlatforms();
+  const isStaff = useIsStaff();
 
   // Watched movies data
   const watchedQuery = useUserMoviesWatched({
@@ -295,6 +297,17 @@ export function WatchedPage() {
       isActive: false,
       onSelect: () => navigate("/app/profile"),
     },
+    // Show Admin tab only if user is staff
+    ...(isStaff === true
+      ? [
+          {
+            id: "admin",
+            label: "Admin",
+            isActive: false,
+            onSelect: () => navigate("/app/admin/dashboard"),
+          },
+        ]
+      : []),
   ];
 
   return (

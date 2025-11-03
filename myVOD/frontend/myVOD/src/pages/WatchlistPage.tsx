@@ -15,6 +15,7 @@ import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
+import { useIsStaff } from "@/hooks/useIsStaff";
 
 // Components
 import { WatchlistControlsBar } from "@/components/watchlist/WatchlistControlsBar";
@@ -61,6 +62,7 @@ export function WatchlistPage() {
   const watchedQuery = useListUserMovies('watched');
   const userProfileQuery = useUserProfile();
   const platformsQuery = usePlatforms();
+  const isStaff = useIsStaff();
 
   // Process and filter data
   const { items, totalCount, visibleCount } = useWatchlistSelectors({
@@ -276,6 +278,17 @@ export function WatchlistPage() {
       isActive: false,
       onSelect: () => navigate("/app/profile"),
     },
+    // Show Admin tab only if user is staff
+    ...(isStaff === true
+      ? [
+          {
+            id: "admin",
+            label: "Admin",
+            isActive: false,
+            onSelect: () => navigate("/app/admin/dashboard"),
+          },
+        ]
+      : []),
   ];
 
   return (
