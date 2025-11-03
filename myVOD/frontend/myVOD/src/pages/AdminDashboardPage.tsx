@@ -65,19 +65,27 @@ export function AdminDashboardPage() {
       id: "watchlist",
       label: "Watchlista",
       isActive: false,
-      onSelect: () => navigate("/app/watchlist"),
+      onSelect: () => {
+        // Use window.location.href to force full page navigation
+        // This ensures React Router properly switches components
+        window.location.href = "/app/watchlist";
+      },
     },
     {
       id: "watched",
       label: "Obejrzane",
       isActive: false,
-      onSelect: () => navigate("/app/watched"),
+      onSelect: () => {
+        window.location.href = "/app/watched";
+      },
     },
     {
       id: "profile",
       label: "Profil",
       isActive: false,
-      onSelect: () => navigate("/app/profile"),
+      onSelect: () => {
+        window.location.href = "/app/profile";
+      },
     },
     {
       id: "admin",
