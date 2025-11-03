@@ -9,6 +9,9 @@ import { OnboardingPlatformsPage, OnboardingFirstMoviesPage, OnboardingAddPage, 
 import { AppRoot } from "@/components/AppRoot";
 import { OnboardingGuard } from "@/components/OnboardingGuard";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import { UnauthorizedErrorPage } from "@/pages/UnauthorizedErrorPage";
+import { OfflineErrorPage } from "@/pages/OfflineErrorPage";
 
 /**
  * Protected route component that requires JWT authentication.
@@ -107,6 +110,18 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "/error/unauthorized",
+    element: <UnauthorizedErrorPage />,
+  },
+  {
+    path: "/error/offline",
+    element: <OfflineErrorPage />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 

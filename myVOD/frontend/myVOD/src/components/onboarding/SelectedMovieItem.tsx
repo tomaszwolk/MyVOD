@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { OnboardingSelectedItem } from "@/types/view/onboarding-watched.types";
 
 /**
@@ -29,18 +30,13 @@ export function SelectedMovieItem({ item, onUndo }: SelectedMovieItemProps) {
     >
       {/* Poster */}
       <div className="flex-shrink-0 w-[50px] h-[75px] bg-muted rounded overflow-hidden">
-        {item.poster_path ? (
-          <img
-            src={item.poster_path}
-            alt={`${item.primary_title} poster`}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-            No image
-          </div>
-        )}
+        <TMDBPoster
+          src={item.poster_path}
+          alt={`${item.primary_title} poster`}
+          width={50}
+          height={75}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Movie info */}

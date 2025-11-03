@@ -16,6 +16,11 @@ export function useListUserMovies(status?: 'watchlist' | 'watched', enabled: boo
     queryFn: () => listUserMovies(status),
     enabled,
     staleTime: 30_000, // Consider data fresh for 30 seconds
+    meta: {
+      // Custom metadata for error logging - availability data comes from backend
+      integration: 'watchmode',
+      operation: 'get_user_movies_with_availability',
+    },
   });
 }
 

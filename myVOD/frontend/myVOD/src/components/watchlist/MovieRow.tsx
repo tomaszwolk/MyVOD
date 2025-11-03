@@ -1,8 +1,9 @@
-import { useState, memo } from "react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Trash2, ImageIcon } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "./AvailabilityIcons";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { WatchlistItemVM } from "@/types/view/watchlist.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -21,11 +22,6 @@ type MovieRowProps = {
  * Displays movie poster, title, year, genres, rating, availability, and action buttons in a horizontal layout.
  */
 export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms, onMarkWatched, onDelete }) {
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   const hasGenres = item.movie.genres && item.movie.genres.length > 0;
   const displayGenres = hasGenres ? item.movie.genres!.slice(0, 3).join(", ") : null;
@@ -39,19 +35,13 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms,
       <div className="flex gap-4">
         {/* Poster */}
         <div className="w-16 h-24 bg-muted rounded flex-shrink-0">
-          {!imageError && item.movie.poster_path ? (
-            <img
-              src={item.movie.poster_path}
-              alt={item.movie.primary_title}
-              className="w-full h-full object-cover rounded"
-              loading="lazy"
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-          )}
+          <TMDBPoster
+            src={item.movie.poster_path}
+            alt={item.movie.primary_title}
+            width={64}
+            height={96}
+            className="w-full h-full object-cover rounded"
+          />
         </div>
 
         {/* Content */}

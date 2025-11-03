@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { SearchOptionVM } from "@/types/api.types";
 import { Loader2 } from "lucide-react";
 
@@ -162,18 +163,13 @@ export function WatchedSearchCombobox({
                   >
                     {/* Poster */}
                     <div className="flex-shrink-0 w-[50px] h-[75px] bg-muted rounded overflow-hidden">
-                      {movie.posterUrl ? (
-                        <img
-                          src={movie.posterUrl}
-                          alt={`${movie.primaryTitle} poster`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                          No image
-                        </div>
-                      )}
+                      <TMDBPoster
+                        src={movie.posterUrl}
+                        alt={`${movie.primaryTitle} poster`}
+                        width={50}
+                        height={75}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
                     {/* Movie info */}

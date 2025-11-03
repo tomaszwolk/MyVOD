@@ -114,12 +114,12 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
   - Obsługa błędów z czytelnymi komunikatami
   - Loading states podczas pobierania danych
 
-11) Widoki błędów i fallbacki
+11) Widoki błędów i fallbacki ✅ **ZAIMPLEMENTOWANE**
 - Ścieżki widoków: `*` (404), dedykowane: `/error/unauthorized`, `/error/offline`.
 - Główny cel: Czytelne komunikaty i CTA (np. „Zaloguj ponownie”, „Odśwież”).
 - Kluczowe informacje do wyświetlenia: opis błędu, akcje powrotu/ponów.
-- Kluczowe komponenty widoku: Empty/Illustration, Buttons, Linki.
-- UX, dostępność i względy bezpieczeństwa: nie ujawniać szczegółów systemu, przyjazne opisy, dostępne CTA.
+- Kluczowe komponenty widoku: ErrorView (bazowy), ilustracje z aria-label, przyciski CTA z dostępnością.
+- UX, dostępność i względy bezpieczeństwa: nie ujawniać szczegółów systemu, przyjazne opisy, dostępne CTA, polskie komunikaty, logowanie błędów integracji.
 
 ## 3. Mapa podróży użytkownika
 
@@ -151,8 +151,9 @@ Główne przepływy i przejścia między widokami:
 - „Usuń konto” → AlertDialog → potwierdzenie → hard delete po stronie backendu → clear tokeny → redirect do `/` lub `/auth/login` z komunikatem.
 
 1) Sesja i bezpieczeństwo
-- Każdy request z access tokenem. Na 401: próba refresh (`/api/token/refresh/`); gdy refresh niepowodzenie → redirect do `/auth/login` z komunikatem „Twoja sesja wygasła…”.
+- Każdy request z access tokenem. Na 401: próba refresh (`/api/token/refresh/`); gdy refresh niepowodzenie → redirect do `/error/unauthorized` z komunikatem „Twoja sesja wygasła…".
 - Ochrona tras: guard dla `/app/*` i `/app/admin/*`. Dodatkowa kontrola uprawnień dla admin dashboard - endpointy backend zwracają 403 dla nie-staff użytkowników.
+- Strony błędów: dedykowane strony dla błędów autoryzacji (`/error/unauthorized`) i offline (`/error/offline`).
 - Sprawdzanie uprawnień staff: frontend sprawdza pole `is_staff` z profilu użytkownika (`/api/me/`) przez hook `useIsStaff()`. Zakładka "Admin" jest wyświetlana warunkowo tylko dla użytkowników ze statusem staff.
 
 1) Admin dashboard – przegląd metryk i diagnostyka
@@ -180,7 +181,9 @@ Struktura tras (skrót):
 - `/onboarding/platforms`, `/onboarding/add`, `/onboarding/watched` (chronione, tylko przy pierwszym logowaniu).
 - `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
 - `/app/admin/dashboard` (chronione, wymaga `is_staff = TRUE`). Admin dashboard z metrykami, wykresami, top filmami i logami błędów.
-- `*` (404) oraz dedykowane strony błędów.
+- `/error/unauthorized` - strona błędu autoryzacji (JWT wygasł).
+- `/error/offline` - strona błędu offline.
+- `*` (404) - strona "nie znaleziono".
 
 Nawigacja kluczowych akcji:
 - CTA „Zasugeruj filmy” z headera lub toolbaru otwiera modal przez dodanie URL param `?suggestions=true` do aktualnej trasy.
@@ -218,6 +221,22 @@ Nawigacja kluczowych akcji:
 - ErrorLogsTable: tabela logów błędów z paginacją (50/strona), sortowaniem po kolumnach oraz możliwością kliknięcia user_id do filtrowania.
 - TopMoviesFilters: filtry dla sekcji top filmów (typ: watchlist/watched, zakres: 7d/30d/all).
 - TopMoviesTable: tabela top 10 filmów z kolumnami: pozycja, tytuł, rok, liczba.
+
+**NOWE KOMPONENTY ZAIMPLEMENTOWANE (Widoki błędów i fallbacki):**
+
+- `ErrorView`: bazowy komponent prezentacji błędów z ilustracjami, tytułami, opisami i przyciskami CTA. Obsługuje różne warianty błędów (not_found, unauthorized, offline, suggestions_error).
+- `NotFoundPage`: strona 404 dla nieistniejących tras z przyciskami "Wróć do strony głównej" i "Przejdź do watchlisty".
+- `UnauthorizedErrorPage`: strona błędu autoryzacji z przyciskiem "Zaloguj ponownie" (zachowuje returnTo).
+- `OfflineErrorPage`: strona błędu offline z przyciskami "Spróbuj ponownie" i "Wróć do strony głównej".
+- `OfflineGuard`: HOC komponent do wykrywania stanu online/offline z opcjami banner/redirect.
+- `FallbackBanner`: baner informacyjny dla błędów zewnętrznych API z meta informacjami (ostatnia aktualizacja).
+- `TMDBPoster`: komponent do renderowania plakatów filmów z kontrolowanym fallbackiem na placeholder przy błędach ładowania.
+- `SearchNoResultsItem`: komponent pozycji w dropdown przy braku wyników wyszukiwania z komunikatem i podpowiedzią.
+
+**ZAIMPLEMENTOWANE UTILITY:**
+
+- `error-logger.ts`: system logowania błędów integracji (TMDB, Watchmode, Gemini) do konsoli/monitoringu.
+- `date-utils.ts`: funkcje formatowania daty (polski format "15 października 2023") i czasu względnego.
 - Toasts/Alerts: komunikaty o sukcesie/błędach (w tym 401/403/409/429/404 dla odpowiednich scenariuszy).
 - ErrorBoundary / OfflineBoundary: przyjazne ekrany błędów i offline z retry.
 

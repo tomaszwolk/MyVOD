@@ -1,9 +1,10 @@
-import { useState, memo } from "react";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -31,11 +32,6 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   onDelete,
   isDeleting
 }) {
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 2).join(", ") : null;
@@ -56,19 +52,13 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
     >
       {/* Poster */}
       <div className="aspect-[2/3] bg-muted relative">
-        {!imageError && item.posterPath ? (
-          <img
-            src={item.posterPath}
-            alt={item.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onError={handleImageError}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-        )}
+        <TMDBPoster
+          src={item.posterPath}
+          alt={item.title}
+          width={200}
+          height={300}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Content */}

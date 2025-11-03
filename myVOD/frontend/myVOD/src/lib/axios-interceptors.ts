@@ -28,7 +28,8 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
  */
 export function setupAxiosInterceptors(
   axiosInstance: AxiosInstance,
-  onLogout: () => void
+  onLogout: () => void,
+  onUnauthorized?: () => void
 ) {
   // Request interceptor: Add access token to requests
   axiosInstance.interceptors.request.use(
@@ -96,17 +97,22 @@ export function setupAxiosInterceptors(
 
       if (!refreshToken) {
         isRefreshing = false;
-        onLogout();
+        // No refresh token available - show unauthorized page or logout
+        if (onUnauthorized) {
+          onUnauthorized();
+        } else {
+          onLogout();
+        }
         return Promise.reject(error);
       }
 
       try {
         // Attempt to refresh the access token
         const { access: newAccessToken } = await refreshAccessToken(refreshToken);
-        
+
         // Update localStorage and context
         localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-        
+
         // Update the original request with new token
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -119,10 +125,14 @@ export function setupAxiosInterceptors(
         // Retry the original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh token is invalid or expired - logout user
+        // Refresh token is invalid or expired - show unauthorized page
         processQueue(refreshError as AxiosError, null);
         isRefreshing = false;
-        onLogout();
+        if (onUnauthorized) {
+          onUnauthorized();
+        } else {
+          onLogout();
+        }
         return Promise.reject(refreshError);
       }
     }

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Plus, Check } from "lucide-react";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { AISuggestionsDto } from "@/types/api.types";
 
 /**
@@ -66,16 +67,14 @@ export function SuggestionModal({ open, onOpenChange, data, onAdd }: SuggestionM
           {data.suggestions.map((suggestion) => (
             <div key={suggestion.tconst} className="border rounded-lg p-4">
               <div className="flex gap-4">
-                <div className="w-20 h-28 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                  {suggestion.poster_path ? (
-                    <img
-                      src={suggestion.poster_path}
-                      alt={suggestion.primary_title}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  ) : (
-                    <div className="text-muted-foreground text-xs">Brak plakatu</div>
-                  )}
+                <div className="w-20 h-28 bg-muted rounded flex-shrink-0">
+                  <TMDBPoster
+                    src={suggestion.poster_path}
+                    alt={suggestion.primary_title}
+                    width={80}
+                    height={112}
+                    className="w-full h-full object-cover rounded"
+                  />
                 </div>
 
                 <div className="flex-1 min-w-0">

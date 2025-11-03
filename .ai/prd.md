@@ -977,8 +977,9 @@ Kryteria akceptacji:
 - Po wygaśnięciu access tokena próba akcji zwraca błąd 401 Unauthorized
 - System próbuje automatycznie odświeżyć token używając refresh tokena
 - Jeśli refresh token jest ważny, nowy access token jest otrzymany i akcja jest powtarzana
-- Jeśli refresh token wygasł lub jest nieważny, użytkownik jest przekierowany do logowania
-- Komunikat: "Twoja sesja wygasła. Zaloguj się ponownie." (tylko przy przekierowaniu do logowania)
+- Jeśli refresh token wygasł lub jest nieważny, użytkownik jest przekierowany do dedykowanej strony błędu autoryzacji (`/error/unauthorized`)
+- Strona błędu zawiera przycisk "Zaloguj ponownie" z zachowaniem return-to URL
+- Komunikat: "Twoja sesja wygasła. Zaloguj się ponownie."
 - Po zalogowaniu użytkownik wraca do poprzedniej strony (jeśli możliwe)
 - Brak utraty danych z formularzy (jeśli możliwe)
 

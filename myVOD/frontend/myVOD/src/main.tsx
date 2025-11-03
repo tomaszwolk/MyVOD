@@ -47,25 +47,59 @@ function initializeTheme() {
 // Initialize theme immediately
 initializeTheme();
 
+// Global error handler for integration logging
+const handleQueryError = (error: Error, query: any) => {
+  const meta = query.meta as any;
+
+  // Log integration errors
+  if (meta?.integration) {
+    import('@/utils/error-logger').then(({ logGeminiError, logWatchmodeError }) => {
+      if (meta.integration === 'gemini') {
+        logGeminiError(meta.operation || 'unknown', error, {
+          queryKey: query.queryKey,
+        });
+      } else if (meta.integration === 'watchmode') {
+        logWatchmodeError(meta.operation || 'unknown', error, {
+          queryKey: query.queryKey,
+        });
+      }
+    });
+  }
+};
+
 // Create a client for TanStack Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      onError: handleQueryError,
+    },
+    mutations: {
+      onError: handleQueryError,
     },
   },
 })
 
 // Setup Axios interceptors for automatic token refresh
 // The logout callback will be handled by AuthProvider
-setupAxiosInterceptors(http, () => {
-  // Clear tokens from localStorage
-  localStorage.removeItem("myVOD_access_token");
-  localStorage.removeItem("myVOD_refresh_token");
-  // Redirect to login
-  window.location.href = "/auth/login";
-});
+setupAxiosInterceptors(
+  http,
+  () => {
+    // Clear tokens from localStorage
+    localStorage.removeItem("myVOD_access_token");
+    localStorage.removeItem("myVOD_refresh_token");
+    // Redirect to login
+    window.location.href = "/auth/login";
+  },
+  () => {
+    // Clear tokens from localStorage and redirect to unauthorized page
+    localStorage.removeItem("myVOD_access_token");
+    localStorage.removeItem("myVOD_refresh_token");
+    // Redirect to unauthorized error page
+    window.location.href = "/error/unauthorized";
+  }
+);
 
 
 createRoot(document.getElementById('root')!).render(

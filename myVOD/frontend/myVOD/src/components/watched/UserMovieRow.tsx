@@ -1,9 +1,10 @@
-import { useState, memo } from "react";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -31,11 +32,6 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
   onDelete,
   isDeleting
 }) {
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 3).join(", ") : null;
@@ -57,19 +53,13 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
       <div className="flex gap-4">
         {/* Poster */}
         <div className="w-16 h-24 bg-muted rounded flex-shrink-0">
-          {!imageError && item.posterPath ? (
-            <img
-              src={item.posterPath}
-              alt={item.title}
-              className="w-full h-full object-cover rounded"
-              loading="lazy"
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-          )}
+          <TMDBPoster
+            src={item.posterPath}
+            alt={item.title}
+            width={64}
+            height={96}
+            className="w-full h-full object-cover rounded"
+          />
         </div>
 
         {/* Content */}

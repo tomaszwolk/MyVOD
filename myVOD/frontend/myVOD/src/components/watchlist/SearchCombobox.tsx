@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { Loader2, Search, ImageIcon } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
+import { TMDBPoster } from "@/components/TMDBPoster";
+import { SearchNoResultsItem } from "@/components/SearchNoResultsItem";
 import type { SearchOptionVM } from "@/types/api.types";
 
 /**
@@ -182,9 +184,7 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
           ) : null}
 
           {!error && results.length === 0 && query.length >= 2 && !isLoading && (
-            <div className="p-4 text-center text-muted-foreground text-sm">
-              Brak wyników dla "{query}"
-            </div>
+            <SearchNoResultsItem query={query} />
           )}
 
           {results.length > 0 && (
@@ -217,17 +217,14 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                     aria-busy={isPending}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-18 bg-muted rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {result.posterUrl ? (
-                          <img
-                            src={result.posterUrl}
-                            alt={result.primaryTitle}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                        )}
+                      <div className="w-12 h-18 bg-muted rounded flex-shrink-0">
+                        <TMDBPoster
+                          src={result.posterUrl}
+                          alt={result.primaryTitle}
+                          width={48}
+                          height={72}
+                          className="w-full h-full object-cover rounded"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate text-foreground">

@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { ImageIcon } from "lucide-react";
 import { AvailabilityIcons } from "@/components/watchlist/AvailabilityIcons";
 import { AddToWatchlistButton } from "./AddToWatchlistButton";
+import { TMDBPoster } from "@/components/TMDBPoster";
 import type { AISuggestionCardVM } from "@/types/view/suggestions.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -36,20 +36,14 @@ export const SuggestionCard = memo<SuggestionCardProps>(function SuggestionCard(
     >
       <div className="flex gap-4">
         {/* Poster */}
-        <div className="w-20 h-28 bg-muted rounded flex items-center justify-center flex-shrink-0 overflow-hidden" role="img" aria-label={`Plakat filmu ${item.title}`}>
-          {item.posterUrl ? (
-            <img
-              src={item.posterUrl}
-              alt={`Plakat filmu ${item.title}`}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="text-muted-foreground text-xs p-2 text-center">
-              <ImageIcon className="w-6 h-6 mx-auto mb-1" aria-hidden="true" />
-              <span className="text-[10px]">Brak plakatu</span>
-            </div>
-          )}
+        <div className="w-20 h-28 bg-muted rounded flex-shrink-0">
+          <TMDBPoster
+            src={item.posterUrl}
+            alt={`Plakat filmu ${item.title}`}
+            width={80}
+            height={112}
+            className="w-full h-full object-cover rounded"
+          />
         </div>
 
         {/* Content */}

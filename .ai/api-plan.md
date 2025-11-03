@@ -385,3 +385,33 @@ All endpoints in this section require staff permissions (`is_staff = TRUE`). End
 -   **AI Suggestion Tracking**: When adding movies via `POST /api/user-movies/`, the backend service accepts an optional `added_from_ai_suggestion` parameter to track which movies were added from AI suggestions for analytics and adoption metrics.
 -   **Staff Permissions**: Admin analytics endpoints (`/admin/analytics/api/*`) require staff permissions (`is_staff = TRUE`). The `is_staff` field is included in the user profile response (`GET /api/me/`) and is used by the frontend to conditionally display admin features. The field is read-only and cannot be modified via the API.
 -   **Admin Analytics Data**: Metrics are calculated in real-time from database queries. Timeseries data is generated on-demand for retention and user growth charts. Top movies rankings are calculated based on aggregation of `user_movie` table entries. Error logs are retrieved from the partitioned `integration_error_log` table with efficient filtering and pagination.
+
+## 5. Frontend Error Handling
+
+The frontend implements comprehensive error handling for API interactions:
+
+### 5.1 JWT Token Management
+- **401 Handling**: Axios interceptors automatically attempt token refresh on 401 errors. Failed refresh redirects to `/error/unauthorized` instead of generic `/auth/login`.
+- **Token Refresh**: One-time retry per request with queueing for concurrent requests.
+- **Logout Flow**: Clears tokens and redirects appropriately based on context.
+
+### 5.2 Integration Error Logging
+- **TMDB Errors**: Poster loading failures are logged with context (src, alt, dimensions).
+- **Watchmode Errors**: Availability API failures logged with query context.
+- **Gemini Errors**: AI suggestion failures logged with operation details.
+- **Logging Format**: Structured logs with timestamp, integration type, operation, error details, and user context.
+
+### 5.3 Graceful Degradation
+- **TMDB Fallbacks**: `TMDBPoster` component shows placeholder icons when images fail to load.
+- **API Unavailability**: `FallbackBanner` displays informative messages with last update timestamps.
+- **Offline Detection**: `OfflineGuard` provides banner notifications or page redirects.
+
+### 5.4 Error Pages
+- **404 Page**: Custom `/error/unauthorized` page with navigation options.
+- **Unauthorized Page**: `/error/unauthorized` with return-to functionality.
+- **Offline Page**: `/error/offline` with retry capabilities.
+
+### 5.5 TanStack Query Integration
+- **Global Error Handling**: QueryClient configured with custom error handlers for different integration types.
+- **Retry Logic**: Smart retry policies (no retry for 404/429, up to 2 retries for other errors).
+- **Meta-based Logging**: Query metadata identifies integration type for proper error categorization.

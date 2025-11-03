@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAISuggestions } from "@/lib/api/movies";
+import { logGeminiError } from "@/utils/error-logger";
 import type { AISuggestionsDto } from "@/types/api.types";
 
 /**
@@ -53,6 +54,11 @@ export function useAISuggestions(options: UseAISuggestionsOptions = {}) {
       }
       // Retry other errors up to 2 times
       return failureCount < 2;
+    },
+    meta: {
+      // Custom metadata for error logging
+      integration: 'gemini',
+      operation: 'get_suggestions',
     },
   });
 }
