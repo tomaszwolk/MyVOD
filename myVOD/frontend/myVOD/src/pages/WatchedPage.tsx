@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import { useWatchedPreferences } from "@/hooks/useWatchedPreferences";
 import { useUserMoviesWatched } from "@/hooks/useUserMoviesWatched";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
-import { useRestoreToWatchlist } from "@/hooks/useWatchedActions";
+import { useRestoreToWatchlist, useDeleteFromWatched } from "@/hooks/useWatchedActions";
 import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { ToastViewport } from "@/components/watchlist/ToastViewport";
+import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 
 /**
  * Main watched movies page component.
@@ -66,6 +67,7 @@ export function WatchedPage() {
 
   // Actions
   const restoreMutation = useRestoreToWatchlist();
+  const deleteFromWatchedMutation = useDeleteFromWatched();
   const addMovieMutation = useAddMovie();
   const patchUserMovieMutation = usePatchUserMovie();
 
@@ -85,6 +87,33 @@ export function WatchedPage() {
 
   const handleRestore = (id: number) => {
     restoreMutation.mutate(id);
+  };
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  const handleDelete = (id: number) => {
+    const movie = filteredItems.find(item => item.id === id);
+    if (!movie) return;
+
+    setConfirmDialog({
+      open: true,
+      title: "Usuń film z historii obejrzanych",
+      message: `Czy na pewno chcesz usunąć "${movie.title}" z Twojej historii obejrzanych? Ta operacja jest nieodwracalna.`,
+      onConfirm: () => {
+        deleteFromWatchedMutation.mutate(id);
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+      },
+    });
   };
 
   const watchedEntriesByTconst = useMemo(() => {
@@ -305,6 +334,8 @@ export function WatchedPage() {
             isEmpty={isFilteredEmpty}
             onRestore={handleRestore}
             isRestoring={restoreMutation.isPending}
+            onDelete={handleDelete}
+            isDeleting={deleteFromWatchedMutation.isPending}
           />
         </div>
       </MediaLibraryLayout>
@@ -313,6 +344,14 @@ export function WatchedPage() {
         open={isSuggestionsModalOpen}
         onClose={handleCloseSuggestionsModal}
         watchlistTconstSet={watchlistTconstSet}
+      />
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
       />
 
       <ToastViewport />

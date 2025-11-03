@@ -15,6 +15,8 @@ type WatchedContentProps = {
   isEmpty: boolean;
   onRestore: (id: number) => void;
   isRestoring: boolean;
+  onDelete: (id: number) => void;
+  isDeleting: boolean;
 };
 
 /**
@@ -30,6 +32,8 @@ export function WatchedContent({
   isEmpty,
   onRestore,
   isRestoring,
+  onDelete,
+  isDeleting,
 }: WatchedContentProps) {
   // Show skeleton during loading
   if (isLoading) {
@@ -49,6 +53,8 @@ export function WatchedContent({
         platforms={platforms}
         onRestore={onRestore}
         isRestoring={isRestoring}
+        onDelete={onDelete}
+        isDeleting={isDeleting}
       />
     );
   }
@@ -59,6 +65,8 @@ export function WatchedContent({
       platforms={platforms}
       onRestore={onRestore}
       isRestoring={isRestoring}
+      onDelete={onDelete}
+      isDeleting={isDeleting}
     />
   );
 }

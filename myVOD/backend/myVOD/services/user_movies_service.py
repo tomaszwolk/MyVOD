@@ -367,11 +367,12 @@ def update_user_movie(*, user, user_movie_id: int, action: str):
 
 @transaction.atomic
 def delete_user_movie_soft(*, user, user_movie_id: int):
-    """Soft-deletes a user-movie entry.
+    """Deletes a user-movie entry from watchlist or watched history.
 
     Business Logic:
     - Authorization: Ensures the user_movie belongs to the authenticated user
-    - Sets watchlist_deleted_at to current timestamp
+    - For watched movies (watched_at IS NOT NULL): Hard delete by setting watched_at to NULL
+    - For watchlist movies (watched_at IS NULL): Soft delete by setting watchlist_deleted_at to current timestamp
     - Returns the updated UserMovie with full data (movie, availability)
 
     Args:
@@ -398,15 +399,23 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
             f"UserMovie with id {user_movie_id} not found or does not belong to user"
         )
 
-    # Guard clause: Check if already soft-deleted
-    if user_movie.watchlist_deleted_at is not None:
-        raise UserMovie.DoesNotExist(
-            f"UserMovie with id {user_movie_id} not found or does not belong to user"
-        )
-
-    # Soft-delete the user_movie
-    user_movie.watchlist_deleted_at = timezone.now()
-    user_movie.save(update_fields=['watchlist_deleted_at'])
+    # Determine if movie is watched or on watchlist
+    is_watched = user_movie.watched_at is not None
+    
+    if is_watched:
+        # Hard delete from watched: set watched_at to NULL
+        user_movie.watched_at = None
+        user_movie.save(update_fields=['watched_at'])
+    else:
+        # Guard clause: Check if already soft-deleted (only for watchlist)
+        if user_movie.watchlist_deleted_at is not None:
+            raise UserMovie.DoesNotExist(
+                f"UserMovie with id {user_movie_id} not found or does not belong to user"
+            )
+        
+        # Soft delete from watchlist: set watchlist_deleted_at
+        user_movie.watchlist_deleted_at = timezone.now()
+        user_movie.save(update_fields=['watchlist_deleted_at'])
 
     # No response body needed for DELETE 204 in view → avoid extra re-fetch
     return user_movie

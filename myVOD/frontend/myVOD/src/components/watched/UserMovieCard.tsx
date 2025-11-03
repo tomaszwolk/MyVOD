@@ -1,6 +1,7 @@
 import { useState, memo } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ImageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ImageIcon, Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
@@ -14,6 +15,8 @@ type UserMovieCardProps = {
   platforms: PlatformDto[];
   onRestore: (id: number) => void;
   isRestoring: boolean;
+  onDelete: (id: number) => void;
+  isDeleting: boolean;
 };
 
 /**
@@ -24,7 +27,9 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   item,
   platforms,
   onRestore,
-  isRestoring
+  isRestoring,
+  onDelete,
+  isDeleting
 }) {
   const [imageError, setImageError] = useState(false);
 
@@ -37,6 +42,10 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
 
   const handleRestore = () => {
     onRestore(item.id);
+  };
+
+  const handleDelete = () => {
+    onDelete(item.id);
   };
 
   return (
@@ -105,12 +114,24 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
           Obejrzany: {item.watchedAtLabel}
         </div>
 
-        {/* Action Button */}
-        <RestoreButton
-          onClick={handleRestore}
-          loading={isRestoring}
-          ariaLabel={`Przywróć "${item.title}" do watchlisty`}
-        />
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <RestoreButton
+            onClick={handleRestore}
+            loading={isRestoring}
+            ariaLabel={`Przywróć "${item.title}" do watchlisty`}
+          />
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex items-center gap-2"
+            aria-label={`Usuń "${item.title}" z historii obejrzanych`}
+          >
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
     </article>
   );
