@@ -30,14 +30,14 @@ class IsStaffUser(IsAuthenticated):
     """
     Permission class that checks if user is authenticated and is staff.
     """
-    
+
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
             return False
-        
+
         if not request.user.is_staff:
             return False
-        
+
         return True
 
 

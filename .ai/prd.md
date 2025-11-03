@@ -1171,6 +1171,29 @@ Sekcja 5: Growth
 - Line chart: nowi użytkownicy (daily, weekly, monthly)
 - Cumulative users growth
 
+
+## 7. Planowane nowe funkcjonalności.
+
+### 7.1 Funkcjonalności jakie planuje się po implementacji podstawowych funkcji MVP:
+7.1.1 Dodanie filtrowania dostępnych filmów na konkretnych platformach:
+- na wysokości menu gdzie jest wybór podstron Watchlist, obejrzane, Profil, Admin z prawej strony przy krawędzi znajdują się ikony wyboru platform
+- ikony wyboru platform zawierają: wszystkie dostępne platformy (po dodaniu nowych platform powinny same się pojawiać nowe, nie hardcodowane)
+- przycisk wyboru wszystkich platform / odznaczenia wszystkich platform - maksymalnie z prawej strony
+- przycisk "Ukryj niedostępne" zamienić na "Na moich platformach" - do uzgodnienia
+
+7.1.2 Pobieranie i zapisywanie ocen obejrzanych filmów.
+- sprawdzić możliwość automatycznego pobierania listy obejrzanych filmów i ich ocen (np raz dziennie)
+- możliwość ręcznego odświeżenia listy
+
+7.1.3 Możliwość pobierania automatycznego watchlisty oraz obejrzanych filmów z IMDB:
+- wymaga to podania nazwy użytkownika z IMDB
+- ustawienia list jako publiczne
+- nazwę użytkownika IMDB można podać podczas onboardingu lub w profilu
+- w profilu po podaniu nazwy użytkownika jest możliwość odświeżenia list
+
+7.1.4 Możliwość zalogowania jako mock user.
+- dla nowych użytkowników, by sprawdzić jak działa aplikacja dodana zostanie opcja "Zaloguj jako ..."
+- typy użytkowników: fan anime, fan kina akcji, romantyk, entyzjasta horrorów, fan komedii
 ---
 
 Koniec dokumentu PRD

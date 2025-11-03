@@ -242,137 +242,43 @@ Wszystkie planowane testy dla widoku Watched zostały zaimplementowane i przecho
 ## Etap: Profile View
 
 ### Status implementacji: ✅ GOTOWE DO PRODUKCJI
-### Status testów: ✅ ZAIMPLEMENTOWANE (58 testów)
+- **Aktualizacja 3 listopada 2025:** uproszczono zestaw testów `ProfilePage` – zamiast rozbudowanych makiet wykorzystujemy prawdziwe komponenty i mockujemy wyłącznie hooki, co zmniejsza liczbę testów, ale zwiększa ich niezawodność.
+
+### Status testów: ✅ ZAIMPLEMENTOWANE (8 testów)
 
 **Opis:** Widok profilu użytkownika z możliwością zarządzania preferencjami platform VOD, zmiany hasła oraz usuwania konta (RODO-compliant).
 
 **Komponenty przetestowane:**
-- `ProfilePage` - główny kontener strony
-- `PlatformPreferencesCard` - sekcja wyboru platform VOD
-- `PlatformCheckboxGroup` - grupa checkboxów platform
-- `SaveChangesBar` - pasek akcji zapisywania zmian
-- `ChangePasswordCard` - formularz zmiany hasła
-- `DangerZoneCard` - sekcja niebezpiecznych akcji
-- `DeleteAccountSection` - dialog potwierdzenia usunięcia konta
+- `ProfilePage` – uproszczony zestaw testów integracyjnych obejmujący kluczowe scenariusze (warianty ładowania, błędów, zapisywanie preferencji, zmiana hasła, akcje AI)
+- `PlatformPreferencesCard`, `SaveChangesBar`, `ChangePasswordCard`, `DangerZoneCard`, `DeleteAccountSection` – testowane oddzielnie w ich modułach (bez zmian)
 
 **Hooki przetestowane:**
-- `useUpdateUserPlatforms` - aktualizacja preferencji platform
-- `useChangePassword` - zmiana hasła użytkownika
-- `useDeleteAccount` - usuwanie konta użytkownika
-- `useUserProfile` - pobieranie profilu użytkownika
-- `usePlatforms` - pobieranie dostępnych platform
+- `useUpdateUserPlatforms`, `useChangePassword`, `useDeleteAccount`, `useUserProfile`, `usePlatforms` – bez zmian
 
 ---
 
-### ✅ ZAIMPLEMENTOWANE TESTY PROFILE VIEW
-
-#### Aktualizacje – 31 października 2025
-- Dodano kompleksowe testy dla widoku profilu użytkownika, w tym zarządzanie platformami VOD, zmianę hasła oraz usuwanie konta.
-- Zaimplementowano testy dla hooka `useChangePassword` oraz komponentu `ChangePasswordCard`.
-- Dodano testy integracyjne dla strony `ProfilePage` obejmujące wszystkie główne funkcjonalności.
+### ✅ ZAIMPLEMENTOWANE TESTY PROFILE VIEW (aktualizacja 3 listopada 2025)
 
 #### 1. Hook: `useChangePassword` (`src/hooks/__tests__/useChangePassword.test.ts`)
-
-**Typ:** Testy integracyjne z React Query
-**Framework:** Vitest + React Testing Library
-**Coverage:** 9 testów
-
-**Testy wykonane:**
-```typescript
-✅ should call changePassword with correct payload
-✅ should show success toast on successful password change
-✅ should show error toast for invalid current password (400)
-✅ should show error toast for invalid new password (400)
-✅ should show error toast for unauthorized (401)
-✅ should show generic error toast for server errors (500)
-✅ should show generic error toast for network errors
-✅ should expose mutation state
-✅ should set isPending to true during mutation
-```
+*(bez zmian – 9 testów)*
 
 #### 2. Component: `ChangePasswordCard` (`src/components/profile/__tests__/ChangePasswordCard.test.tsx`)
+*(bez zmian – 20 testów)*
 
-**Typ:** Testy komponentu
-**Framework:** Vitest + React Testing Library
-**Coverage:** 20 testów
-
-**Testy wykonane:**
-```typescript
-✅ renders all form fields (current password, new password, confirm password)
-✅ renders submit and cancel buttons
-✅ displays password fields as password type by default
-✅ toggles password visibility when clicking eye icons
-✅ validates required fields on submit
-✅ validates password minimum length (8 characters)
-✅ validates password contains letter
-✅ validates password contains number
-✅ validates passwords match
-✅ shows error messages for validation failures
-✅ clears form on cancel button click
-✅ calls onChangePassword with correct values on submit
-✅ disables form fields during submission (isChanging=true)
-✅ shows loading spinner during submission
-✅ handles form submission errors gracefully
-✅ resets form after successful password change
-✅ toggles each password field independently
-✅ has correct ARIA attributes for accessibility
-✅ validates password requirements helper text
-✅ prevents submission when form is invalid
-```
-
-#### 3. Component: `ProfilePage` (`src/pages/__tests__/ProfilePage.test.tsx`)
-
-**Typ:** Testy integracyjne strony
-**Framework:** Vitest + React Testing Library
-**Coverage:** 27 testów
-
-**Testy wykonane:**
-```typescript
-✅ Authentication (2 testy)
-  ✅ redirects to login when user is not authenticated
-  ✅ renders profile page when user is authenticated
-
-✅ Layout and Navigation (6 testów)
-  ✅ renders profile page with correct title and subtitle
-  ✅ renders navigation tabs (Watchlista, Obejrzane, Profil)
-  ✅ navigates to watchlist when watchlist tab is clicked
-  ✅ navigates to watched when watched tab is clicked
-  ✅ renders theme toggle and logout button in header
-  ✅ calls logout and navigates when logout button is clicked
-
-✅ Toolbar (3 testy)
-  ✅ renders search combobox in toolbar
-  ✅ renders suggest AI button in toolbar
-  ✅ calls handleSuggestClick when suggest AI button is clicked
-
-✅ Platform Preferences (4 testy)
-  ✅ renders platform preferences card
-  ✅ initializes with user's selected platforms
-  ✅ calls updatePlatforms mutation when save is clicked
-  ✅ resets platform selection when reset is clicked
-
-✅ Change Password (2 testy)
-  ✅ renders change password card
-  ✅ calls changePassword mutation when password is changed
-
-✅ Danger Zone (4 testy)
-  ✅ renders danger zone card
-  ✅ opens delete account dialog when delete button is clicked
-  ✅ calls deleteAccount mutation when delete is confirmed
-  ✅ closes delete account dialog when cancel is clicked
-
-✅ Loading States (2 testy)
-  ✅ displays loading skeleton when profile is loading
-  ✅ displays loading skeleton when platforms are loading
-
-✅ Error States (3 testy)
-  ✅ displays error message when profile fails to load
-  ✅ displays retry button when error occurs
-  ✅ calls refetch when retry button is clicked
-
-✅ Content Structure (1 test)
-  ✅ renders all main sections in correct order
-```
+#### 3. Page: `ProfilePage` (`src/pages/__tests__/ProfilePage.test.tsx`)
+- **Typ:** Uproszczone testy integracyjne strony
+- **Coverage:** 8 testów (realne komponenty, mockowane hooki)
+- **Testy wykonane:**
+  ```typescript
+  ✅ should redirect unauthenticated users to login
+  ✅ should render profile info and preferences when data is available
+  ✅ should navigate to other tabs (watchlist, watched)
+  ✅ should save platform preference changes after toggling selection
+  ✅ should submit change password form with provided credentials
+  ✅ should show skeleton placeholders while profile/platform data loads
+  ✅ should render error state and trigger refetch on retry
+  ✅ should update URL params when AI suggestions button is pressed
+  ```
 
 ---
 
@@ -1575,7 +1481,7 @@ afterAll(() => server.close())
 
 **Musisz zainstalować:**
 ```bash
-npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom @vitest/ui
+npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom @vitest/ui
 ```
 
 **Package versions:**

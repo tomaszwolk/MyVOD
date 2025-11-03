@@ -31,12 +31,14 @@ export function SaveChangesBar({
           variant="outline"
           onClick={onReset}
           disabled={!dirty || saving}
+          data-testid="reset-platforms"
         >
           Anuluj
         </Button>
         <Button
           onClick={onSave}
           disabled={!dirty || saving}
+          data-testid="save-platforms"
         >
           {saving ? (
             <>

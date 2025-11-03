@@ -84,7 +84,7 @@ export function ChangePasswordCard({
   };
 
   return (
-    <div className="bg-card border rounded-lg shadow-sm">
+    <div className="bg-card border rounded-lg shadow-sm" data-testid="change-password-card">
       <div className="p-6">
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-2">Zmień hasło</h2>
@@ -230,6 +230,7 @@ export function ChangePasswordCard({
             <Button
               type="submit"
               disabled={isChanging}
+              data-testid="change-password-submit"
             >
               {isChanging ? (
                 <>

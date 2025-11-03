@@ -335,8 +335,14 @@ export function ProfilePage() {
         <div className="p-4">
           {isLoading ? (
             <div className="space-y-4">
-              <div className="h-8 bg-muted animate-pulse rounded w-1/3" />
-              <div className="h-64 bg-muted animate-pulse rounded" />
+              <div
+                className="h-8 bg-muted animate-pulse rounded w-1/3"
+                data-testid="skeleton-heading"
+              />
+              <div
+                className="h-64 bg-muted animate-pulse rounded"
+                data-testid="skeleton-content"
+              />
             </div>
           ) : hasError ? (
             <div className="text-center py-12">
