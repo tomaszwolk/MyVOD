@@ -111,8 +111,11 @@ class UserProfileGetAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('email', response.data)
         self.assertIn('platforms', response.data)
+        self.assertIn('is_staff', response.data)
         self.assertEqual(response.data['email'], self.user.email)
         self.assertIsInstance(response.data['platforms'], list)
+        self.assertIsInstance(response.data['is_staff'], bool)
+        self.assertEqual(response.data['is_staff'], getattr(self.user, 'is_staff', False))
 
     def test_get_user_profile_response_structure(self):
         """Test that response has correct structure matching UserProfileDto."""
@@ -127,11 +130,13 @@ class UserProfileGetAPITests(APITestCase):
         # Verify top-level fields
         self.assertIn('email', response.data)
         self.assertIn('platforms', response.data)
-        self.assertEqual(set(response.data.keys()), {'email', 'platforms'})
+        self.assertIn('is_staff', response.data)
+        self.assertEqual(set(response.data.keys()), {'email', 'platforms', 'is_staff'})
 
         # Verify field types
         self.assertIsInstance(response.data['email'], str)
         self.assertIsInstance(response.data['platforms'], list)
+        self.assertIsInstance(response.data['is_staff'], bool)
 
         # Verify platform structure if platforms exist
         if len(response.data['platforms']) > 0:
@@ -464,7 +469,11 @@ class UserProfilePatchAPITests(APITestCase):
         # Verify response structure
         self.assertIn('email', response.data)
         self.assertIn('platforms', response.data)
-        self.assertEqual(set(response.data.keys()), {'email', 'platforms'})
+        self.assertIn('is_staff', response.data)
+        self.assertEqual(set(response.data.keys()), {'email', 'platforms', 'is_staff'})
+        
+        # Verify field types
+        self.assertIsInstance(response.data['is_staff'], bool)
 
         # Verify platform structure
         for platform in response.data['platforms']:
