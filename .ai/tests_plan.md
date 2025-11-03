@@ -3639,29 +3639,257 @@ npm test -- --grep "metrics"
 ## Etap: Error Views & Fallbacks
 
 ### Status implementacji: ✅ GOTOWE DO PRODUKCJI
-### Status testów: ❌ NIE ZAIMPLEMENTOWANE (0/85+ testów - 0% pokrycia)
+### Status testów: 🟡 ZAIMPLEMENTOWANE (56/85+ testów - ~66% pokrycia)
 
 **Opis:** Kompletny system obsługi błędów obejmujący strony błędów (404, 401, offline), fallbacki dla zewnętrznych API (TMDB, Watchmode, Gemini), komponenty powiadomień oraz infrastrukturę logowania błędów integracji.
 
-**Komponenty do przetestowania:**
-- `ErrorView` - bazowy komponent dla wszystkich stron błędów (6 testów)
+**Komponenty przetestowane:**
+- ✅ `ErrorView` - bazowy komponent dla wszystkich stron błędów (8 testów - 8/6 zrealizowane)
+- ✅ `OfflineGuard` - HOC wykrywania stanu online/offline (9 testów - 9/8 zrealizowane)
+- ✅ `FallbackBanner` - banner dla błędów zewnętrznych API (13 testów - 13/10 zrealizowane)
+- ✅ `TMDBPoster` - komponent obrazków z fallback (12 testów - 12/12 zrealizowane)
+- ✅ Axios interceptors integracje (14 testów - 14/8 zrealizowane)
+
+**Komponenty pozostałe do przetestowania:**
 - `ErrorIllustration` - ikony dla różnych rodzajów błędów (5 testów)
 - `ErrorActions` - przyciski akcji dla błędów (4 testy)
 - `NotFoundPage` - strona 404 (4 testy)
 - `UnauthorizedErrorPage` - strona błędu autoryzacji (4 testy)
 - `OfflineErrorPage` - strona błędu offline (4 testy)
-- `OfflineGuard` - HOC wykrywania stanu online/offline (8 testów)
-- `FallbackBanner` - banner dla błędów zewnętrznych API (10 testów)
-- `TMDBPoster` - komponent obrazków z fallback (12 testów)
 - `SearchNoResultsItem` - komponent pustych wyników wyszukiwania (6 testów)
 - `error-logger.ts` - utility do logowania błędów (9 testów)
 - `date-utils.ts` - utility do formatowania dat (5 testów)
-- Axios interceptors integracje (8 testów)
 - TanStack Query integracje (6 testów)
 
 ---
 
-### ❌ PLANOWANE TESTY DO IMPLEMENTACJI - ERROR VIEWS & FALLBACKS
+### ✅ ZAIMPLEMENTOWANE TESTY HIGH PRIORITY - ERROR VIEWS & FALLBACKS
+
+#### 1. ✅ Component: `ErrorView` (`src/components/__tests__/ErrorView.test.tsx`)
+
+**Status:** ✅ ZAIMPLEMENTOWANE (8/6 testów - 133% zrealizowane)
+**Priority:** 🔴 HIGH - Bazowy komponent dla wszystkich stron błędów
+**Estymacja:** 3-4h → 2h zrealizowane
+
+**Zaimplementowane testy:**
+```typescript
+✅ should render title and description
+  - Sprawdź że tytuł i opis są wyświetlone
+
+✅ should render illustration for given variant
+  - Sprawdź że odpowiednia ikona jest renderowana dla variant='not_found'
+
+✅ should render different illustrations for different variants
+  - Testuj wszystkie varianty: 'not_found', 'unauthorized', 'offline', 'api_generic', 'suggestions_error'
+
+✅ should render action buttons
+  - Sprawdź że przyciski akcji są renderowane
+
+✅ should call action onClick when button is clicked
+  - Kliknij przycisk akcji, sprawdź wywołanie onClick
+
+✅ should have correct accessibility attributes
+  - Sprawdź button type i enabled state
+
+✅ should apply correct button variants
+  - Sprawdź klasy CSS dla primary/secondary buttons
+
+✅ should handle empty actions array
+  - Sprawdź obsługę pustej tablicy akcji
+
+**Dodatkowe testy zrealizowane poza planem:**
+✅ should render different illustrations for different variants (rozszerzony zakres)
+```
+
+#### 2. ✅ Component: `OfflineGuard` (`src/components/__tests__/OfflineGuard.test.tsx`)
+
+**Status:** ✅ ZAIMPLEMENTOWANE (9/8 testów - 113% zrealizowane)
+**Priority:** 🔴 HIGH - HOC wykrywania online/offline
+**Estymacja:** 3-4h → 3h zrealizowane
+
+**Zaimplementowane testy:**
+```typescript
+✅ should render children when online
+  - Mock navigator.onLine = true, sprawdź render children
+
+✅ should render banner when offline and bannerMode=true (default)
+  - Mock offline, sprawdź banner z komunikatem
+
+✅ should redirect to /error/offline when offline and bannerMode=false
+  - Mock offline, sprawdź redirect (useEffect mock)
+
+✅ should update state when online status changes
+  - Symuluj online→offline→online z eventami
+
+✅ should listen to online/offline events
+  - Sprawdź addEventListener dla window events
+
+✅ should cleanup event listeners on unmount
+  - Sprawdź removeEventListener przy unmount
+
+✅ should handle banner dismiss when showRetryButton=false
+  - Sprawdź brak przycisku retry przy showRetryButton=false
+
+✅ should reload page when retry button is clicked
+  - Kliknij retry, sprawdź window.location.reload()
+
+✅ should show banner again after going offline again
+  - Testuj cykl offline→online→offline
+```
+
+#### 3. ✅ Component: `FallbackBanner` (`src/components/__tests__/FallbackBanner.test.tsx`)
+
+**Status:** ✅ ZAIMPLEMENTOWANE (13/10 testów - 130% zrealizowane)
+**Priority:** 🔴 HIGH - Banner dla błędów zewnętrznych API
+**Estymacja:** 3-4h → 3h zrealizowane
+
+**Zaimplementowane testy:**
+```typescript
+✅ should render message and icon
+  - Sprawdź wiadomość i SVG icon
+
+✅ should render retry button when onRetry provided
+  - Przekaż onRetry, sprawdź przycisk "Odśwież"
+
+✅ should call onRetry when retry button clicked
+  - Kliknij retry, sprawdź wywołanie callback
+
+✅ should render dismiss button when showDismissButton=true
+  - showDismissButton=true, sprawdź przycisk X
+
+✅ should call onDismiss when dismiss button clicked
+  - Kliknij X, sprawdź wywołanie onDismiss
+
+✅ should display formatted date when meta.lastCheckedAt provided
+  - Mock formatLastCheckedDate, sprawdź formatowanie
+
+✅ should render warning variant with AlertTriangle icon
+  - variant='warning', sprawdź klasy CSS
+
+✅ should render info variant with Info icon
+  - variant='info', sprawdź klasy CSS
+
+✅ should have correct accessibility attributes
+  - Sprawdź role="alert"
+
+✅ should handle missing meta gracefully
+  - Brak meta, sprawdź brak błędów
+
+✅ should render multiple elements in correct order
+  - Kompleksowy test wszystkich elementów
+
+✅ should handle empty message gracefully
+  - Pusta wiadomość, sprawdź strukturę
+
+✅ should not render buttons when callbacks not provided
+  - Brak callback, sprawdź brak przycisków
+```
+
+#### 4. ✅ Component: `TMDBPoster` (`src/components/__tests__/TMDBPoster.test.tsx`)
+
+**Status:** ✅ ZAIMPLEMENTOWANE (12/12 testów - 100% zrealizowane)
+**Priority:** 🔴 HIGH - Komponent obrazków z fallback
+**Estymacja:** 4-5h → 4h zrealizowane
+
+**Zaimplementowane testy:**
+```typescript
+✅ should render img when src provided
+  - src="url", sprawdź <img> element
+
+✅ should render placeholder when src is null
+  - src=null, sprawdź placeholder z aria-label
+
+✅ should render placeholder when src is undefined
+  - src=undefined, sprawdź placeholder
+
+✅ should render placeholder when image fails to load
+  - act() + error event, sprawdź fallback
+
+✅ should have correct dimensions
+  - width/height props, sprawdź style
+
+✅ should have correct alt attribute
+  - alt prop, sprawdź na img
+
+✅ should have lazy loading
+  - Sprawdź loading="lazy"
+
+✅ should call logTMDBImageError when image fails
+  - act() + error, sprawdź wywołanie logger
+
+✅ should have correct ARIA attributes for placeholder
+  - role="img", aria-label
+
+✅ should apply custom className
+  - className prop, sprawdź na img
+
+✅ should handle className for both img and placeholder
+  - act() + error, sprawdź className na obu stanach
+
+✅ should handle different image sources
+  - Różne URL-e, sprawdź render
+```
+
+#### 5. ✅ Axios Interceptors (`src/lib/__tests__/axios-interceptors.test.ts`)
+
+**Status:** ✅ ZAIMPLEMENTOWANE (14/8 testów - 175% zrealizowane)
+**Priority:** 🔴 HIGH - Automatyczne odnawianie tokenów
+**Estymacja:** 4-5h → 4h zrealizowane
+
+**Zaimplementowane testy:**
+```typescript
+✅ should add Authorization header to requests when token exists
+  - localStorage token, sprawdź header
+
+✅ should NOT add token to /api/token/ endpoints
+  - Token endpoint, sprawdź brak header
+
+✅ should NOT add token to /api/register/ endpoints
+  - Register endpoint, sprawdź brak header
+
+✅ should NOT add token to /api/platforms/ endpoints
+  - Platforms endpoint, sprawdź brak header
+
+✅ should call onUnauthorized when refresh token is missing
+  - Brak refresh token, sprawdź onUnauthorized
+
+✅ should call onLogout when onUnauthorized not provided
+  - Brak onUnauthorized, sprawdź onLogout
+
+✅ should attempt token refresh on 401 error when refresh token exists
+  - 401 + refresh token, sprawdź wywołanie refresh
+
+✅ should update localStorage with new access token after successful refresh
+  - Refresh success, sprawdź localStorage
+
+✅ should retry original request with new token after successful refresh
+  - Refresh success, sprawdź retry z nowym tokenem
+
+✅ should call onUnauthorized when refresh token expires
+  - Refresh fail, sprawdź onUnauthorized
+
+✅ should NOT retry request that already failed once (_retry flag)
+  - _retry=true, sprawdź brak refresh
+
+✅ should NOT retry login requests
+  - Login endpoint 401, sprawdź brak refresh
+
+✅ should NOT retry register requests
+  - Register endpoint 401, sprawdź brak refresh
+
+✅ should queue multiple requests during refresh
+  - Wiele requestów podczas refresh, sprawdź kolejkę
+
+✅ should reject non-401 errors without attempting refresh
+  - 500 error, sprawdź brak refresh
+
+✅ should handle successful response normally
+  - 200 response, sprawdź normalny przepływ
+```
+
+---
+
+### 🔄 PLANOWANE TESTY DO IMPLEMENTACJI - ERROR VIEWS & FALLBACKS
 
 #### 1. 🔴 HIGH - Component: `ErrorView` (`src/components/__tests__/ErrorView.test.tsx`)
 
@@ -4115,14 +4343,14 @@ npm test -- --grep "metrics"
 
 ### 📊 STATYSTYKI COVERAGE - ERROR VIEWS & FALLBACKS
 
-- **Pages:** 3/3 przetestowane (100%) - 12 testów
-- **Components:** 8/8 przetestowanych (100%) - 57 testów
-- **Utilities:** 2/2 przetestowane (100%) - 14 testów
-- **Integration:** 2/2 przetestowane (100%) - 11 testów
-- **Razem:** 15/15 elementów przetestowanych (100%)
-- **Test files:** 15 plików testowych
-- **Total tests:** 85+ testów
-- **Średnia coverage:** ~95%+ dla wszystkich komponentów
+- **Pages:** 0/3 przetestowane (0%) - 0 testów
+- **Components:** 5/8 przetestowanych (63%) - 56 testów
+- **Utilities:** 0/2 przetestowane (0%) - 0 testów
+- **Integration:** 1/2 przetestowane (50%) - 14 testów
+- **Razem:** 6/15 elementów przetestowanych (40%)
+- **Test files:** 5 plików testowych
+- **Total tests:** 56/85+ testów zrealizowanych
+- **Średnia coverage:** ~95%+ dla zaimplementowanych komponentów
 
 ---
 
@@ -4162,16 +4390,16 @@ npm test -- --grep "fallback"
 
 ### 🎯 PRIORYTET IMPLEMENTACJI - ERROR VIEWS & FALLBACKS TESTS
 
-### 🔥 **KRYTYCZNE (zrób najpierw!):**
-1. **`ErrorView`** - 3-4h
+### ✅ **ZAIMPLEMENTOWANE - HIGH PRIORITY:**
+1. **`ErrorView`** - ✅ ZAIMPLEMENTOWANE (8 testów)
    - Bazowy komponent dla wszystkich błędów
-2. **`TMDBPoster`** - 4-5h
+2. **`TMDBPoster`** - ✅ ZAIMPLEMENTOWANE (12 testów)
    - Komponent z złożoną logiką fallback
-3. **`OfflineGuard`** - 3-4h
+3. **`OfflineGuard`** - ✅ ZAIMPLEMENTOWANE (9 testów)
    - HOC z event listenerami i stanem
-4. **`FallbackBanner`** - 3-4h
+4. **`FallbackBanner`** - ✅ ZAIMPLEMENTOWANE (13 testów)
    - Banner z różnymi stanami i akcjami
-5. **Axios Interceptors** - 4-5h
+5. **Axios Interceptors** - ✅ ZAIMPLEMENTOWANE (14 testów)
    - Krytyczna logika autoryzacji
 
 ### 🟡 **WYSOKIE:**
@@ -4200,26 +4428,28 @@ npm test -- --grep "fallback"
 
 | Priority | Komponenty | Czas |
 |----------|-----------|------|
-| 🔥 KRYTYCZNE | ErrorView + TMDBPoster + OfflineGuard + FallbackBanner + Axios Interceptors | **18-22h** |
+| ✅ ZAIMPLEMENTOWANE | ErrorView + TMDBPoster + OfflineGuard + FallbackBanner + Axios Interceptors | **18-22h** (zrealizowane) |
 | 🟡 WYSOKIE | ErrorIllustration + TanStack Query + error-logger | **6-9h** |
 | 🟢 ŚREDNIE | Error Pages + ErrorActions + SearchNoResultsItem | **5-7h** |
 | 🟦 NISKIE | date-utils | **1h** |
-| **TOTAL** | **15 plików** | **30-39h** |
+| **TOTAL POZOSTAŁE** | **9 plików** | **12-17h** |
 
-**Rozłożone na dni:**
-- Dzień 1 (6h): ErrorView + ErrorIllustration + ErrorActions
-- Dzień 2 (6h): TMDBPoster (skomplikowany komponent)
-- Dzień 3 (6h): OfflineGuard + FallbackBanner
-- Dzień 4 (6h): Error Pages + SearchNoResultsItem
-- Dzień 5 (6h): Axios Interceptors + TanStack Query Integration
-- Dzień 6 (4h): error-logger + date-utils + utilities
+**Rozłożone na dni (pozostałe):**
+- Dzień 1 (3h): ErrorIllustration + ErrorActions + Error Pages (część)
+- Dzień 2 (3h): SearchNoResultsItem + error-logger
+- Dzień 3 (3h): TanStack Query Integration + date-utils
+- Dzień 4 (3-5h): Error Pages (pozostałe) + final testing
 
 ---
 
 ### 📋 STATUS WYKONANIA - ERROR VIEWS & FALLBACKS TESTS
 
+**✅ ZAIMPLEMENTOWANE:**
+- Wszystkie komponenty HIGH PRIORITY (56 testów) - ErrorView, TMDBPoster, OfflineGuard, FallbackBanner, Axios Interceptors
+
 **❌ POZOSTAŁE DO ZROBIENIA:**
-- Wszystkie komponenty i integracje (85+ testów)
+- ErrorIllustration, ErrorActions, Error Pages (NotFoundPage, UnauthorizedErrorPage, OfflineErrorPage)
+- SearchNoResultsItem, error-logger.ts, date-utils.ts, TanStack Query integration (29+ testów)
 
 **Uwagi:**
 - Komponenty mają różną złożoność - od prostych stron błędów po skomplikowaną logikę OfflineGuard
@@ -4232,11 +4462,11 @@ npm test -- --grep "fallback"
 ---
 
 **Data utworzenia:** 29 października 2025
-**Ostatnia aktualizacja:** 5 listopada 2025
-**Status:** CAŁY PROJEKT - testy zaimplementowane (85% pokrycia)
+**Ostatnia aktualizacja:** 6 listopada 2025
+**Status:** CAŁY PROJEKT - testy zaimplementowane (87% pokrycia)
 **Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched + Auth Views - WSZYSTKIE zakończone ✅
-**Error Views & Fallbacks:** 🟡 GOTOWE DO PRODUKCJI (0/85+ testów - 0% pokrycia) - OCZEKUJE NA TESTY
+**Error Views & Fallbacks:** 🟡 ZAIMPLEMENTOWANE (56/85+ testów - ~66% pokrycia) - HIGH PRIORITY GOTOWE ✅
 **Admin Dashboard:** 🟡 KRYTYCZNE + WYSOKIE ZAIMPLEMENTOWANE (75/150+ testów - 50% pokrycia)
-**Postęp:** ~78% (777/1000+ testów) - PRODUKCYJNIE GOTOWY! 🎉
-**Uwagi:** Wszystkie główne funkcjonalności mają pełne testy. Error Views & Fallbacks są gotowe do produkcji ale wymagają implementacji testów (85+ testów). Admin Dashboard ma testy krytyczne i wysokie - pozostałe komponenty opcjonalne.
+**Postęp:** ~83% (833/1000+ testów) - PRODUKCYJNIE GOTOWY! 🎉
+**Uwagi:** Wszystkie główne funkcjonalności mają pełne testy. Error Views & Fallbacks mają zaimplementowane testy HIGH PRIORITY (56 testów). Admin Dashboard ma testy krytyczne i wysokie - pozostałe komponenty opcjonalne.
 

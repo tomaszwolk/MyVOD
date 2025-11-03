@@ -2,7 +2,6 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axio
 import { setupAxiosInterceptors } from '../axios-interceptors';
 import { refreshAccessToken } from '../api/auth';
 
-// Mock axios
 vi.mock('axios', () => ({
   default: {
     create: vi.fn(() => ({
@@ -22,25 +21,25 @@ vi.mock('axios', () => ({
   },
 }));
 
-// Mock refreshAccessToken
 vi.mock('../api/auth', () => ({
   refreshAccessToken: vi.fn(),
 }));
 
-// Mock localStorage
 const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
 };
+
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-describe('axios-interceptors', () => {
+describe('setupAxiosInterceptors', () => {
   let mockAxios: AxiosInstance;
   let onLogout: vi.MockedFunction<() => void>;
+  let onUnauthorized: vi.MockedFunction<() => void>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -53,11 +52,12 @@ describe('axios-interceptors', () => {
     // Create mock axios instance
     mockAxios = axios.create();
 
-    // Mock onLogout function
+    // Mock callbacks
     onLogout = vi.fn();
+    onUnauthorized = vi.fn();
 
     // Setup interceptors
-    setupAxiosInterceptors(mockAxios, onLogout);
+    setupAxiosInterceptors(mockAxios, onLogout, onUnauthorized);
   });
 
   describe('Request Interceptor', () => {
@@ -67,7 +67,7 @@ describe('axios-interceptors', () => {
       requestInterceptor = mockAxios.interceptors.request.use.mock.calls[0][0];
     });
 
-    it('should add Authorization header to requests', () => {
+    it('should add Authorization header to requests when token exists', () => {
       // Given: access token exists in localStorage
       localStorageMock.getItem.mockReturnValue('test-token');
 
@@ -99,7 +99,7 @@ describe('axios-interceptors', () => {
       expect(result.headers.Authorization).toBeUndefined();
     });
 
-    it('should NOT add token to /api/register/', () => {
+    it('should NOT add token to /api/register/ endpoints', () => {
       // Given: access token exists in localStorage
       localStorageMock.getItem.mockReturnValue('test-token');
 
@@ -115,7 +115,7 @@ describe('axios-interceptors', () => {
       expect(result.headers.Authorization).toBeUndefined();
     });
 
-    it('should NOT add token to /api/platforms/', () => {
+    it('should NOT add token to /api/platforms/ endpoints', () => {
       // Given: access token exists in localStorage
       localStorageMock.getItem.mockReturnValue('test-token');
 
@@ -155,7 +155,34 @@ describe('axios-interceptors', () => {
       responseInterceptor = mockAxios.interceptors.response.use.mock.calls[0][1];
     });
 
-    it('should call onLogout when refresh token is missing', async () => {
+    it('should call onUnauthorized when refresh token is missing', async () => {
+      // Given: no refresh token in localStorage
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'myVOD_refresh_token') return null;
+        return 'old-token';
+      });
+
+      const error = {
+        config: { url: '/api/me/' },
+        response: { status: 401 },
+      };
+
+      // When: 401 error occurs
+      try {
+        await responseInterceptor(error);
+      } catch {
+        // Expected to reject
+      }
+
+      // Then: onUnauthorized should be called
+      expect(onUnauthorized).toHaveBeenCalled();
+      expect(onLogout).not.toHaveBeenCalled();
+    });
+
+    it('should call onLogout when onUnauthorized is not provided and refresh token is missing', async () => {
+      // Setup interceptors without onUnauthorized
+      setupAxiosInterceptors(mockAxios, onLogout);
+
       // Given: no refresh token in localStorage
       localStorageMock.getItem.mockImplementation((key) => {
         if (key === 'myVOD_refresh_token') return null;
@@ -178,7 +205,7 @@ describe('axios-interceptors', () => {
       expect(onLogout).toHaveBeenCalled();
     });
 
-    it('should attempt token refresh on 401 error', async () => {
+    it('should attempt token refresh on 401 error when refresh token exists', async () => {
       // Given: refresh token exists and refresh succeeds
       const mockRefresh = vi.mocked(refreshAccessToken);
       mockRefresh.mockResolvedValue({ access: 'new-token' });
@@ -206,7 +233,7 @@ describe('axios-interceptors', () => {
       expect(result).toBeDefined();
     });
 
-    it('should update localStorage with new access token', async () => {
+    it('should update localStorage with new access token after successful refresh', async () => {
       // Given: refresh succeeds
       const mockRefresh = vi.mocked(refreshAccessToken);
       mockRefresh.mockResolvedValue({ access: 'new-token' });
@@ -231,7 +258,7 @@ describe('axios-interceptors', () => {
       expect(localStorageMock.setItem).toHaveBeenCalledWith('myVOD_access_token', 'new-token');
     });
 
-    it('should retry original request with new token', async () => {
+    it('should retry original request with new token after successful refresh', async () => {
       // Given: refresh succeeds
       const mockRefresh = vi.mocked(refreshAccessToken);
       mockRefresh.mockResolvedValue({ access: 'new-token' });
@@ -255,12 +282,12 @@ describe('axios-interceptors', () => {
       // Then: original request should be retried with new token
       expect(mockAxiosInstance).toHaveBeenCalledWith({
         ...error.config,
-        headers: { Authorization: 'new-token' },
+        headers: { Authorization: 'Bearer new-token' },
         _retry: true,
       });
     });
 
-    it('should call onLogout when refresh token expires', async () => {
+    it('should call onUnauthorized when refresh token expires', async () => {
       // Given: refresh fails
       const mockRefresh = vi.mocked(refreshAccessToken);
       mockRefresh.mockRejectedValue(new Error('Invalid refresh token'));
@@ -282,8 +309,69 @@ describe('axios-interceptors', () => {
         // Expected to reject
       }
 
-      // Then: onLogout should be called
-      expect(onLogout).toHaveBeenCalled();
+      // Then: onUnauthorized should be called
+      expect(onUnauthorized).toHaveBeenCalled();
+    });
+
+    it('should NOT retry request that already failed once (_retry flag)', async () => {
+      // Given: request already has _retry flag
+      const error = {
+        config: {
+          url: '/api/me/',
+          headers: {},
+          _retry: true
+        },
+        response: { status: 401 },
+      };
+
+      // When: 401 error occurs on already retried request
+      try {
+        await responseInterceptor(error);
+      } catch (rejectedError) {
+        // Then: should reject without attempting refresh
+        expect(rejectedError).toBe(error);
+      }
+
+      // And refresh should not be called
+      expect(vi.mocked(refreshAccessToken)).not.toHaveBeenCalled();
+    });
+
+    it('should NOT retry login requests', async () => {
+      // Given: login request fails with 401
+      const error = {
+        config: { url: '/api/token/login/' },
+        response: { status: 401 },
+      };
+
+      // When: 401 error occurs on login endpoint
+      try {
+        await responseInterceptor(error);
+      } catch (rejectedError) {
+        // Then: should reject without attempting refresh
+        expect(rejectedError).toBe(error);
+      }
+
+      // And refresh should not be called
+      expect(vi.mocked(refreshAccessToken)).not.toHaveBeenCalled();
+    });
+
+    it('should NOT retry register requests', async () => {
+      // Given: register request fails with 401
+      const error = {
+        config: { url: '/api/register/' },
+        response: { status: 401 },
+      };
+
+      // When: 401 error occurs on register endpoint
+      try {
+        await responseInterceptor(error);
+      } catch (rejectedError) {
+        // Then: should reject without attempting refresh
+        expect(rejectedError).toBe(error);
+      }
+
+      // And refresh should not be called
+      expect(vi.mocked(refreshAccessToken)).not.toHaveBeenCalled();
     });
 
     it('should queue multiple requests during refresh', async () => {
@@ -321,45 +409,14 @@ describe('axios-interceptors', () => {
       expect(mockAxiosInstance).toHaveBeenCalledTimes(2);
     });
 
-    it('should set isRefreshing flag during refresh', async () => {
-      // Given: refresh will take some time
-      const mockRefresh = vi.mocked(refreshAccessToken);
-      mockRefresh.mockResolvedValue({ access: 'new-token' });
-
-      localStorageMock.getItem.mockImplementation((key) => {
-        if (key === 'myVOD_refresh_token') return 'refresh-token';
-        return null;
-      });
-
-      const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'success' });
-      (mockAxios as any).mockImplementation(mockAxiosInstance);
-
+    it('should reject non-401 errors without attempting refresh', async () => {
+      // Given: 500 error (not 401)
       const error = {
-        config: { url: '/api/me/', headers: {} },
-        response: { status: 401 },
+        config: { url: '/api/me/' },
+        response: { status: 500 },
       };
 
-      // When: 401 error occurs
-      const promise = responseInterceptor(error);
-
-      // Then: isRefreshing should be managed (we can't directly test this flag
-      // but we can verify the flow works correctly)
-      await promise;
-      expect(mockRefresh).toHaveBeenCalledWith('refresh-token');
-    });
-
-    it('should NOT retry request that already failed once (_retry flag)', async () => {
-      // Given: request already has _retry flag
-      const error = {
-        config: {
-          url: '/api/me/',
-          headers: {},
-          _retry: true
-        },
-        response: { status: 401 },
-      };
-
-      // When: 401 error occurs on already retried request
+      // When: non-401 error occurs
       try {
         await responseInterceptor(error);
       } catch (rejectedError) {
@@ -371,23 +428,18 @@ describe('axios-interceptors', () => {
       expect(vi.mocked(refreshAccessToken)).not.toHaveBeenCalled();
     });
 
-    it('should NOT retry login or register requests', async () => {
-      // Given: login request fails with 401
-      const error = {
-        config: { url: '/api/token/login/' },
-        response: { status: 401 },
+    it('should handle successful response normally', async () => {
+      // Given: successful response
+      const response = {
+        data: 'success',
+        status: 200,
       };
 
-      // When: 401 error occurs on login endpoint
-      try {
-        await responseInterceptor(error);
-      } catch (rejectedError) {
-        // Then: should reject without attempting refresh
-        expect(rejectedError).toBe(error);
-      }
+      // When: successful response is handled
+      const result = await responseInterceptor(response);
 
-      // And refresh should not be called
-      expect(vi.mocked(refreshAccessToken)).not.toHaveBeenCalled();
+      // Then: should return response unchanged
+      expect(result).toBe(response);
     });
   });
 });
