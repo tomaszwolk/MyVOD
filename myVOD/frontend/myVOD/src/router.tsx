@@ -4,6 +4,7 @@ import { LoginPage } from "@/pages/auth/LoginPage";
 import { WatchlistPage } from "@/pages/WatchlistPage";
 import { WatchedPage } from "@/pages/WatchedPage";
 import { ProfilePage } from "@/pages/ProfilePage";
+import { AdminDashboardPage } from "@/pages/AdminDashboardPage";
 import { OnboardingPlatformsPage, OnboardingFirstMoviesPage, OnboardingAddPage, OnboardingWatchedPage } from "@/pages/onboarding";
 import { AppRoot } from "@/components/AppRoot";
 import { OnboardingGuard } from "@/components/OnboardingGuard";
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: "app/profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "app/admin/dashboard",
+        element: <AdminDashboardPage />,
       },
       {
         path: "onboarding",
