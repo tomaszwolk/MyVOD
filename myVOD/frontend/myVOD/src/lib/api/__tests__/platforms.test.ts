@@ -77,6 +77,103 @@ describe('getPlatforms', () => {
   });
 });
 
+describe('getPlatforms - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    mock.onGet('/platforms/').networkError();
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    mock.onGet('/platforms/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    mock.onGet('/platforms/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    mock.onGet('/platforms/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    mock.onGet('/platforms/').reply(500, 'Internal server error - not JSON');
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    mock.onGet('/platforms/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    mock.onGet('/platforms/').reply(403, {
+      detail: 'Access forbidden'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    mock.onGet('/platforms/').reply(429, {
+      detail: 'Too many platform requests. Try again later.'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    mock.onGet('/platforms/').reply(409, {
+      detail: 'Platform access conflict'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    mock.onGet('/platforms/').reply(422, {
+      detail: 'Invalid platforms request'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    mock.onGet('/platforms/').reply(502, {
+      detail: 'Bad gateway'
+    });
+
+    await expect(getPlatforms()).rejects.toThrow();
+  });
+});
+
 describe('patchUserPlatforms', () => {
   let mock: MockAdapter;
 
@@ -157,5 +254,104 @@ describe('patchUserPlatforms', () => {
 
     expect(result).toBeDefined();
     // Query invalidation would be tested in integration tests
+  });
+});
+
+describe('patchUserPlatforms - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').networkError();
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(500, 'Internal server error - not JSON');
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(429, {
+      detail: 'Too many platform update requests. Try again later.'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(409, {
+      detail: 'Platform update conflict'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(422, {
+      detail: 'Invalid platform IDs'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    const platformIds = [1, 2];
+    mock.onPatch('/me/').reply(502, {
+      detail: 'Bad gateway'
+    });
+
+    await expect(patchUserPlatforms(platformIds)).rejects.toThrow();
   });
 });

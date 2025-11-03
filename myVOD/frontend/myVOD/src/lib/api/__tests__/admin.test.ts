@@ -158,6 +158,121 @@ describe("Admin API Functions", () => {
     });
   });
 
+  describe("getAdminMetrics - Comprehensive Error Handling", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("should handle network connection refused (ECONNREFUSED)", async () => {
+      const networkError = new Error("Network Error");
+      networkError.name = "ECONNREFUSED";
+      (http.get as any).mockRejectedValueOnce(networkError);
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle network timeout (408)", async () => {
+      const timeoutError = new Error("Request timeout");
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 408,
+          data: { detail: "Request timeout" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle server unavailable (503)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 503,
+          data: { detail: "Service temporarily unavailable" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle gateway timeout (504)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 504,
+          data: { detail: "Gateway timeout" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle malformed JSON response (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "Internal server error - not JSON",
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle HTML error response instead of JSON (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "<html><body>Server Error</body></html>",
+          headers: { "content-type": "text/html" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle too many requests (429)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 429,
+          data: { detail: "Too many admin requests. Try again later." },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle conflict state (409)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 409,
+          data: { detail: "Admin metrics conflict" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle unprocessable entity (422)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 422,
+          data: { detail: "Invalid admin metrics request" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+
+    it("should handle bad gateway (502)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 502,
+          data: { detail: "Bad gateway" },
+        },
+      });
+
+      await expect(getAdminMetrics()).rejects.toThrow();
+    });
+  });
+
   describe("getTopMovies", () => {
     const mockQuery: TopMoviesQuery = {
       type: "watchlist",
@@ -253,6 +368,125 @@ describe("Admin API Functions", () => {
       (http.get as any).mockRejectedValueOnce(networkError);
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow("Network Error");
+    });
+  });
+
+  describe("getTopMovies - Comprehensive Error Handling", () => {
+    const mockQuery: TopMoviesQuery = {
+      type: "watchlist",
+      range: "30d",
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("should handle network connection refused (ECONNREFUSED)", async () => {
+      const networkError = new Error("Network Error");
+      networkError.name = "ECONNREFUSED";
+      (http.get as any).mockRejectedValueOnce(networkError);
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle network timeout (408)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 408,
+          data: { detail: "Request timeout" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle server unavailable (503)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 503,
+          data: { detail: "Service temporarily unavailable" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle gateway timeout (504)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 504,
+          data: { detail: "Gateway timeout" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle malformed JSON response (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "Internal server error - not JSON",
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle HTML error response instead of JSON (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "<html><body>Server Error</body></html>",
+          headers: { "content-type": "text/html" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle too many requests (429)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 429,
+          data: { detail: "Too many top movies requests. Try again later." },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle conflict state (409)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 409,
+          data: { detail: "Top movies conflict" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle unprocessable entity (422)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 422,
+          data: { detail: "Invalid top movies query" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle bad gateway (502)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 502,
+          data: { detail: "Bad gateway" },
+        },
+      });
+
+      await expect(getTopMovies(mockQuery)).rejects.toThrow();
     });
   });
 
@@ -379,6 +613,126 @@ describe("Admin API Functions", () => {
       (http.get as any).mockRejectedValueOnce(networkError);
 
       await expect(getErrorLogs(mockQuery)).rejects.toThrow("Network Error");
+    });
+  });
+
+  describe("getErrorLogs - Comprehensive Error Handling", () => {
+    const mockQuery: ErrorLogsQuery = {
+      api_type: ["tmdb"],
+      date_from: "2024-01-01",
+      user_id: "123",
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("should handle network connection refused (ECONNREFUSED)", async () => {
+      const networkError = new Error("Network Error");
+      networkError.name = "ECONNREFUSED";
+      (http.get as any).mockRejectedValueOnce(networkError);
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle network timeout (408)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 408,
+          data: { detail: "Request timeout" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle server unavailable (503)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 503,
+          data: { detail: "Service temporarily unavailable" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle gateway timeout (504)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 504,
+          data: { detail: "Gateway timeout" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle malformed JSON response (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "Internal server error - not JSON",
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle HTML error response instead of JSON (500)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: "<html><body>Server Error</body></html>",
+          headers: { "content-type": "text/html" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle too many requests (429)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 429,
+          data: { detail: "Too many error logs requests. Try again later." },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle conflict state (409)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 409,
+          data: { detail: "Error logs conflict" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle unprocessable entity (422)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 422,
+          data: { detail: "Invalid error logs query" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
+    });
+
+    it("should handle bad gateway (502)", async () => {
+      (http.get as any).mockRejectedValueOnce({
+        response: {
+          status: 502,
+          data: { detail: "Bad gateway" },
+        },
+      });
+
+      await expect(getErrorLogs(mockQuery)).rejects.toThrow();
     });
   });
 
