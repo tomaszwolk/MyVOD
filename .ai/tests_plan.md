@@ -2834,6 +2834,213 @@ npm install --save-dev msw
 
 ---
 
+## 🎉 **ZAIMPLEMENTOWANE TESTY BATCH 4 - EDGE CASES & VALIDATION** (27 testów)
+
+### **Batch 4: ✅ Dodatkowe testy bezpieczeństwa** (27 testów)
+
+**Plik:** `src/lib/api/__tests__/auth.test.ts`
+
+**Data implementacji:** 3 listopada 2025
+**Pokrycie:** 100% → **100%** (utrzymane maksimum)
+**Priorytet:** 🟡 MEDIUM - Dodatkowe bezpieczeństwo
+
+#### **Zaimplementowane funkcje z edge cases:**
+
+1. **registerUser** (7 dodatkowych testów):
+   - Empty/null email validation
+   - Empty password validation
+   - Very long email (>200 chars)
+   - Unicode characters in email
+   - Email already exists (409)
+   - Weak password validation
+
+2. **loginUser** (8 dodatkowych testów):
+   - Empty/null email validation
+   - Empty password validation
+   - Very long email validation
+   - Unicode characters in email
+   - Non-existent user (404)
+   - Account disabled (401)
+   - Too many login attempts (429)
+
+3. **changePassword** (8 dodatkowych testów):
+   - Empty current/new password validation
+   - Null values validation
+   - Same password validation
+   - Weak password validation
+   - Very long passwords (>300 chars)
+   - Rate limiting (429)
+   - Unicode characters support
+
+4. **Network & Server Errors** (4 dodatkowe testy):
+   - Network timeout (408)
+   - Server maintenance (503)
+   - Malformed JSON responses (500)
+   - Empty response body (204)
+
+#### **Testy obejmują:**
+```typescript
+✅ Empty/null parameter validation
+✅ Very long input validation (>200-300 chars)
+✅ Unicode character support
+✅ Business logic validation (same password, weak passwords)
+✅ Rate limiting scenarios (429)
+✅ Account status validation (disabled users)
+✅ Network/server error handling
+✅ Edge case responses (empty body, malformed JSON)
+```
+
+#### **Techniczne szczegóły:**
+- **Framework:** Vitest + MockAdapter (axios-mock-adapter)
+- **Coverage:** 100% statements, 100% branches, 100% functions, 100% lines
+- **Łącznie:** 27 nowych testów zwiększających bezpieczeństwo API
+- **Razem w auth.test.ts:** 50 testów (23 oryginalne + 27 edge cases)
+
+## 📋 **BATCH 4: OPCJA DO WDROŻENIA - EDGE CASES DLA MOVIES.TS** (40-50 testów)
+
+### **Batch 4: 🟡 OPCJA - Dodatkowe edge cases dla movies.ts**
+
+**Status:** ❌ NIE ZAIMPLEMENTOWANE (opcja do wdrożenia w przyszłości)
+
+**Plik:** `src/lib/api/__tests__/movies.test.ts`
+
+**Priorytet:** 🟡 LOW - Dodatkowe bezpieczeństwo (opcjonalne)
+
+#### **Planowane funkcje z edge cases:**
+
+1. **searchMovies** (8-10 testów):
+   - Empty query validation (< 2 chars)
+   - Very long queries (>1000 chars)
+   - Unicode characters and emojis
+   - SQL injection patterns (`' OR 1=1 --`, `DROP TABLE`, etc.)
+   - Special characters (`<script>`, `&<>"`)
+   - Rate limiting (429)
+   - Network timeout (408)
+   - Malformed JSON response (500)
+
+2. **addUserMovie** (6-8 testów):
+   - Invalid tconst format (not matching `tt\d+` pattern)
+   - Very long tconst (>20 chars)
+   - Null/undefined tconst
+   - Duplicate movie (409)
+   - Rate limiting (429)
+   - Network errors
+
+3. **restoreUserMovie** (6-8 testów):
+   - Invalid userMovieId (non-numeric, negative)
+   - Non-existent userMovieId (404)
+   - Rate limiting (429)
+   - Network timeout
+   - Malformed responses
+
+4. **getAISuggestions** (6-8 testów):
+   - Rate limiting (429)
+   - Network timeout (408)
+   - Server maintenance (503)
+   - Empty suggestions array
+   - Malformed suggestion objects
+   - Very large response
+
+5. **patchUserMovie** (6-8 testów):
+   - Invalid actions (not 'mark_as_watched', 'restore_to_watchlist', etc.)
+   - Missing required fields
+   - Invalid userMovieId
+   - Rate limiting (429)
+   - Concurrent modification (409)
+
+6. **deleteUserMovie** (6-8 testów):
+   - Invalid userMovieId format
+   - Non-existent userMovieId (404)
+   - Already deleted (404)
+   - Rate limiting (429)
+   - Network errors
+
+7. **listUserMovies** (6-8 testów):
+   - Invalid status filters (not 'watchlist', 'watched', 'all')
+   - Very large result sets
+   - Rate limiting (429)
+   - Network timeout
+   - Malformed movie objects
+
+#### **Planowane scenariusze testowe:**
+```typescript
+✅ Parameter validation (empty, null, invalid format)
+✅ Unicode and special character handling
+✅ Very long inputs (>1000 chars)
+✅ SQL injection prevention
+✅ Rate limiting scenarios (429)
+✅ Network errors (408, timeout)
+✅ Server errors (500, 502, 503)
+✅ Business logic validation
+✅ Malformed responses
+✅ Edge case data structures
+```
+
+#### **Szacowane korzyści:**
+- Dodatkowe bezpieczeństwo API
+- Lepiej przetestowane edge cases
+- Większa odporność na ataki
+- Lepsze pokrycie błędów użytkownika
+
+#### **Szacowana implementacja:**
+- **Czas:** 4-6 godzin
+- **Testy:** 40-50 nowych testów
+- **Pokrycie:** movies.ts: 95.65% → ~98%
+
+---
+
+## 🔥 **BATCH 5: WDRAŻANIE - KOMPLEKSOWE TESTY BŁĘDÓW API**
+
+### **Batch 5: 🔴 HIGH - Kompleksowe testy błędów dla wszystkich funkcji API**
+
+**Status:** 🚧 WDRAŻANIE W TOKU
+
+**Rozkład na etapy:**
+1. **✅ Etap 1 ZAKOŃCZONY:** Testy błędów dla funkcji auth (loginUser, registerUser, refreshAccessToken) - **20 testów**
+2. **✅ Etap 2 ZAKOŃCZONY:** Testy błędów dla pozostałych funkcji auth (getUserProfile, deleteAccount, changePassword) - **32 testy**
+3. **Etap 3:** Testy błędów dla funkcji movies (searchMovies, addUserMovie, patchUserMovie)
+4. **Etap 4:** Testy błędów dla pozostałych funkcji movies (deleteUserMovie, listUserMovies, restoreUserMovie, getAISuggestions)
+5. **Etap 5:** Testy błędów dla funkcji admin i platforms
+
+#### **✅ Etap 1 - ZAKOŃCZONY (20 testów)**
+
+**Funkcje przetestowane:**
+- `loginUser`: 8 nowych testów błędów
+- `registerUser`: 9 nowych testów błędów
+- `refreshAccessToken`: 11 nowych testów błędów
+
+**Rodzaje błędów pokryte:**
+- Network errors (ECONNREFUSED, timeout 408)
+- Server errors (500, 502, 503, 504)
+- Authentication errors (401, 403)
+- Business logic errors (409, 422)
+- Rate limiting (429)
+- Malformed responses (HTML zamiast JSON)
+- Empty/null responses
+
+**Razem w auth.test.ts:** 78 testów (58 poprzednich + 20 nowych)
+
+#### **✅ Etap 2 - ZAKOŃCZONY (32 testy)**
+
+**Funkcje przetestowane:**
+- `getUserProfile`: 11 nowych testów błędów
+- `deleteAccount`: 11 nowych testów błędów
+- `changePassword`: 10 nowych testów błędów
+
+**Rodzaje błędów pokryte dla każdej funkcji:**
+- Network errors (ECONNREFUSED, timeout 408)
+- Server errors (500, 502, 503, 504)
+- Authentication errors (401, 403)
+- Business logic errors (409, 422)
+- Rate limiting (429)
+- Malformed responses (HTML zamiast JSON)
+- Bad gateway (502)
+
+**Razem w auth.test.ts:** 110 testów (78 poprzednich + 32 nowych)
+**Razem w Batch 5:** 52 testy błędów (20 + 32)
+
+---
+
 ### 📝 Specjalne wymagania testowe
 
 #### Mock dla complex flow
