@@ -7,6 +7,7 @@ import type { WatchedMovieItemVM, PlatformDto } from '@/types/view/watched.types
 vi.mock('lucide-react', () => ({
   RotateCcw: () => <div data-testid="rotate-ccw-icon" />,
   ImageIcon: () => <div data-testid="image-icon" />,
+  Trash2: () => <div data-testid="trash2-icon" />,
 }));
 
 describe('UserMovieCard', () => {

@@ -12,6 +12,10 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => vi.fn(),
+  useSearchParams: () => [
+    new URLSearchParams(),
+    vi.fn(),
+  ],
 }));
 
 vi.mock("@/components/library/MediaLibraryLayout", () => ({
@@ -37,8 +41,12 @@ vi.mock("@/components/watched/WatchedContent", () => ({
   },
 }));
 
-vi.mock("@/components/watchlist/SuggestionModal", () => ({
-  SuggestionModal: () => null,
+vi.mock("@/components/suggestions/AISuggestionsDialog", () => ({
+  AISuggestionsDialog: () => null,
+}));
+
+vi.mock("@/components/watchlist/ConfirmDialog", () => ({
+  ConfirmDialog: () => null,
 }));
 
 vi.mock("@/components/watchlist/ToastViewport", () => ({
@@ -67,6 +75,7 @@ vi.mock("@/hooks/usePlatforms", () => ({
 
 vi.mock("@/hooks/useWatchedActions", () => ({
   useRestoreToWatchlist: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteFromWatched: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock("@/hooks/useAddMovie", () => ({
@@ -81,14 +90,13 @@ vi.mock("@/hooks/usePatchUserMovie", () => ({
   usePatchUserMovie: () => ({ mutateAsync: vi.fn() }),
 }));
 
-vi.mock("@/hooks/useAISuggestionsHandler", () => ({
-  useAISuggestionsHandler: () => ({
-    handleSuggestClick: vi.fn(),
-    isSuggestDisabled: false,
-    suggestionsData: null,
-    isModalOpen: false,
-    closeModal: vi.fn(),
-    addFromSuggestion: vi.fn(),
+vi.mock("@/hooks/useAISuggestions", () => ({
+  useAISuggestions: () => ({
+    data: null,
+    error: null,
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
   }),
 }));
 

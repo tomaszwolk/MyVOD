@@ -5,15 +5,13 @@ import React from "react";
 
 // Mock dependencies
 const mockNavigate = vi.fn();
+const mockSetSearchParams = vi.fn();
 const mockLogout = vi.fn();
 const mockUpdatePlatforms = vi.fn();
 const mockDeleteAccount = vi.fn();
 const mockChangePassword = vi.fn();
 const mockAddMovie = vi.fn();
 const mockPatchUserMovie = vi.fn();
-const mockHandleSuggestClick = vi.fn();
-const mockAddFromSuggestion = vi.fn();
-const mockCloseModal = vi.fn();
 
 const mockUseAuth = vi.fn();
 
@@ -23,6 +21,10 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
+  useSearchParams: () => [
+    new URLSearchParams(),
+    mockSetSearchParams,
+  ],
 }));
 
 vi.mock("@/hooks/useUserProfile", () => ({
@@ -70,14 +72,13 @@ vi.mock("@/hooks/usePatchUserMovie", () => ({
   }),
 }));
 
-vi.mock("@/hooks/useAISuggestionsHandler", () => ({
-  useAISuggestionsHandler: () => ({
-    handleSuggestClick: mockHandleSuggestClick,
-    isSuggestDisabled: false,
-    suggestionsData: null,
-    isModalOpen: false,
-    closeModal: mockCloseModal,
-    addFromSuggestion: mockAddFromSuggestion,
+vi.mock("@/hooks/useAISuggestions", () => ({
+  useAISuggestions: () => ({
+    data: null,
+    error: null,
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
   }),
 }));
 
@@ -228,8 +229,8 @@ vi.mock("@/components/ui/button", () => ({
   ),
 }));
 
-vi.mock("@/components/watchlist/SuggestionModal", () => ({
-  SuggestionModal: () => null,
+vi.mock("@/components/suggestions/AISuggestionsDialog", () => ({
+  AISuggestionsDialog: () => null,
 }));
 
 vi.mock("sonner", () => ({
@@ -253,6 +254,7 @@ describe("ProfilePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNavigate.mockClear();
+    mockSetSearchParams.mockClear();
     mockLogout.mockClear();
     mockUpdatePlatforms.mockClear();
     mockDeleteAccount.mockClear();
@@ -415,14 +417,20 @@ describe("ProfilePage", () => {
       expect(screen.getByTestId("suggest-ai-button")).toBeInTheDocument();
     });
 
-    it("calls handleSuggestClick when suggest AI button is clicked", async () => {
+    it("calls setSearchParams when suggest AI button is clicked", async () => {
       const user = userEvent.setup();
       render(<ProfilePage />);
 
       const suggestButton = screen.getByTestId("suggest-ai-button");
       await user.click(suggestButton);
 
-      expect(mockHandleSuggestClick).toHaveBeenCalled();
+      expect(mockSetSearchParams).toHaveBeenCalled();
+      // Check that it was called with searchParams that include 'suggestions=true'
+      const callArgs = mockSetSearchParams.mock.calls[0];
+      expect(callArgs[0]).toBeInstanceOf(URLSearchParams);
+      expect(callArgs[0].get('suggestions')).toBe('true');
+      // Check that replace option is false
+      expect(callArgs[1]).toEqual({ replace: false });
     });
   });
 
