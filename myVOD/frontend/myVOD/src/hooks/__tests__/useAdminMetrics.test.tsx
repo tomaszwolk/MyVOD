@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAdminMetrics } from "../useAdminMetrics";
 import { getAdminMetrics } from "@/lib/api/admin";
@@ -155,13 +155,14 @@ describe("useAdminMetrics", () => {
       expect(mockGetAdminMetrics).toHaveBeenCalledTimes(1);
     });
 
-    // Simulate window focus - the hook should not refetch
-    window.dispatchEvent(new Event('focus'));
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      await Promise.resolve();
+    });
 
-    // Wait a bit and check that API wasn't called again
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    expect(mockGetAdminMetrics).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockGetAdminMetrics).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("should return loading state initially", () => {

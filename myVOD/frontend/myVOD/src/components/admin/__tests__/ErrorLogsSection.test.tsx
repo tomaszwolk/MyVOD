@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ErrorLogsSection } from "../ErrorLogsSection";
 import type { ErrorLogsQuery, PaginatedErrorLogsDto } from "@/types/view/admin.types";
@@ -300,10 +300,12 @@ describe("ErrorLogsSection", () => {
     const exportButton = screen.getByText("Eksportuj CSV");
     await user.click(exportButton);
 
-    expect(mockExportErrorLogsCSV).toHaveBeenCalledWith({
-      page: 1,
-      page_size: 50,
-      sort: "-occurred_at",
+    await waitFor(() => {
+      expect(mockExportErrorLogsCSV).toHaveBeenCalledWith({
+        page: 1,
+        page_size: 50,
+        sort: "-occurred_at",
+      });
     });
   });
 
@@ -322,16 +324,16 @@ describe("ErrorLogsSection", () => {
     const exportButton = screen.getByText("Eksportuj CSV");
     await user.click(exportButton);
 
-    expect(toast.success).toHaveBeenCalledWith("Eksport CSV rozpoczęty");
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Eksport CSV rozpoczęty");
+    });
   });
 
   it("should show error toast on export failure", async () => {
     const user = userEvent.setup();
     const { toast } = await import("sonner");
 
-    mockExportErrorLogsCSV.mockImplementation(() => {
-      throw new Error("Export failed");
-    });
+    mockExportErrorLogsCSV.mockRejectedValueOnce(new Error("Export failed"));
 
     mockUseErrorLogs.mockReturnValue({
       data: mockErrorLogsData,
@@ -344,7 +346,9 @@ describe("ErrorLogsSection", () => {
     const exportButton = screen.getByText("Eksportuj CSV");
     await user.click(exportButton);
 
-    expect(toast.error).toHaveBeenCalledWith("Nie udało się wyeksportować danych");
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Nie udało się wyeksportować danych");
+    });
   });
 
   it("should disable export button when loading", () => {

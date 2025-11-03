@@ -7,6 +7,10 @@
  * Example: "15 października 2023"
  */
 export function formatLastCheckedDate(dateString: string): string {
+  if (!dateString) {
+    return 'nieznana data';
+  }
+
   try {
     const date = new Date(dateString);
 
@@ -47,7 +51,17 @@ export function isValidDate(dateString: string): boolean {
  */
 export function formatRelativeTime(dateString: string): string {
   try {
+    if (!dateString) {
+      return 'nieznany czas';
+    }
+
     const date = new Date(dateString);
+
+    // Check if date is invalid
+    if (isNaN(date.getTime())) {
+      return 'nieznany czas';
+    }
+
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));

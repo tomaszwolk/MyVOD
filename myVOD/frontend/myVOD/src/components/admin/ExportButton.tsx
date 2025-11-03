@@ -15,7 +15,7 @@ type ExportButtonProps = {
 export function ExportButton({ query, disabled }: ExportButtonProps) {
   const handleExport = async () => {
     try {
-      exportTopMoviesCSV(query);
+      await exportTopMoviesCSV(query);
       toast.success("Eksport CSV rozpoczęty");
     } catch (error) {
       toast.error("Nie udało się wyeksportować danych");

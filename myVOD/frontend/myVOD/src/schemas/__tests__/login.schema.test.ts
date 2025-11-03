@@ -169,13 +169,19 @@ describe('loginSchema', () => {
 
       // Then: should fail with errors for both fields
       expect(result.success).toBe(false);
-      expect(result.error?.issues).toHaveLength(2);
 
-      const emailError = result.error?.issues.find(issue => issue.path.includes('email'));
-      const passwordError = result.error?.issues.find(issue => issue.path.includes('password'));
+      const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+      const passwordErrors = result.error?.issues.filter(issue => issue.path.includes('password'));
 
-      expect(emailError?.message).toBe('Email jest wymagany');
-      expect(passwordError?.message).toBe('Hasło jest wymagane');
+      // Email has 2 errors: too_small and invalid_format
+      expect(emailErrors?.length).toBe(2);
+      expect(passwordErrors?.length).toBe(1);
+
+      // Check that we have the expected error messages
+      const errorMessages = result.error?.issues.map(issue => issue.message);
+      expect(errorMessages).toContain('Email jest wymagany');
+      expect(errorMessages).toContain('Proszę podać poprawny adres email');
+      expect(errorMessages).toContain('Hasło jest wymagane');
     });
 
     it('should fail when email is invalid and password is empty', () => {

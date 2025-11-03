@@ -27,7 +27,6 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/*.spec.ts', // ignore spec files
-      '**/*.test.ts', // ignore .ts test files when .tsx exists
     ],
   },
 })

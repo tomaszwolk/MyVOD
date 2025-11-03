@@ -114,8 +114,8 @@ describe('date-utils', () => {
       const invalidDate = 'invalid-date';
       const result = formatRelativeTime(invalidDate);
 
-      // formatRelativeTime falls back to formatLastCheckedDate for invalid dates
-      expect(result).toBe('nieznana data');
+      // formatRelativeTime returns 'nieznany czas' for invalid dates
+      expect(result).toBe('nieznany czas');
     });
 
     it('should handle edge cases', () => {

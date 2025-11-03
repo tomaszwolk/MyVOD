@@ -38,7 +38,7 @@ describe('SelectedMovieItem', () => {
     const itemWithoutPoster = { ...baseItem, poster_path: null };
     render(<SelectedMovieItem {...defaultProps} item={itemWithoutPoster} />);
 
-    expect(screen.getByText('No image')).toBeInTheDocument();
+    expect(screen.getByLabelText('Brak plakatu dla filmu The Shawshank Redemption poster')).toBeInTheDocument();
   });
 
   it('should show loading status', () => {

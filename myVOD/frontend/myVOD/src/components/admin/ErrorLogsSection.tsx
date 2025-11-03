@@ -29,9 +29,9 @@ export function ErrorLogsSection() {
     });
   }, []);
 
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback(async () => {
     try {
-      exportErrorLogsCSV(query);
+      await exportErrorLogsCSV(query);
       toast.success("Eksport CSV rozpoczęty");
     } catch (error) {
       toast.error("Nie udało się wyeksportować danych");

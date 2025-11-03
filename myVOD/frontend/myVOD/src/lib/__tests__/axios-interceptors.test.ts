@@ -49,8 +49,15 @@ describe('setupAxiosInterceptors', () => {
     localStorageMock.setItem.mockImplementation(() => {});
     localStorageMock.removeItem.mockImplementation(() => {});
 
-    // Create mock axios instance
-    mockAxios = axios.create();
+    // Create mock axios instance that is also callable
+    const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'retried' });
+    mockAxiosInstance.interceptors = {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    };
+    mockAxiosInstance.get = vi.fn();
+    mockAxiosInstance.post = vi.fn();
+    mockAxios = mockAxiosInstance as any;
 
     // Mock callbacks
     onLogout = vi.fn();
@@ -64,7 +71,7 @@ describe('setupAxiosInterceptors', () => {
     let requestInterceptor: any;
 
     beforeEach(() => {
-      requestInterceptor = mockAxios.interceptors.request.use.mock.calls[0][0];
+      requestInterceptor = mockAxios.interceptors.request.use.mock.calls[mockAxios.interceptors.request.use.mock.calls.length - 1][0];
     });
 
     it('should add Authorization header to requests when token exists', () => {
@@ -152,7 +159,7 @@ describe('setupAxiosInterceptors', () => {
     let responseInterceptor: any;
 
     beforeEach(() => {
-      responseInterceptor = mockAxios.interceptors.response.use.mock.calls[0][1];
+      responseInterceptor = mockAxios.interceptors.response.use.mock.calls[mockAxios.interceptors.response.use.mock.calls.length - 1][1];
     });
 
     it('should call onUnauthorized when refresh token is missing', async () => {
@@ -183,6 +190,9 @@ describe('setupAxiosInterceptors', () => {
       // Setup interceptors without onUnauthorized
       setupAxiosInterceptors(mockAxios, onLogout);
 
+      // Extract the new response interceptor after setup
+      const newResponseInterceptor = mockAxios.interceptors.response.use.mock.calls[mockAxios.interceptors.response.use.mock.calls.length - 1][1];
+
       // Given: no refresh token in localStorage
       localStorageMock.getItem.mockImplementation((key) => {
         if (key === 'myVOD_refresh_token') return null;
@@ -196,7 +206,7 @@ describe('setupAxiosInterceptors', () => {
 
       // When: 401 error occurs
       try {
-        await responseInterceptor(error);
+        await newResponseInterceptor(error);
       } catch {
         // Expected to reject
       }
@@ -216,9 +226,8 @@ describe('setupAxiosInterceptors', () => {
         return null;
       });
 
-      // Mock axios instance to resolve
-      const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'success' });
-      (mockAxios as any).mockImplementation(mockAxiosInstance);
+      // Mock axios.get to resolve for token refresh
+      mockAxios.get.mockResolvedValue({ data: { access: 'new-token' } });
 
       const error = {
         config: { url: '/api/me/', headers: {} },
@@ -243,8 +252,8 @@ describe('setupAxiosInterceptors', () => {
         return null;
       });
 
-      const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'success' });
-      (mockAxios as any).mockImplementation(mockAxiosInstance);
+      // Mock axios.get to resolve for token refresh
+      mockAxios.get.mockResolvedValue({ data: { access: 'new-token' } });
 
       const error = {
         config: { url: '/api/me/', headers: {} },
@@ -268,8 +277,8 @@ describe('setupAxiosInterceptors', () => {
         return null;
       });
 
-      const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'success' });
-      (mockAxios as any).mockImplementation(mockAxiosInstance);
+      // Mock axios.get to resolve for token refresh
+      mockAxios.get.mockResolvedValue({ data: { access: 'new-token' } });
 
       const error = {
         config: { url: '/api/me/', headers: {} },
@@ -280,7 +289,7 @@ describe('setupAxiosInterceptors', () => {
       await responseInterceptor(error);
 
       // Then: original request should be retried with new token
-      expect(mockAxiosInstance).toHaveBeenCalledWith({
+      expect(mockAxios).toHaveBeenCalledWith({
         ...error.config,
         headers: { Authorization: 'Bearer new-token' },
         _retry: true,
@@ -384,8 +393,8 @@ describe('setupAxiosInterceptors', () => {
         return null;
       });
 
-      const mockAxiosInstance = vi.fn().mockResolvedValue({ data: 'success' });
-      (mockAxios as any).mockImplementation(mockAxiosInstance);
+      // Mock axios.get to resolve for token refresh
+      mockAxios.get.mockResolvedValue({ data: { access: 'new-token' } });
 
       // When: multiple 401 errors occur simultaneously
       const error1 = {
@@ -406,7 +415,7 @@ describe('setupAxiosInterceptors', () => {
       await Promise.all([promise1, promise2]);
 
       // Then: axios should be called twice (original + retry for each)
-      expect(mockAxiosInstance).toHaveBeenCalledTimes(2);
+      expect(mockAxios).toHaveBeenCalledTimes(2);
     });
 
     it('should reject non-401 errors without attempting refresh', async () => {
@@ -435,8 +444,11 @@ describe('setupAxiosInterceptors', () => {
         status: 200,
       };
 
+      // Get the success handler (first argument to response.use)
+      const responseSuccessHandler = mockAxios.interceptors.response.use.mock.calls[mockAxios.interceptors.response.use.mock.calls.length - 1][0];
+
       // When: successful response is handled
-      const result = await responseInterceptor(response);
+      const result = await responseSuccessHandler(response);
 
       // Then: should return response unchanged
       expect(result).toBe(response);

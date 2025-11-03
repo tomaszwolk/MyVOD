@@ -14,7 +14,7 @@ import type {
  */
 
 // Get base URL without /api prefix for admin endpoints
-const getAdminBaseURL = () => {
+export const getAdminBaseURL = () => {
   const baseURL = http.defaults.baseURL || "http://localhost:8000/api";
   return baseURL.replace("/api", "");
 };
@@ -103,7 +103,7 @@ export async function getErrorLogs(query: ErrorLogsQuery = {}): Promise<Paginate
  * @param query - Query parameters (type and range)
  * @returns Promise<void> - triggers browser download
  */
-export function exportTopMoviesCSV(query: TopMoviesQuery): void {
+export async function exportTopMoviesCSV(query: TopMoviesQuery): Promise<void> {
   const params = new URLSearchParams({
     type: query.type,
     range: query.range,
@@ -111,37 +111,35 @@ export function exportTopMoviesCSV(query: TopMoviesQuery): void {
   
   const url = `${getAdminBaseURL()}/admin/analytics/api/top-movies/export.csv?${params.toString()}`;
   const token = localStorage.getItem("myVOD_access_token");
-  
-  // Create a temporary link and trigger download
-  const link = document.createElement("a");
-  link.href = url;
-  link.style.display = "none";
-  
-  // Add Authorization header via fetch (CSV download)
-  fetch(url, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.blob();
-    })
-    .then((blob) => {
-      const blobUrl = window.URL.createObjectURL(blob);
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.style.display = "none";
+
+    try {
       link.href = blobUrl;
       link.download = `top-movies-${query.type}-${query.range}.csv`;
       document.body.appendChild(link);
       link.click();
+    } finally {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    })
-    .catch((error) => {
-      console.error("Error exporting CSV:", error);
-      throw error;
-    });
+    }
+  } catch (error) {
+    console.error("Error exporting CSV:", error);
+    throw error;
+  }
 }
 
 /**
@@ -150,7 +148,7 @@ export function exportTopMoviesCSV(query: TopMoviesQuery): void {
  * @param query - Query parameters (filters)
  * @returns Promise<void> - triggers browser download
  */
-export function exportErrorLogsCSV(query: ErrorLogsQuery = {}): void {
+export async function exportErrorLogsCSV(query: ErrorLogsQuery = {}): Promise<void> {
   const params = new URLSearchParams();
   
   if (query.api_type && query.api_type.length > 0) {
@@ -177,37 +175,35 @@ export function exportErrorLogsCSV(query: ErrorLogsQuery = {}): void {
   
   const url = `${getAdminBaseURL()}/admin/analytics/api/error-logs/export.csv?${params.toString()}`;
   const token = localStorage.getItem("myVOD_access_token");
-  
-  // Create a temporary link and trigger download
-  const link = document.createElement("a");
-  link.href = url;
-  link.style.display = "none";
-  
-  // Add Authorization header via fetch (CSV download)
-  fetch(url, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.blob();
-    })
-    .then((blob) => {
-      const blobUrl = window.URL.createObjectURL(blob);
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.style.display = "none";
+
+    try {
       link.href = blobUrl;
       const dateStr = new Date().toISOString().split("T")[0];
       link.download = `error-logs-${dateStr}.csv`;
       document.body.appendChild(link);
       link.click();
+    } finally {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    })
-    .catch((error) => {
-      console.error("Error exporting CSV:", error);
-      throw error;
-    });
+    }
+  } catch (error) {
+    console.error("Error exporting CSV:", error);
+    throw error;
+  }
 }
 
