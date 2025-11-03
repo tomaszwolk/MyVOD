@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "users",
     "movies",
     "user_movies",
+    "analytics",
 ]
 
 MIDDLEWARE = [

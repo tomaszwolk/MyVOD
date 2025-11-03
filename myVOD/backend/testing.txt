@@ -20,6 +20,7 @@ python manage.py test services.tests.test_user_registration_service
 python manage.py test services.tests.test_ai_suggestions_service
 python manage.py test services.tests.test_watchmode_service -v 2
 python manage.py test services.tests.test_ai_suggestions_service
+python manage.py test analytics.tests
 
 
 # test user

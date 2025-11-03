@@ -4,21 +4,21 @@
  * Admin metrics DTO returned from GET /admin/analytics/api/metrics/
  */
 export type AdminMetricsDto = {
-  total_users: number;
-  new_users: {
-    today: number;
-    last_7_days: number;
-    last_30_days: number;
-  };
-  retention_7d_percent: number;
-  retention_30d_percent: number;
-  pct_users_with_min_10_movies: number;
-  pct_users_used_ai: number;
-  pct_users_added_ai_movies: number;
-  avg_movies_per_user: number;
+  total_users?: number | null;
+  new_users?: {
+    today?: number | null;
+    last_7_days?: number | null;
+    last_30_days?: number | null;
+  } | null;
+  retention_7d_percent?: number | null;
+  retention_30d_percent?: number | null;
+  pct_users_with_min_10_movies?: number | null;
+  pct_users_used_ai?: number | null;
+  pct_users_added_ai_movies?: number | null;
+  avg_movies_per_user?: number | null;
   retention_timeseries?: RetentionPoint[];
   new_users_timeseries?: UsersGrowthPoint[];
-  last_updated_at: string; // ISO datetime
+  last_updated_at?: string; // ISO datetime
 };
 
 /**

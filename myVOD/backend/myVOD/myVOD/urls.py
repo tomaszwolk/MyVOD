@@ -29,6 +29,10 @@ from drf_spectacular.views import (
 from . import views
 
 urlpatterns = [
+    # Admin Analytics API (under /admin/analytics/api/)
+    # Must be BEFORE admin.site.urls to avoid being caught by Django Admin
+    path("admin/analytics/api/", include("analytics.urls")),
+    
     # Admin panel
     path("admin/", admin.site.urls),
 
