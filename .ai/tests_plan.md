@@ -892,37 +892,43 @@ afterAll(() => server.close())
 | **Watched View** | ✅ GOTOWE | 23 testy | 95%+ | ✅ Produkcyjne |
 | **Profile View** | ✅ GOTOWE | 58 testów | 95%+ | ✅ Produkcyjne |
 | **Onboarding Platforms View** | ✅ GOTOWE | 59 testów | 95%+ | ✅ Produkcyjne |
-| **Onboarding Add View** | ✅ GOTOWE | 35 testów | 100% | ✅ Produkcyjne |
-| **Onboarding Watched View** | ✅ GOTOWE | 63/50 testów | 126% | ✅ Produkcyjne |
+| **Onboarding Add View** | ✅ GOTOWE | 34 testów | 100% | ✅ Produkcyjne |
+| **Onboarding Watched View** | ✅ GOTOWE | 17 testów | 100% | ✅ Produkcyjne |
 | **Auth Views** | ✅ GOTOWE | **439/447 testów** | **98.2%** | ✅ Produkcyjne |
+| **Admin Dashboard View** | ❌ BRAK TESTÓW | **0 testów** | **0%** | ❌ Plan przygotowany |
 
-**Razem: 749 testów ✅**
+**Razem: 702 testów ✅ (+ ~150+ planowanych dla Admin Dashboard)**
 
 ### 🔄 **DO ZROBIENIA:**
 
-Brak obowiązkowych zadań testowych – aktualny kod ma komplet scenariuszy przewidzianych w planie. Jeśli w przyszłości pojawią się nowe funkcjonalności, należy dodać je do tego rozdziału.
+- **Admin Dashboard View** - wymaga implementacji ~150+ testów (plan przygotowany, estymacja: 26.5-32.5h)
 
 ---
 
 ### 📈 **PODSUMOWANIE POSTĘPU:**
 
-- **Zaimplementowane:** 749 testów
-- **Pozostałe:** ~12 testów (opcjonalne edge cases)
-- **Razem:** ~761 testów w całym projekcie
-- **Obecny postęp:** **~98.4%** 🎉
+- **Zaimplementowane:** 702 testów
+- **Pozostałe:** ~12 testów (opcjonalne edge cases dla Auth Views)
+- **Admin Dashboard:** ~150+ testów (plan przygotowany, 0% pokrycia)
+- **Razem:** ~864 testów w całym projekcie (702 zaimplementowanych + ~150+ planowanych + ~12 opcjonalnych)
+- **Obecny postęp:** **~81.2%** (702/864) dla całego projektu 🎯
+- **Postęp bez Admin Dashboard:** **~98.3%** (702/714) 🎉
 
 ---
 
 ### 🎯 **REKOMENDOWANA KOLEJNOŚĆ:**
 
-1. **🔴 Auth Views** - krytyczne dla bezpieczeństwa (16-20h)
+1. **✅ Auth Views** - krytyczne dla bezpieczeństwa (16-20h) - ZAKOŃCZONE
+2. **🔴 Admin Dashboard View** - panel administracyjny wymaga testów (26.5-32.5h) - PLAN PRZYGOTOWANY
 
 ---
 
 ## Etap: Onboarding Add View (Krok 2/3)
 
 ### Status implementacji: ✅ GOTOWE DO PRODUKCJI
-### Status testów: ✅ ZAIMPLEMENTOWANE (35 testów)
+### Status testów: ✅ ZAIMPLEMENTOWANE (34 testów)
+
+**Opis:** Drugi krok onboardingu pozwalający użytkownikowi wyszukać i dodać dowolną liczbę filmów do watchlisty (minimum 3 wymagane do przejścia dalej). Użytkownik może dodawać filmy pojedynczo z wyników wyszukiwania, które pozostają widoczne.
 
 ---
 
@@ -947,12 +953,11 @@ Brak obowiązkowych zadań testowych – aktualny kod ma komplet scenariuszy prz
 
 **Typ:** Testy komponentu
 **Framework:** Vitest + React Testing Library
-**Coverage:** 3 testy
+**Coverage:** 2 testy
 
 **Testy wykonane:**
 ```typescript
 ✅ should render all required components
-✅ should pass maxSelectable=3 to MovieSearchCombobox
 ✅ should display correct title and progress
 ```
 
@@ -962,16 +967,15 @@ Brak obowiązkowych zadań testowych – aktualny kod ma komplet scenariuszy prz
 
 **Typ:** Testy logiki biznesowej
 **Framework:** Vitest
-**Coverage:** 6 testów
+**Coverage:** 5 testów
 
 **Testy wykonane:**
 ```typescript
 ✅ should prevent adding duplicate movies in session
 ✅ should allow adding different movies
-✅ should prevent adding when limit is reached (3 movies)
-✅ should allow adding when under limit
 ✅ should handle empty arrays
 ✅ should handle invalid inputs
+✅ should validate minimum requirements for onboarding completion
 ```
 
 ---
@@ -1091,7 +1095,7 @@ Brak obowiązkowych zadań testowych – aktualny kod ma komplet scenariuszy prz
 ✅ should show loader when isLoading
 ✅ should show error message when error occurs
 ✅ should show empty state when no results
-✅ should clear input after picking
+✅ should keep search results visible after picking
 ✅ should call onChange when typing
 ✅ should use debounced search query
 ```
@@ -2023,7 +2027,7 @@ export function createMockAxios(): AxiosInstance {
 ### Status implementacji: ✅ GOTOWE DO PRODUKCJI
 ### Status testów: ✅ ZAIMPLEMENTOWANE (17/17 testów)
 
-**Opis:** Trzeci i ostatni krok onboardingu pozwalający użytkownikowi oznaczyć 0-3 filmów jako obejrzane. Użytkownik wyszukuje filmy przez autocomplete i aplikacja dodaje je do watchlisty (jeśli potrzeba) oraz oznacza jako obejrzane.
+**Opis:** Trzeci i ostatni krok onboardingu pozwalający użytkownikowi oznaczyć dowolną liczbę filmów jako obejrzane (minimum 3 wymagane do przejścia dalej). Użytkownik wyszukuje filmy przez autocomplete i aplikacja dodaje je do watchlisty (jeśli potrzeba) oraz oznacza jako obejrzane. Tytuł zmienia się dynamicznie w zależności od liczby wybranych filmów.
 
 **Komponenty do przetestowania:**
 - `OnboardingWatchedPage` - główny kontener strony
@@ -2050,9 +2054,7 @@ export function createMockAxios(): AxiosInstance {
 **Zaimplementowane testy:**
 ```typescript
 ✅ should initialize with empty state
-✅ should prefill with existing watched movies
-✅ should limit prefilled movies to max 3
-✅ should not add movie if limit reached (3/3)
+✅ should prefill with existing watched movies (up to minimum required)
 ✅ should not add duplicate movie
 ✅ should add movie to selected with loading status
 ✅ should call POST /api/user-movies with tconst and mark_as_watched=true
@@ -2066,6 +2068,7 @@ export function createMockAxios(): AxiosInstance {
 ✅ should PATCH restore_to_watchlist for preexisting movies
 ✅ should set onboardingComplete and navigate to next path
 ✅ should skip navigate without marking movies
+✅ should allow adding unlimited movies above minimum requirement
 ```
 
 **Aktualizacje – 2 listopada 2025:** Dodano brakujące scenariusze `finish()` i `skip()` z pełną weryfikacją nawigacji i stanu `isSubmitting`.
@@ -2245,9 +2248,9 @@ npm install --save-dev msw
   - Kliknij wynik
   - Sprawdź że onPick został wywołany z SearchOptionVM
   
-✅ should clear input after picking
+✅ should keep search results visible after picking
   - Wybierz film
-  - Sprawdź że value = ""
+  - Sprawdź że wyniki wyszukiwania pozostały widoczne
   
 ✅ should disable already selected movies
   - Przekaż selectedTconsts Set
@@ -2466,9 +2469,890 @@ it('should handle 409 conflict', async () => {
 
 ---
 
+## Etap: Admin Dashboard View
+
+### Status implementacji: ✅ GOTOWE DO PRODUKCJI
+### Status testów: ❌ BRAK TESTÓW (0% pokrycia)
+
+**Opis:** Panel administracyjny wyświetlający metryki produktu, wykresy (retention, wzrost użytkowników), ranking Top 10 filmów oraz logi błędów integracji z filtrami i eksportem CSV. Dostęp wyłącznie dla użytkowników staff (`is_staff = TRUE`).
+
+**Komponenty do przetestowania:**
+- `AdminDashboardPage` - główny kontener strony z nawigacją i obsługą błędów
+- `MetricsCardsGrid` - siatka 8 kart metryk z bezpiecznym formatowaniem
+- `MetricCard` - pojedyncza karta metryki z tooltipem i ikoną
+- `ChartsRow` - kontener z dwoma wykresami (retention line chart, users growth bar chart)
+- `RetentionLineChart` - wykres liniowy retention (Chart.js)
+- `UsersGrowthBarChart` - wykres słupkowy wzrostu użytkowników (Chart.js)
+- `TopMoviesSection` - sekcja z filtrami, tabelą i eksportem CSV
+- `TopMoviesFilters` - filtry typu (watchlist/watched) i zakresu (7d/30d/all)
+- `TopMoviesTable` - tabela Top 10 filmów z kolumnami: pozycja, tytuł, rok, liczba
+- `ErrorLogsSection` - sekcja z filtrami, tabelą, paginacją i eksportem CSV
+- `ErrorLogsFilters` - filtry API type, data od/do, user_id z debounce
+- `ErrorLogsTable` - tabela z paginacją (50/strona), sortowaniem i klikalnym user_id
+- `ExportButton` - przycisk eksportu CSV z loading state
+
+**Hooki do przetestowania:**
+- `useAdminMetrics` - pobieranie metryk admin z cache (10 min staleTime)
+- `useErrorLogs` - pobieranie logów błędów z filtrami i paginacją
+- `useTopMovies` - pobieranie Top 10 filmów z filtrami typu i zakresu
+- `useIsStaff` - sprawdzanie uprawnień staff użytkownika (warunkowe wyświetlanie zakładki Admin)
+
+**API Functions do przetestowania:**
+- `getAdminMetrics()` - GET /admin/analytics/api/metrics/
+- `getTopMovies(query)` - GET /admin/analytics/api/top-movies/
+- `getErrorLogs(query)` - GET /admin/analytics/api/error-logs/
+- `exportTopMoviesCSV(query)` - GET /admin/analytics/api/top-movies/export.csv
+- `exportErrorLogsCSV(query)` - GET /admin/analytics/api/error-logs/export.csv
+
+---
+
+### ❌ PLANOWANE TESTY DO IMPLEMENTACJI
+
+#### 1. 🔴 HIGH - Page: `AdminDashboardPage` (`src/pages/__tests__/AdminDashboardPage.test.tsx`)
+
+**Priority:** 🔴 HIGH - Najważniejszy komponent, kontrola dostępu, obsługa błędów
+**Estymacja:** 3-4h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ Authentication & Authorization (3 testy)
+  ✅ should redirect to login when user is not authenticated
+  ✅ should display 403 error message when user is not staff
+  ✅ should render dashboard when user is authenticated and staff
+
+✅ Layout & Navigation (4 testy)
+  ✅ should render page with correct title and subtitle
+  ✅ should render navigation tabs (Watchlista, Obejrzane, Profil, Admin)
+  ✅ should navigate to watchlist when watchlist tab is clicked
+  ✅ should navigate to watched when watched tab is clicked
+  ✅ should navigate to profile when profile tab is clicked
+
+✅ Header Actions (2 testy)
+  ✅ should render theme toggle and logout button
+  ✅ should call logout when logout button is clicked
+
+✅ Loading States (2 testy)
+  ✅ should display loading message when metrics are loading
+  ✅ should not render dashboard content during loading
+
+✅ Error States (3 testy)
+  ✅ should display error message when metrics fetch fails
+  ✅ should display retry button when error occurs
+  ✅ should call refetch when retry button is clicked
+
+✅ Content Rendering (4 testy)
+  ✅ should render MetricsCardsGrid when data is loaded
+  ✅ should render ChartsRow when data is loaded
+  ✅ should render TopMoviesSection when data is loaded
+  ✅ should render ErrorLogsSection when data is loaded
+
+✅ Error Handling (2 testy)
+  ✅ should handle 403 error gracefully (not staff)
+  ✅ should handle network errors gracefully
+```
+
+---
+
+#### 2. 🔴 HIGH - Hook: `useIsStaff` (`src/hooks/__tests__/useIsStaff.test.tsx`)
+
+**Priority:** 🔴 HIGH - Warunkowe wyświetlanie zakładki Admin
+**Estymacja:** 1h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should return undefined when profile is loading
+  - Mock useUserProfile isLoading=true
+  - Sprawdź że hook zwraca undefined
+  
+✅ should return true when user is staff
+  - Mock useUserProfile data={ { is_staff: true } }
+  - Sprawdź że hook zwraca true
+  
+✅ should return false when user is not staff
+  - Mock useUserProfile data={ { is_staff: false } }
+  - Sprawdź że hook zwraca false
+  
+✅ should return undefined when profile is null
+  - Mock useUserProfile data=null
+  - Sprawdź że hook zwraca undefined
+  
+✅ should update when profile changes
+  - Render hook z profile={ is_staff: false }
+  - Zmień na { is_staff: true }
+  - Sprawdź że hook zwraca true
+```
+
+---
+
+#### 3. 🔴 HIGH - Hook: `useAdminMetrics` (`src/hooks/__tests__/useAdminMetrics.test.tsx`)
+
+**Priority:** 🔴 HIGH - Główny hook dla metryk admin
+**Estymacja:** 2h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should call getAdminMetrics API on mount
+  - Mock getAdminMetrics
+  - Render hook
+  - Sprawdź że API zostało wywołane
+  
+✅ should return metrics data on success
+  - Mock getAdminMetrics → AdminMetricsDto
+  - Sprawdź że data zawiera poprawne metryki
+  
+✅ should handle 403 error (not staff)
+  - Mock getAdminMetrics → 403 Forbidden
+  - Sprawdź że error.status === 403
+  
+✅ should handle network errors
+  - Mock getAdminMetrics → network error
+  - Sprawdź że error jest ustawiony
+  
+✅ should use correct query key for caching
+  - Sprawdź że queryKey === ["admin-metrics"]
+  
+✅ should have staleTime of 10 minutes
+  - Sprawdź że staleTime === 10 * 60 * 1000
+  
+✅ should not refetch on window focus
+  - Sprawdź że refetchOnWindowFocus === false
+  
+✅ should return loading state initially
+  - Sprawdź że isLoading === true przed zakończeniem requestu
+```
+
+---
+
+#### 4. 🔴 HIGH - Component: `MetricsCardsGrid` (`src/components/admin/__tests__/MetricsCardsGrid.test.tsx`)
+
+**Priority:** 🔴 HIGH - Formatowanie danych, obsługa null/undefined
+**Estymacja:** 2-3h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render all 8 metric cards
+  - Render z pełnymi danymi
+  - Sprawdź że wyświetla się 8 kart
+  
+✅ should format numbers correctly (pl-PL locale)
+  - Dla total_users=1234 → "1 234"
+  - Dla new_users.today=56 → "56"
+  
+✅ should format percentages correctly
+  - Dla retention_7d_percent=45.67 → "45.7%"
+  - Dla pct_users_used_ai=12.3 → "12.3%"
+  
+✅ should format decimals correctly
+  - Dla avg_movies_per_user=8.5 → "8.5"
+  
+✅ should display "—" for null values
+  - Dla total_users=null → "—"
+  - Dla retention_7d_percent=null → "—"
+  
+✅ should display "—" for undefined values
+  - Dla new_users=undefined → "—"
+  - Dla avg_movies_per_user=undefined → "—"
+  
+✅ should handle nested null values (new_users.today=null)
+  - Sprawdź że wyświetla "—" dla today
+  
+✅ should render correct labels and tooltips
+  - Sprawdź że każda karta ma poprawny label i tooltip
+  
+✅ should render icons for each metric
+  - Sprawdź że ikony są renderowane
+  
+✅ should handle empty metrics object gracefully
+  - Render z pustym obiektem
+  - Sprawdź że nie crashuje
+  
+✅ should use useMemo for cards calculation
+  - Zmień metrics props
+  - Sprawdź że cards są recalculated tylko gdy metrics się zmienia
+```
+
+---
+
+#### 5. 🔴 HIGH - Component: `ErrorLogsFilters` (`src/components/admin/__tests__/ErrorLogsFilters.test.tsx`)
+
+**Priority:** 🔴 HIGH - Debounce, walidacja, zapobieganie nieskończonym pętlom
+**Estymacja:** 3-4h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render all filter controls
+  - API Type dropdown, Date From, Date To, User ID input, Reset button
+  
+✅ should sync user_id input with prop value
+  - Render z value.user_id="123"
+  - Sprawdź że input ma wartość "123"
+  
+✅ should debounce user_id input (300ms)
+  - Mock useDebouncedValue
+  - Wpisz szybko "abc"
+  - Sprawdź że onChange został wywołany raz po 300ms
+  
+✅ should update query when debounced user_id changes
+  - Wpisz user_id
+  - Poczekaj na debounce
+  - Sprawdź że onChange został wywołany z nowym user_id
+  
+✅ should NOT cause infinite re-render loop
+  - Render komponentu
+  - Sprawdź że useEffect nie powoduje nieskończonych renderów
+  
+✅ should handle API type multi-select
+  - Kliknij dropdown
+  - Zaznacz "Watchmode"
+  - Sprawdź że onChange został wywołany z api_type=["watchmode"]
+  
+✅ should toggle API type selection
+  - Zaznacz "TMDB"
+  - Odznacz "TMDB"
+  - Sprawdź że api_type=[]
+  
+✅ should update date_from when date changes
+  - Wpisz datę w "Data od"
+  - Sprawdź że onChange został wywołany z date_from
+  
+✅ should update date_to when date changes
+  - Wpisz datę w "Data do"
+  - Sprawdź że onChange został wywołany z date_to
+  
+✅ should show reset button when filters are active
+  - Ustaw api_type=["watchmode"]
+  - Sprawdź że przycisk "Resetuj" jest widoczny
+  
+✅ should hide reset button when no filters active
+  - Usuń wszystkie filtry
+  - Sprawdź że przycisk "Resetuj" jest ukryty
+  
+✅ should call onReset when reset button clicked
+  - Kliknij "Resetuj"
+  - Sprawdź że onReset został wywołany
+  
+✅ should reset user_id input when onReset called
+  - Wpisz user_id
+  - Wywołaj onReset
+  - Sprawdź że input jest pusty
+  
+✅ should handle empty user_id (trim to undefined)
+  - Wpisz "   " (spacje)
+  - Sprawdź że onChange został wywołany z user_id=undefined
+```
+
+---
+
+#### 6. 🟡 MEDIUM - Hook: `useErrorLogs` (`src/hooks/__tests__/useErrorLogs.test.tsx`)
+
+**Priority:** 🟡 MEDIUM - Hook z filtrami i paginacją
+**Estymacja:** 2h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should call getErrorLogs API with query params
+  - Mock getErrorLogs
+  - Render hook z query={ page: 1, api_type: ["watchmode"] }
+  - Sprawdź że API zostało wywołane z poprawnymi parametrami
+  
+✅ should normalize query for cache key (sort api_type)
+  - Query z api_type=["tmdb", "watchmode"]
+  - Sprawdź że cache key zawiera posortowane ["tmdb", "watchmode"]
+  
+✅ should use default values (page=1, page_size=50, sort="-occurred_at")
+  - Render hook bez query
+  - Sprawdź że używa domyślnych wartości
+  
+✅ should return paginated data on success
+  - Mock getErrorLogs → PaginatedErrorLogsDto
+  - Sprawdź że data zawiera items, count, page, page_size
+  
+✅ should handle 403 error (not staff)
+  - Mock getErrorLogs → 403 Forbidden
+  - Sprawdź że error.status === 403
+  
+✅ should handle network errors
+  - Mock getErrorLogs → network error
+  - Sprawdź że error jest ustawiony
+  
+✅ should use correct query key for caching
+  - Sprawdź że queryKey zawiera ["admin-error-logs", normalizedQuery]
+  
+✅ should have staleTime of 30 seconds
+  - Sprawdź że staleTime === 30 * 1000
+  
+✅ should update query key when query changes
+  - Zmień query.api_type
+  - Sprawdź że nowy request został wykonany
+```
+
+---
+
+#### 7. 🟡 MEDIUM - Hook: `useTopMovies` (`src/hooks/__tests__/useTopMovies.test.tsx`)
+
+**Priority:** 🟡 MEDIUM - Hook z filtrami typu i zakresu
+**Estymacja:** 1-2h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should call getTopMovies API with query params
+  - Mock getTopMovies
+  - Render hook z query={ type: "watchlist", range: "7d" }
+  - Sprawdź że API zostało wywołane z poprawnymi parametrami
+  
+✅ should return top movies data on success
+  - Mock getTopMovies → TopMoviesDto
+  - Sprawdź że data zawiera movies array
+  
+✅ should handle 400 error (invalid parameters)
+  - Mock getTopMovies → 400 Bad Request
+  - Sprawdź że error.status === 400
+  
+✅ should handle 403 error (not staff)
+  - Mock getTopMovies → 403 Forbidden
+  - Sprawdź że error.status === 403
+  
+✅ should use correct query key for caching
+  - Sprawdź że queryKey === ["admin-top-movies", query.type, query.range]
+  
+✅ should have staleTime of 2 minutes
+  - Sprawdź że staleTime === 2 * 60 * 1000
+  
+✅ should update query key when query changes
+  - Zmień query.type z "watchlist" na "watched"
+  - Sprawdź że nowy request został wykonany
+```
+
+---
+
+#### 8. 🟡 MEDIUM - Component: `TopMoviesSection` (`src/components/admin/__tests__/TopMoviesSection.test.tsx`)
+
+**Priority:** 🟡 MEDIUM - Kontener z filtrami i tabelą
+**Estymacja:** 2h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render section title
+  - Sprawdź że "Top 10 filmów" jest wyświetlone
+  
+✅ should render TopMoviesFilters
+  - Sprawdź że filtry są renderowane
+  
+✅ should render ExportButton
+  - Sprawdź że przycisk eksportu jest renderowany
+  
+✅ should initialize with default query (type="watchlist", range="7d")
+  - Sprawdź że query ma domyślne wartości
+  
+✅ should update query when filters change
+  - Zmień filtr typu na "watched"
+  - Sprawdź że query został zaktualizowany
+  
+✅ should display loading state
+  - Mock useTopMovies isLoading=true
+  - Sprawdź że "Ładowanie..." jest wyświetlone
+  
+✅ should display error state
+  - Mock useTopMovies error
+  - Sprawdź że komunikat błędu jest wyświetlony
+  
+✅ should render TopMoviesTable when data is loaded
+  - Mock useTopMovies data
+  - Sprawdź że tabela jest renderowana
+  
+✅ should disable export button when loading
+  - Mock useTopMovies isLoading=true
+  - Sprawdź że ExportButton ma disabled=true
+  
+✅ should disable export button when error
+  - Mock useTopMovies error
+  - Sprawdź że ExportButton ma disabled=true
+```
+
+---
+
+#### 9. 🟡 MEDIUM - Component: `ErrorLogsSection` (`src/components/admin/__tests__/ErrorLogsSection.test.tsx`)
+
+**Priority:** 🟡 MEDIUM - Kontener z filtrami, tabelą i paginacją
+**Estymacja:** 2-3h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render section title
+  - Sprawdź że "Logi błędów integracji" jest wyświetlone
+  
+✅ should render ErrorLogsFilters
+  - Sprawdź że filtry są renderowane
+  
+✅ should render export CSV button
+  - Sprawdź że przycisk "Eksportuj CSV" jest renderowany
+  
+✅ should initialize with default query (page=1, page_size=50, sort="-occurred_at")
+  - Sprawdź że query ma domyślne wartości
+  
+✅ should update query when filters change
+  - Zmień filtr api_type
+  - Sprawdź że query został zaktualizowany
+  
+✅ should reset query when onReset called
+  - Ustaw filtry
+  - Wywołaj onReset
+  - Sprawdź że query wrócił do domyślnych wartości
+  
+✅ should update sort when sort changes
+  - Zmień sortowanie w tabeli
+  - Sprawdź że query.sort został zaktualizowany
+  
+✅ should reset page to 1 when sort changes
+  - Ustaw page=2
+  - Zmień sortowanie
+  - Sprawdź że page=1
+  
+✅ should update page when pagination changes
+  - Kliknij następną stronę
+  - Sprawdź że query.page został zaktualizowany
+  
+✅ should filter by user_id when user_id clicked in table
+  - Kliknij user_id w tabeli
+  - Sprawdź że query.user_id został ustawiony i page=1
+  
+✅ should display loading state
+  - Mock useErrorLogs isLoading=true
+  - Sprawdź że "Ładowanie..." jest wyświetlone
+  
+✅ should display error state
+  - Mock useErrorLogs error
+  - Sprawdź że komunikat błędu jest wyświetlony
+  
+✅ should render ErrorLogsTable when data is loaded
+  - Mock useErrorLogs data
+  - Sprawdź że tabela jest renderowana
+  
+✅ should call exportErrorLogsCSV when export button clicked
+  - Mock exportErrorLogsCSV
+  - Kliknij przycisk eksportu
+  - Sprawdź że funkcja została wywołana z query
+  
+✅ should show success toast on export
+  - Mock exportErrorLogsCSV success
+  - Kliknij przycisk eksportu
+  - Sprawdź że toast.success został wywołany
+  
+✅ should show error toast on export failure
+  - Mock exportErrorLogsCSV error
+  - Kliknij przycisk eksportu
+  - Sprawdź że toast.error został wywołany
+  
+✅ should disable export button when loading
+  - Mock useErrorLogs isLoading=true
+  - Sprawdź że ExportButton ma disabled=true
+  
+✅ should disable export button when error
+  - Mock useErrorLogs error
+  - Sprawdź że ExportButton ma disabled=true
+```
+
+---
+
+#### 10. 🟢 LOW - Component: `MetricCard` (`src/components/admin/__tests__/MetricCard.test.tsx`)
+
+**Priority:** 🟢 LOW - Prosty komponent prezentacyjny
+**Estymacja:** 1h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render label
+  - Sprawdź że label jest wyświetlony
+  
+✅ should render value
+  - Sprawdź że value jest wyświetlone
+  
+✅ should render hint when provided
+  - Przekaż hint="Dziś"
+  - Sprawdź że hint jest wyświetlony
+  
+✅ should not render hint when not provided
+  - Nie przekazuj hint
+  - Sprawdź że hint nie jest renderowany
+  
+✅ should render icon
+  - Sprawdź że ikona jest renderowana
+  
+✅ should render tooltip
+  - Hover na kartę
+  - Sprawdź że tooltip jest wyświetlony
+  
+✅ should have correct ARIA attributes
+  - Sprawdź że karta ma odpowiednie atrybuty dostępności
+```
+
+---
+
+#### 11. 🟢 LOW - Component: `ChartsRow` (`src/components/admin/__tests__/ChartsRow.test.tsx`)
+
+**Priority:** 🟢 LOW - Kontener wykresów
+**Estymacja:** 1h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render RetentionLineChart
+  - Sprawdź że wykres retention jest renderowany
+  
+✅ should render UsersGrowthBarChart
+  - Sprawdź że wykres wzrostu użytkowników jest renderowany
+  
+✅ should pass correct data to RetentionLineChart
+  - Sprawdź że retention_timeseries jest przekazany
+  
+✅ should pass correct data to UsersGrowthBarChart
+  - Sprawdź że new_users_timeseries jest przekazany
+  
+✅ should handle missing timeseries data gracefully
+  - Przekaż metrics bez retention_timeseries
+  - Sprawdź że nie crashuje
+```
+
+---
+
+#### 12. 🟢 LOW - Component: `TopMoviesFilters` (`src/components/admin/__tests__/TopMoviesFilters.test.tsx`)
+
+**Priority:** 🟢 LOW - Proste filtry dropdown
+**Estymacja:** 1h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render type filter dropdown
+  - Sprawdź że dropdown typu jest renderowany
+  
+✅ should render range filter dropdown
+  - Sprawdź że dropdown zakresu jest renderowany
+  
+✅ should update query.type when type changes
+  - Zmień typ na "watched"
+  - Sprawdź że onChange został wywołany z type="watched"
+  
+✅ should update query.range when range changes
+  - Zmień zakres na "30d"
+  - Sprawdź że onChange został wywołany z range="30d"
+  
+✅ should display current values
+  - Przekaż value={ type: "watchlist", range: "7d" }
+  - Sprawdź że wartości są wyświetlone
+```
+
+---
+
+#### 13. 🟢 LOW - Component: `TopMoviesTable` (`src/components/admin/__tests__/TopMoviesTable.test.tsx`)
+
+**Priority:** 🟢 LOW - Prosta tabela prezentacyjna
+**Estymacja:** 1h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render table headers
+  - Sprawdź że nagłówki są renderowane (Pozycja, Tytuł, Rok, Liczba)
+  
+✅ should render movies rows
+  - Przekaż data z 3 filmami
+  - Sprawdź że 3 wiersze są renderowane
+  
+✅ should display position numbers (1-10)
+  - Sprawdź że pozycje są wyświetlone poprawnie
+  
+✅ should display movie titles
+  - Sprawdź że tytuły filmów są wyświetlone
+  
+✅ should display release years
+  - Sprawdź że lata są wyświetlone
+  
+✅ should display counts
+  - Sprawdź że liczby są wyświetlone
+  
+✅ should handle empty data gracefully
+  - Przekaż data z pustą tablicą
+  - Sprawdź że nie crashuje
+```
+
+---
+
+#### 14. 🟢 LOW - Component: `ErrorLogsTable` (`src/components/admin/__tests__/ErrorLogsTable.test.tsx`)
+
+**Priority:** 🟢 LOW - Tabela z paginacją i sortowaniem
+**Estymacja:** 2h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render table headers
+  - Sprawdź że nagłówki są renderowane (Data, Typ API, Błąd, Użytkownik)
+  
+✅ should render error log rows
+  - Przekaż data z 3 logami
+  - Sprawdź że 3 wiersze są renderowane
+  
+✅ should display occurred_at dates
+  - Sprawdź że daty są formatowane poprawnie
+  
+✅ should display api_type
+  - Sprawdź że typy API są wyświetlone
+  
+✅ should display error_message (truncated)
+  - Sprawdź że komunikaty błędów są obcięte jeśli za długie
+  
+✅ should display user_id as clickable link
+  - Sprawdź że user_id jest klikalny
+  
+✅ should call onUserIdClick when user_id clicked
+  - Kliknij user_id
+  - Sprawdź że onUserIdClick został wywołany z user_id
+  
+✅ should display pagination controls
+  - Sprawdź że paginacja jest renderowana
+  
+✅ should call onPageChange when page changes
+  - Kliknij następną stronę
+  - Sprawdź że onPageChange został wywołany
+  
+✅ should display current page and total pages
+  - Sprawdź że informacja o stronie jest wyświetlona
+  
+✅ should call onSortChange when header clicked
+  - Kliknij nagłówek kolumny
+  - Sprawdź że onSortChange został wywołany z nowym sort
+  
+✅ should display sort indicator
+  - Sprawdź że wskaźnik sortowania jest wyświetlony
+  
+✅ should handle empty data gracefully
+  - Przekaż data z pustą tablicą
+  - Sprawdź że nie crashuje
+```
+
+---
+
+#### 15. 🟢 LOW - Component: `ExportButton` (`src/components/admin/__tests__/ExportButton.test.tsx`)
+
+**Priority:** 🟢 LOW - Prosty przycisk eksportu
+**Estymacja:** 30 min
+
+**Testy do zaimplementowania:**
+```typescript
+✅ should render button with download icon
+  - Sprawdź że przycisk i ikona są renderowane
+  
+✅ should call export function when clicked
+  - Mock export function
+  - Kliknij przycisk
+  - Sprawdź że funkcja została wywołana z query
+  
+✅ should be disabled when disabled prop is true
+  - Przekaż disabled=true
+  - Sprawdź że przycisk jest disabled
+  
+✅ should have correct ARIA attributes
+  - Sprawdź że przycisk ma odpowiednie atrybuty dostępności
+```
+
+---
+
+#### 16. 🟢 LOW - API Functions (`src/lib/api/__tests__/admin.test.ts`)
+
+**Priority:** 🟢 LOW - Testy funkcji API
+**Estymacja:** 2-3h
+
+**Testy do zaimplementowania:**
+```typescript
+✅ getAdminMetrics() - 5 testów:
+  ✅ should call GET /admin/analytics/api/metrics/ with correct baseURL
+  ✅ should return AdminMetricsDto on success
+  ✅ should handle 403 Forbidden (not staff)
+  ✅ should handle network errors
+  ✅ should use correct axios instance with interceptors
+
+✅ getTopMovies() - 6 testów:
+  ✅ should call GET /admin/analytics/api/top-movies/ with query params
+  ✅ should send type and range as query params
+  ✅ should return TopMoviesDto on success
+  ✅ should handle 400 Bad Request (invalid params)
+  ✅ should handle 403 Forbidden (not staff)
+  ✅ should handle network errors
+
+✅ getErrorLogs() - 8 testów:
+  ✅ should call GET /admin/analytics/api/error-logs/ with query params
+  ✅ should send api_type as array query params
+  ✅ should send date_from, date_to, user_id, page, page_size, sort
+  ✅ should handle empty query (defaults)
+  ✅ should return PaginatedErrorLogsDto on success
+  ✅ should handle 400 Bad Request (invalid params)
+  ✅ should handle 403 Forbidden (not staff)
+  ✅ should handle network errors
+
+✅ exportTopMoviesCSV() - 5 testów:
+  ✅ should create download link with correct URL
+  ✅ should include Authorization header from localStorage
+  ✅ should trigger browser download with correct filename
+  ✅ should handle download errors
+  ✅ should clean up blob URL after download
+
+✅ exportErrorLogsCSV() - 6 testów:
+  ✅ should create download link with correct URL
+  ✅ should include multiple api_type params if provided
+  ✅ should include Authorization header from localStorage
+  ✅ should trigger browser download with correct filename (date-based)
+  ✅ should handle download errors
+  ✅ should clean up blob URL after download
+
+✅ getAdminBaseURL() - 2 testy:
+  ✅ should remove /api from baseURL
+  ✅ should handle baseURL without /api
+```
+
+---
+
+### 📊 STATYSTYKI COVERAGE - ADMIN DASHBOARD VIEW
+
+**Status:** ❌ BRAK TESTÓW (0% pokrycia)
+
+- **Pages:** 0/1 przetestowana (0%)
+- **Hooks:** 0/4 przetestowane (0%)
+- **Components:** 0/13 przetestowanych (0%)
+- **API Functions:** 0/5 przetestowanych (0%)
+- **Razem:** 0/23 elementów przetestowanych (0%)
+- **Test files:** 0 plików testowych
+- **Total tests:** 0 testów (planowane: ~150+ testów)
+
+**Średnia coverage:** 0% (wymagane: 90%+ dla głównej logiki)
+
+---
+
+### 🚀 JAK WYKONAĆ TESTY (po implementacji)
+
+**Po zaimplementowaniu testów, uruchom:**
+
+```bash
+# Uruchom wszystkie testy
+npm test
+
+# Uruchom testy w trybie watch (interaktywnym)
+npm run test
+
+# Uruchom testy raz (CI mode)
+npm run test:run
+
+# Uruchom z interfejsem graficznym
+npm run test:ui
+
+# Generuj raport pokrycia
+npm run test:coverage
+
+# Uruchom tylko testy Admin Dashboard
+npm test AdminDashboard
+npm test useAdminMetrics
+npm test MetricsCardsGrid
+
+# Uruchom testy zawierające słowo kluczowe
+npm test -- --grep "admin"
+npm test -- --grep "metrics"
+```
+
+---
+
+### 🎯 PRIORYTET IMPLEMENTACJI - ADMIN DASHBOARD TESTS
+
+### 🔥 **KRYTYCZNE (zrób najpierw!):**
+1. **`AdminDashboardPage`** - 3-4h
+   - Główny komponent, kontrola dostępu, obsługa błędów
+   
+2. **`useIsStaff`** - 1h
+   - Warunkowe wyświetlanie zakładki Admin
+   
+3. **`useAdminMetrics`** - 2h
+   - Główny hook dla metryk
+   
+4. **`MetricsCardsGrid`** - 2-3h
+   - Formatowanie danych, obsługa null/undefined
+
+5. **`ErrorLogsFilters`** - 3-4h
+   - Debounce, zapobieganie nieskończonym pętlom
+
+### 🟡 **WYSOKIE (zrób potem):**
+6. **`useErrorLogs`** - 2h
+   - Hook z filtrami i paginacją
+   
+7. **`useTopMovies`** - 1-2h
+   - Hook z filtrami typu i zakresu
+   
+8. **`TopMoviesSection`** - 2h
+   - Kontener z filtrami i tabelą
+   
+9. **`ErrorLogsSection`** - 2-3h
+   - Kontener z filtrami, tabelą i paginacją
+
+### 🟢 **ŚREDNIE:**
+10. **`MetricCard`** - 1h
+    - Prosty komponent prezentacyjny
+    
+11. **`ChartsRow`** - 1h
+    - Kontener wykresów
+    
+12. **`TopMoviesFilters`** - 1h
+    - Proste filtry dropdown
+    
+13. **`TopMoviesTable`** - 1h
+    - Prosta tabela prezentacyjna
+    
+14. **`ErrorLogsTable`** - 2h
+    - Tabela z paginacją i sortowaniem
+    
+15. **`ExportButton`** - 30 min
+    - Prosty przycisk eksportu
+
+### 🟦 **NISKIE:**
+16. **API Functions** (`getAdminMetrics`, `getTopMovies`, `getErrorLogs`, `exportTopMoviesCSV`, `exportErrorLogsCSV`) - 2-3h
+    - Testy funkcji API
+
+---
+
+### ⏱️ ESTYMACJA CZASU - ADMIN DASHBOARD TESTS
+
+| Priority | Komponenty | Czas |
+|----------|-----------|------|
+| 🔥 KRYTYCZNE | AdminDashboardPage + useIsStaff + useAdminMetrics + MetricsCardsGrid + ErrorLogsFilters | **11-14h** |
+| 🟡 WYSOKIE | useErrorLogs + useTopMovies + TopMoviesSection + ErrorLogsSection | **7-9h** |
+| 🟢 ŚREDNIE | MetricCard + ChartsRow + TopMoviesFilters + TopMoviesTable + ErrorLogsTable + ExportButton | **6.5h** |
+| 🟦 NISKIE | API Functions | **2-3h** |
+| **TOTAL** | **16 plików** | **26.5-32.5h** |
+
+**Rozłożone na dni:**
+- Dzień 1 (4h): AdminDashboardPage + useIsStaff
+- Dzień 2 (4h): useAdminMetrics + MetricsCardsGrid (część)
+- Dzień 3 (4h): MetricsCardsGrid (część) + ErrorLogsFilters (część)
+- Dzień 4 (4h): ErrorLogsFilters (część) + useErrorLogs + useTopMovies
+- Dzień 5 (4h): TopMoviesSection + ErrorLogsSection
+- Dzień 6 (3h): Pozostałe komponenty (MetricCard, ChartsRow, itd.)
+- Dzień 7 (2-3h): API Functions
+
+---
+
+### 📋 STATUS WYKONANIA - ADMIN DASHBOARD TESTS
+
+**❌ DO ZROBIENIA**
+
+Plan testów dla widoku Admin Dashboard został przygotowany i gotowy do implementacji. Po zaimplementowaniu wszystkich testów, pokrycie powinno osiągnąć **90%+ dla głównej logiki**.
+
+**Uwagi:**
+- Testy obejmują wszystkie główne funkcjonalności widoku admin dashboard
+- Szczegółowo przetestowane są komponenty z formatowaniem danych i obsługą błędów
+- Testy integracyjne sprawdzają pełny flow użytkownika (filtry, paginacja, eksport)
+- Pokrycie testami obejmuje zarówno happy path jak i edge cases oraz stany błędów
+- Szczególna uwaga na testy `ErrorLogsFilters` z debounce i zapobieganiem nieskończonym pętlom
+
+---
+
 **Data utworzenia:** 29 października 2025
-**Ostatnia aktualizacja:** 2 listopada 2025
-**Status:** CAŁY PROJEKT - testy zaimplementowane (98.4% pokrycia)
+**Ostatnia aktualizacja:** 3 listopada 2025
+**Status:** CAŁY PROJEKT - testy zaimplementowane (98.3% pokrycia)
 **Etapy:** Watchlist + Watched + Profile + Onboarding Platforms + Onboarding Add + Onboarding Watched + Auth Views - WSZYSTKIE zakończone ✅
-**Postęp:** ~98.4% (749/761 testów) - PRODUKCYJNIE GOTOWY! 🎉
+**Postęp:** ~98.3% (702/714 testów) - PRODUKCYJNIE GOTOWY! 🎉
+**Admin Dashboard:** ❌ BRAK TESTÓW (0% pokrycia - plan testów przygotowany)
+**Uwagi:** Zaktualizowano plan testów po zmianach w onboarding (nieograniczona liczba filmów, widoczne wyniki wyszukiwania)
 

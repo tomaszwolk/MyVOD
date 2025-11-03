@@ -43,19 +43,19 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - Kluczowe komponenty widoku: CheckboxGroup z ikonami platform, Buttons (Dalej, Skip), Progress bar.
 - UX, dostępność i względy bezpieczeństwa: możliwość przejścia dalej bez wyboru, zachowanie wyboru, focus i role dla checkboxów, wizualne stany zaznaczenia.
 
-4) Widok: Onboarding – Krok 2: Dodaj 3 filmy do watchlisty
+4) Widok: Onboarding – Krok 2: Dodaj filmy do watchlisty
 - Ścieżka widoku: `/onboarding/first-movies`
-- Główny cel: Dodanie 0–3 filmów do watchlisty poprzez wyszukiwarkę z autocomplete.
-- Kluczowe informacje do wyświetlenia: pole wyszukiwania, dropdown do 10 wyników (plakat, tytuł, rok, ocena), licznik „Dodane: X/3”, lista dodanych.
+- Główny cel: Dodanie minimum 3 filmów do watchlisty poprzez wyszukiwarkę z autocomplete (użytkownik może dodać więcej niż 3).
+- Kluczowe informacje do wyświetlenia: pole wyszukiwania, dropdown do 10 wyników (plakat, tytuł, rok, ocena), licznik „Dodane: X”, lista dodanych, dynamiczny tytuł.
 - Kluczowe komponenty widoku: Combobox z debounce, Lista wyników, Lista dodanych pozycji (mini-kafelki), Buttons (Dalej, Skip).
-- UX, dostępność i względy bezpieczeństwa: responsywność i łatwe trafianie w pozycje listy, placeholder dla braku plakatu, jasny komunikat przy braku wyników, zapobieganie duplikatom w sesji.
+- UX, dostępność i względy bezpieczeństwa: responsywność i łatwe trafianie w pozycje listy, placeholder dla braku plakatu, jasny komunikat przy braku wyników, zapobieganie duplikatom w sesji, walidacja minimum 3 filmów do przejścia dalej.
 
-5) Widok: Onboarding – Krok 3: Oznacz 3 obejrzane
+5) Widok: Onboarding – Krok 3: Oznacz filmy jako obejrzane
 - Ścieżka widoku: `/onboarding/watched`
-- Główny cel: Oznaczenie 0–3 filmów jako obejrzane (przeniesienie do historii).
-- Kluczowe informacje do wyświetlenia: pole wyszukiwania, wyniki, licznik „Oznaczone: X/3”, lista oznaczonych.
+- Główny cel: Oznaczenie minimum 3 filmów jako obejrzane (użytkownik może oznaczyć więcej niż 3).
+- Kluczowe informacje do wyświetlenia: pole wyszukiwania, wyniki, licznik „Oznaczone: X”, lista oznaczonych, dynamiczny tytuł.
 - Kluczowe komponenty widoku: Combobox, Kafelki/wiersze wyników z akcją „Oznacz obejrzane”, Buttons (Zakończ, Skip).
-- UX, dostępność i względy bezpieczeństwa: brak wymuszeń (można 0/3), komunikaty sukcesu/błędu, mechanika: dodanie, jeśli brak, a następnie oznaczenie jako obejrzane w tle.
+- UX, dostępność i względy bezpieczeństwa: brak wymuszeń (wymagane minimum 3 do przejścia dalej), komunikaty sukcesu/błędu, mechanika: dodanie, jeśli brak, a następnie oznaczenie jako obejrzane w tle, tytuł zmienia się dynamicznie po dodaniu 3 filmów.
 
 6) Widok: Dashboard – Watchlista
 - Ścieżka widoku: `/watchlist`

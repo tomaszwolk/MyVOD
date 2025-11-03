@@ -265,16 +265,21 @@ Struktura 3-stopniowa:
    - Checkboxy dla 5 platform
    - Komunikat zachęcający do wyboru minimum 1 platformy
    - Przycisk "Skip" dla pominięcia
-   
-2. Krok 2: "Dodaj pierwsze 3 filmy do watchlisty"
+
+2. Krok 2: "Dodaj przynajmniej 3 filmy do watchlisty"
    - Wyszukiwarka filmów z autocomplete
-   - Licznik dodanych filmów (0/3)
+   - Licznik dodanych filmów (bez limitu górnego)
+   - Użytkownik może dodać dowolną liczbę filmów
+   - Wymagane minimum 3 filmy do przejścia dalej
    - Przycisk "Skip" dla pominięcia
-   
-3. Krok 3: "Oznacz 3 filmy które już widziałeś"
+
+3. Krok 3: "Oznacz przynajmniej 3 filmy które już widziałeś"
    - Wyszukiwarka filmów
    - Bezpośrednie dodanie do zakładki "Obejrzane"
-   - Licznik oznaczonych filmów (0/3)
+   - Licznik oznaczonych filmów (bez limitu górnego)
+   - Użytkownik może oznaczyć dowolną liczbę filmów
+   - Wymagane minimum 3 filmy do przejścia dalej
+   - Dynamiczny tytuł: po dodaniu 3 filmów zmienia się na "Idź dalej lub dodaj kolejne filmy"
    - Przycisk "Skip" dla pominięcia
 
 Wymagania UX:
@@ -509,29 +514,31 @@ Kryteria akceptacji:
 - Wybory są zapisywane w profilu użytkownika
 
 US-005: Onboarding - Dodanie pierwszych filmów
-Jako nowy użytkownik chcę dodać pierwsze 3 filmy do watchlisty, aby poznać funkcjonalność aplikacji.
+Jako nowy użytkownik chcę dodać pierwsze filmy do watchlisty, aby poznać funkcjonalność aplikacji.
 
 Kryteria akceptacji:
-- System wyświetla ekran z tytułem "Dodaj pierwsze 3 filmy do watchlisty" (Krok 2/3)
+- System wyświetla ekran z tytułem "Dodaj przynajmniej 3 filmy do watchlisty" (Krok 2/3)
 - Wyświetlana jest wyszukiwarka z autocomplete
-- Licznik pokazuje postęp: "Dodane: 0/3", "1/3", "2/3", "3/3"
-- Użytkownik może dodać 0-3 filmy (nie jest wymagane minimum)
+- Licznik pokazuje postęp: "Dodane: X" (bez limitu górnego)
+- Użytkownik może dodać dowolną liczbę filmów (minimum 3 wymagane do przejścia dalej)
 - Każdy dodany film pojawia się na liście poniżej wyszukiwarki
-- Przycisk "Dalej" jest aktywny po dodaniu 3 filmów lub od razu (brak wymuszenia)
+- Przycisk "Dalej" jest aktywny dopiero po dodaniu minimum 3 filmów
 - Przycisk "Skip" pozwala pominąć krok
 - Po kliknięciu "Dalej" lub "Skip" użytkownik przechodzi do Kroku 3
 - Dodane filmy są zapisywane na watchliście użytkownika
 
 US-006: Onboarding - Oznaczenie obejrzanych filmów
-Jako nowy użytkownik chcę oznaczyć 3 filmy które już widziałem, aby system mógł generować lepsze sugestie AI.
+Jako nowy użytkownik chcę oznaczyć filmy które już widziałem, aby system mógł generować lepsze sugestie AI.
 
 Kryteria akceptacji:
-- System wyświetla ekran z tytułem "Oznacz 3 filmy które już widziałeś" (Krok 3/3)
+- System wyświetla ekran z dynamicznym tytułem:
+  - "Oznacz przynajmniej 3 filmy które już widziałeś" (gdy użytkownik ma mniej niż 3 filmy)
+  - "Idź dalej lub dodaj kolejne filmy" (gdy użytkownik ma już 3+ filmów)
 - Wyświetlana jest wyszukiwarka z autocomplete
-- Licznik pokazuje postęp: "Oznaczone: 0/3", "1/3", "2/3", "3/3"
-- Użytkownik może oznaczyć 0-3 filmy (nie jest wymagane minimum)
+- Licznik pokazuje postęp: "Oznaczone: X" (bez limitu górnego)
+- Użytkownik może oznaczyć dowolną liczbę filmów (minimum 3 wymagane do przejścia dalej)
 - Każdy oznaczony film pojawia się na liście poniżej wyszukiwarki
-- Przycisk "Zakończ" jest zawsze aktywny
+- Przycisk "Zakończ" jest aktywny dopiero po oznaczeniu minimum 3 filmów
 - Przycisk "Skip" pozwala pominąć krok
 - Po kliknięciu "Zakończ" lub "Skip" użytkownik przechodzi do głównej strony
 - Oznaczone filmy są zapisywane w zakładce "Obejrzane" z datą dzisiejszą
