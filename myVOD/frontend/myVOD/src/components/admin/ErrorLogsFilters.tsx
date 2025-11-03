@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,16 +33,41 @@ const API_TYPES: Array<{ value: ErrorLogsQuery["api_type"][number]; label: strin
 export function ErrorLogsFilters({ value, onChange, onReset }: ErrorLogsFiltersProps) {
   const [userIdInput, setUserIdInput] = useState(value.user_id || "");
   const debouncedUserId = useDebouncedValue(userIdInput, 300);
+  
+  // Track previous debounced value to avoid infinite loops
+  const prevDebouncedUserIdRef = useRef<string>(debouncedUserId);
+  // Track current value.user_id to compare without causing re-renders
+  const currentUserIdRef = useRef<string | undefined>(value.user_id);
+
+  // Sync local input with prop value when it changes externally (e.g., reset)
+  useEffect(() => {
+    if (value.user_id !== userIdInput) {
+      setUserIdInput(value.user_id || "");
+    }
+    currentUserIdRef.current = value.user_id;
+  }, [value.user_id, userIdInput]);
 
   // Update query when debounced user ID changes
   useEffect(() => {
-    if (debouncedUserId !== value.user_id) {
-      onChange({
-        ...value,
-        user_id: debouncedUserId.trim() || undefined,
-      });
+    // Only update if debounced value actually changed
+    if (prevDebouncedUserIdRef.current === debouncedUserId) {
+      return;
     }
-  }, [debouncedUserId, value, onChange]);
+    
+    prevDebouncedUserIdRef.current = debouncedUserId;
+    
+    // Only update if the debounced value is different from current value
+    const newUserId = debouncedUserId.trim() || undefined;
+    
+    // Compare with current value using ref to avoid dependency on value
+    if (currentUserIdRef.current !== newUserId) {
+      // Use functional update form to avoid dependency on value
+      onChange((prevValue) => ({
+        ...prevValue,
+        user_id: newUserId,
+      }));
+    }
+  }, [debouncedUserId, onChange]); // onChange is stable (setQuery from useState)
 
   const handleApiTypeToggle = useCallback(
     (apiType: ErrorLogsQuery["api_type"][number]) => {
