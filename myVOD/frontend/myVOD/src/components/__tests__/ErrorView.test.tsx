@@ -61,21 +61,59 @@ describe('ErrorView', () => {
     expect(screen.getByLabelText('Ikona błędu')).toBeInTheDocument();
   });
 
-  it('should render action buttons', () => {
-    render(<ErrorView variant={mockVariant} model={mockModel} />);
-
-    expect(screen.getByRole('button', { name: 'Spróbuj ponownie' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Przejdź do strony głównej' })).toBeInTheDocument();
+  it('should render Home icon for not_found variant', () => {
+    render(<ErrorView variant="not_found" model={mockModel} />);
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-16', 'w-16', 'text-muted-foreground', 'lucide', 'lucide-house');
   });
 
-  it('should call action onClick when button is clicked', async () => {
-    render(<ErrorView variant={mockVariant} model={mockModel} />);
-
-    const retryButton = screen.getByRole('button', { name: 'Spróbuj ponownie' });
-    await user.click(retryButton);
-
-    expect(mockModel.actions[0].onClick).toHaveBeenCalledTimes(1);
+  it('should render LogIn icon for unauthorized variant', () => {
+    render(<ErrorView variant="unauthorized" model={mockModel} />);
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-16', 'w-16', 'text-muted-foreground', 'lucide', 'lucide-log-in');
   });
+
+  it('should render WifiOff icon for offline variant', () => {
+    render(<ErrorView variant="offline" model={mockModel} />);
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-16', 'w-16', 'text-muted-foreground', 'lucide', 'lucide-wifi-off');
+  });
+
+  it('should render RefreshCw icon for suggestions_error variant', () => {
+    render(<ErrorView variant="suggestions_error" model={mockModel} />);
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-16', 'w-16', 'text-muted-foreground', 'lucide', 'lucide-refresh-cw');
+  });
+
+  it('should render AlertTriangle icon for api_generic variant', () => {
+    render(<ErrorView variant="api_generic" model={mockModel} />);
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass('h-16', 'w-16', 'text-muted-foreground', 'lucide', 'lucide-triangle-alert');
+  });
+
+  it('should have correct ARIA attributes for all variants', () => {
+    const variants: ErrorKind[] = ['not_found', 'unauthorized', 'offline', 'suggestions_error', 'api_generic'];
+
+    variants.forEach(variant => {
+      const { rerender } = render(<ErrorView variant={variant} model={mockModel} />);
+
+      const expectedLabels = {
+        not_found: 'Ikona strony nie znaleziono',
+        unauthorized: 'Ikona błędu autoryzacji',
+        offline: 'Ikona braku połączenia',
+        suggestions_error: 'Ikona błędu sugestii',
+        api_generic: 'Ikona błędu'
+      };
+
+      expect(screen.getByLabelText(expectedLabels[variant])).toBeInTheDocument();
+    });
+  });
+
 
   it('should have correct accessibility attributes', () => {
     render(<ErrorView variant={mockVariant} model={mockModel} />);
@@ -117,4 +155,36 @@ describe('ErrorView', () => {
     expect(screen.getByText('This is a test error description')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('should render all action buttons', () => {
+    render(<ErrorView variant={mockVariant} model={mockModel} />);
+
+    expect(screen.getAllByRole('button')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Spróbuj ponownie' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Przejdź do strony głównej' })).toBeInTheDocument();
+  });
+
+  it('should call onClick when button clicked', async () => {
+    const user = userEvent.setup();
+    render(<ErrorView variant={mockVariant} model={mockModel} />);
+
+    const primaryButton = screen.getByRole('button', { name: 'Spróbuj ponownie' });
+    await user.click(primaryButton);
+
+    expect(mockModel.actions[0].onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('should apply correct variant to buttons', () => {
+    render(<ErrorView variant={mockVariant} model={mockModel} />);
+
+    const primaryButton = screen.getByRole('button', { name: 'Spróbuj ponownie' });
+    const secondaryButton = screen.getByRole('button', { name: 'Przejdź do strony głównej' });
+
+    // Primary button should have default variant
+    expect(primaryButton).toHaveClass('bg-primary');
+
+    // Secondary button should have secondary variant
+    expect(secondaryButton).toHaveClass('bg-secondary');
+  });
+
 });
