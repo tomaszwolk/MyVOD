@@ -2998,8 +2998,8 @@ npm install --save-dev msw
 **Rozkład na etapy:**
 1. **✅ Etap 1 ZAKOŃCZONY:** Testy błędów dla funkcji auth (loginUser, registerUser, refreshAccessToken) - **20 testów**
 2. **✅ Etap 2 ZAKOŃCZONY:** Testy błędów dla pozostałych funkcji auth (getUserProfile, deleteAccount, changePassword) - **32 testy**
-3. **Etap 3:** Testy błędów dla funkcji movies (searchMovies, addUserMovie, patchUserMovie)
-4. **Etap 4:** Testy błędów dla pozostałych funkcji movies (deleteUserMovie, listUserMovies, restoreUserMovie, getAISuggestions)
+3. **✅ Etap 3 ZAKOŃCZONY:** Testy błędów dla funkcji movies (searchMovies, addUserMovie, patchUserMovie) - **30 testów**
+4. **✅ Etap 4 ZAKOŃCZONY:** Testy błędów dla pozostałych funkcji movies (deleteUserMovie, listUserMovies, restoreUserMovie, getAISuggestions) - **44 testy**
 5. **Etap 5:** Testy błędów dla funkcji admin i platforms
 
 #### **✅ Etap 1 - ZAKOŃCZONY (20 testów)**
@@ -3038,6 +3038,46 @@ npm install --save-dev msw
 
 **Razem w auth.test.ts:** 110 testów (78 poprzednich + 32 nowych)
 **Razem w Batch 5:** 52 testy błędów (20 + 32)
+
+#### **✅ Etap 3 - ZAKOŃCZONY (30 testów)**
+
+**Funkcje przetestowane:**
+- `searchMovies`: 11 nowych testów błędów
+- `addUserMovie`: 10 nowych testów błędów
+- `patchUserMovie`: 9 nowych testów błędów
+
+**Rodzaje błędów pokryte dla każdej funkcji:**
+- Network errors (ECONNREFUSED, timeout 408)
+- Server errors (500, 502, 503, 504)
+- Authentication errors (401, 403)
+- Business logic errors (409, 422)
+- Rate limiting (429)
+- Malformed responses (HTML zamiast JSON)
+- Bad gateway (502)
+
+**Razem w movies.test.ts:** 66 testów (36 poprzednich + 30 nowych)
+**Razem w Batch 5:** 82 testy błędów (52 + 30)
+
+#### **✅ Etap 4 - ZAKOŃCZONY (44 testy)**
+
+**Funkcje przetestowane:**
+- `deleteUserMovie`: 11 nowych testów błędów
+- `listUserMovies`: 11 nowych testów błędów
+- `restoreUserMovie`: 11 nowych testów błędów
+- `getAISuggestions`: 11 nowych testów błędów
+
+**Rodzaje błędów pokryte dla każdej funkcji:**
+- Network errors (ECONNREFUSED, timeout 408)
+- Server errors (500, 502, 503, 504)
+- Authentication errors (401, 403)
+- Business logic errors (409, 422)
+- Rate limiting (429)
+- Malformed responses (HTML zamiast JSON)
+- Bad gateway (502)
+
+**Razem w movies.test.ts:** 110 testów (66 poprzednich + 44 nowych)
+**Razem w Batch 5:** 126 testów błędów (82 + 44)
+**Razem w całym projekcie:** ~400+ testów
 
 ---
 

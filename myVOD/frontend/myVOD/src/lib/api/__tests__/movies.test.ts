@@ -151,6 +151,114 @@ describe('patchUserMovie', () => {
   });
 });
 
+describe('patchUserMovie - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).networkError();
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(500, 'Internal server error - not JSON');
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(403, {
+      detail: 'Movie update forbidden'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(429, {
+      detail: 'Too many update requests. Try again later.'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(422, {
+      detail: 'Invalid update action'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    const id = 123;
+    const command: UpdateUserMovieCommand = { action: 'mark_as_watched' };
+    mock.onPatch(`/user-movies/${id}/`).reply(502, {
+      detail: 'Bad gateway'
+    });
+
+    await expect(patchUserMovie(id, command)).rejects.toThrow();
+  });
+});
+
 describe('deleteUserMovie', () => {
   let mock: MockAdapter;
 
@@ -191,6 +299,113 @@ describe('deleteUserMovie', () => {
   it('should handle 401 Unauthorized', async () => {
     const id = 123;
     mock.onDelete(`/user-movies/${id}/`).reply(401, { detail: 'Unauthorized' });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+});
+
+describe('deleteUserMovie - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).networkError();
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(500, 'Internal server error - not JSON');
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(403, {
+      detail: 'Delete forbidden'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(429, {
+      detail: 'Too many delete requests. Try again later.'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(409, {
+      detail: 'Delete conflict'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(422, {
+      detail: 'Invalid delete request'
+    });
+
+    await expect(deleteUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    const id = 123;
+    mock.onDelete(`/user-movies/${id}/`).reply(502, {
+      detail: 'Bad gateway'
+    });
 
     await expect(deleteUserMovie(id)).rejects.toThrow();
   });
@@ -248,6 +463,102 @@ describe('listUserMovies', () => {
 
   it('should handle errors', async () => {
     mock.onGet('/user-movies/').reply(500, { detail: 'Internal server error' });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+});
+
+describe('listUserMovies - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    mock.onGet('/user-movies/').networkError();
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    mock.onGet('/user-movies/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    mock.onGet('/user-movies/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    mock.onGet('/user-movies/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    mock.onGet('/user-movies/').reply(500, 'Internal server error - not JSON');
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    mock.onGet('/user-movies/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    mock.onGet('/user-movies/').reply(403, {
+      detail: 'Access forbidden'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    mock.onGet('/user-movies/').reply(429, {
+      detail: 'Too many list requests. Try again later.'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    mock.onGet('/user-movies/').reply(409, {
+      detail: 'List conflict'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    mock.onGet('/user-movies/').reply(422, {
+      detail: 'Invalid list request'
+    });
+
+    await expect(listUserMovies()).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    mock.onGet('/user-movies/').reply(502, {
+      detail: 'Bad gateway'
+    });
 
     await expect(listUserMovies()).rejects.toThrow();
   });
@@ -312,6 +623,102 @@ describe('searchMovies', () => {
 
   it('should handle API errors', async () => {
     mock.onGet('/movies/').reply(500, { detail: 'Internal server error' });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+});
+
+describe('searchMovies - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    mock.onGet('/movies/').networkError();
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    mock.onGet('/movies/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    mock.onGet('/movies/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    mock.onGet('/movies/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    mock.onGet('/movies/').reply(500, 'Internal server error - not JSON');
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    mock.onGet('/movies/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    mock.onGet('/movies/').reply(403, {
+      detail: 'Access forbidden'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    mock.onGet('/movies/').reply(429, {
+      detail: 'Too many search requests. Try again later.'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    mock.onGet('/movies/').reply(409, {
+      detail: 'Search conflict'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    mock.onGet('/movies/').reply(422, {
+      detail: 'Invalid search query'
+    });
+
+    await expect(searchMovies('shawshank')).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    mock.onGet('/movies/').reply(502, {
+      detail: 'Bad gateway'
+    });
 
     await expect(searchMovies('shawshank')).rejects.toThrow();
   });
@@ -386,6 +793,104 @@ describe('addUserMovie', () => {
   });
 });
 
+describe('addUserMovie - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').networkError();
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(500, 'Internal server error - not JSON');
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(403, {
+      detail: 'Adding movies forbidden'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(429, {
+      detail: 'Too many add requests. Try again later.'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(422, {
+      detail: 'Invalid movie data'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    const command: AddUserMovieCommand = { tconst: 'tt0111161' };
+    mock.onPost('/user-movies/').reply(502, {
+      detail: 'Bad gateway'
+    });
+
+    await expect(addUserMovie(command)).rejects.toThrow();
+  });
+});
+
 describe('restoreUserMovie', () => {
   let mock: MockAdapter;
 
@@ -448,6 +953,113 @@ describe('restoreUserMovie', () => {
   });
 });
 
+describe('restoreUserMovie - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).networkError();
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(500, 'Internal server error - not JSON');
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(403, {
+      detail: 'Restore forbidden'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(429, {
+      detail: 'Too many restore requests. Try again later.'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(409, {
+      detail: 'Restore conflict'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(422, {
+      detail: 'Invalid restore request'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    const id = 123;
+    mock.onPatch(`/user-movies/${id}/`).reply(502, {
+      detail: 'Bad gateway'
+    });
+
+    await expect(restoreUserMovie(id)).rejects.toThrow();
+  });
+});
+
 describe('getAISuggestions', () => {
   let mock: MockAdapter;
 
@@ -502,6 +1114,102 @@ describe('getAISuggestions', () => {
   it('should handle server errors (500)', async () => {
     mock.onGet('/suggestions/').reply(500, {
       detail: 'AI service temporarily unavailable'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+});
+
+describe('getAISuggestions - Comprehensive Error Handling', () => {
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    mock = new MockAdapter(http);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should handle network connection refused (ECONNREFUSED)', async () => {
+    mock.onGet('/suggestions/').networkError();
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle network timeout (408)', async () => {
+    mock.onGet('/suggestions/').reply(408, {
+      detail: 'Request timeout'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle server unavailable (503)', async () => {
+    mock.onGet('/suggestions/').reply(503, {
+      detail: 'Service temporarily unavailable'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle gateway timeout (504)', async () => {
+    mock.onGet('/suggestions/').reply(504, {
+      detail: 'Gateway timeout'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle malformed JSON response (500)', async () => {
+    mock.onGet('/suggestions/').reply(500, 'Internal server error - not JSON');
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle HTML error response instead of JSON (500)', async () => {
+    mock.onGet('/suggestions/').reply(500, '<html><body>Server Error</body></html>', {
+      'content-type': 'text/html'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle forbidden access (403)', async () => {
+    mock.onGet('/suggestions/').reply(403, {
+      detail: 'AI suggestions forbidden'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle too many requests (429)', async () => {
+    mock.onGet('/suggestions/').reply(429, {
+      detail: 'Too many AI requests. Try again later.'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle conflict state (409)', async () => {
+    mock.onGet('/suggestions/').reply(409, {
+      detail: 'AI suggestions conflict'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle unprocessable entity (422)', async () => {
+    mock.onGet('/suggestions/').reply(422, {
+      detail: 'Invalid AI suggestions request'
+    });
+
+    await expect(getAISuggestions()).rejects.toThrow();
+  });
+
+  it('should handle bad gateway (502)', async () => {
+    mock.onGet('/suggestions/').reply(502, {
+      detail: 'Bad gateway'
     });
 
     await expect(getAISuggestions()).rejects.toThrow();
