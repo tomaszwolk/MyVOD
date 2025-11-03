@@ -80,6 +80,7 @@ export type UserMovieDto = {
 export type AddUserMovieCommand = {
   tconst: string;
   mark_as_watched?: boolean;
+  added_from_ai_suggestion?: boolean;
 };
 
 export type UpdateUserMovieCommand = {

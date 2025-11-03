@@ -79,6 +79,7 @@ class AddUserMovieCommandSerializer(serializers.Serializer):
         }
     )
     mark_as_watched = serializers.BooleanField(required=False, default=False)
+    added_from_ai_suggestion = serializers.BooleanField(required=False, default=False)
 
 
 class UpdateUserMovieCommandSerializer(serializers.Serializer):

@@ -110,7 +110,7 @@ def build_user_movies_queryset(
 
 
 @transaction.atomic
-def add_movie_to_watchlist(*, user, tconst: str):
+def add_movie_to_watchlist(*, user, tconst: str, added_from_ai_suggestion: bool = False):
     """Adds a movie to user's watchlist or restores a soft-deleted entry.
 
     Business Logic:
@@ -123,6 +123,7 @@ def add_movie_to_watchlist(*, user, tconst: str):
     Args:
         user: The authenticated user object with `email` attribute
         tconst: The IMDb movie identifier (e.g., 'tt0816692')
+        added_from_ai_suggestion: Whether the movie was added from an AI suggestion (default: False)
 
     Returns:
         UserMovie: The created or restored user_movie instance with:
@@ -167,13 +168,17 @@ def add_movie_to_watchlist(*, user, tconst: str):
             logger.info(f"Restoring soft-deleted user_movie id={existing_entry.id}")
             existing_entry.watchlisted_at = timezone.now()
             existing_entry.watchlist_deleted_at = None
-            existing_entry.save(update_fields=['watchlisted_at', 'watchlist_deleted_at'])
+            if added_from_ai_suggestion:
+                existing_entry.added_from_ai_suggestion = True
+            existing_entry.save(update_fields=['watchlisted_at', 'watchlist_deleted_at', 'added_from_ai_suggestion'] if added_from_ai_suggestion else ['watchlisted_at', 'watchlist_deleted_at'])
             user_movie = existing_entry
         else:
             # Entry exists but watchlisted_at is NULL - set it now
             logger.info(f"Updating incomplete user_movie id={existing_entry.id}")
             existing_entry.watchlisted_at = timezone.now()
-            existing_entry.save(update_fields=['watchlisted_at'])
+            if added_from_ai_suggestion:
+                existing_entry.added_from_ai_suggestion = True
+            existing_entry.save(update_fields=['watchlisted_at', 'added_from_ai_suggestion'] if added_from_ai_suggestion else ['watchlisted_at'])
             user_movie = existing_entry
     else:
         # No existing entry - create new one
@@ -184,7 +189,7 @@ def add_movie_to_watchlist(*, user, tconst: str):
             watchlisted_at=timezone.now(),
             watchlist_deleted_at=None,
             watched_at=None,
-            added_from_ai_suggestion=False
+            added_from_ai_suggestion=added_from_ai_suggestion
         )
         logger.info(f"Created new user_movie with id={user_movie.id}")
 
@@ -212,7 +217,7 @@ def add_movie_to_watchlist(*, user, tconst: str):
 
 
 @transaction.atomic
-def add_movie_as_watched(*, user, tconst: str):
+def add_movie_as_watched(*, user, tconst: str, added_from_ai_suggestion: bool = False):
     """Add or update a movie as watched without affecting watchlisted_at when not needed."""
 
     supabase_user_uuid = _resolve_user_uuid(user)
@@ -240,6 +245,10 @@ def add_movie_as_watched(*, user, tconst: str):
             existing_entry.watchlist_deleted_at = None
             update_fields.append('watchlist_deleted_at')
 
+        if added_from_ai_suggestion:
+            existing_entry.added_from_ai_suggestion = True
+            update_fields.append('added_from_ai_suggestion')
+
         existing_entry.save(update_fields=update_fields)
         user_movie = existing_entry
     else:
@@ -249,7 +258,7 @@ def add_movie_as_watched(*, user, tconst: str):
             watchlisted_at=None,
             watchlist_deleted_at=None,
             watched_at=timezone.now(),
-            added_from_ai_suggestion=False
+            added_from_ai_suggestion=added_from_ai_suggestion
         )
         created = True
 

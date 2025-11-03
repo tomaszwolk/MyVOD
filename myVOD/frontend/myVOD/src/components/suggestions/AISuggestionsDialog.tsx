@@ -88,7 +88,10 @@ export function AISuggestionsDialog({
     setIsAddingByTconst(prev => ({ ...prev, [tconst]: true }));
 
     try {
-      await addToWatchlistMutation.mutateAsync({ tconst });
+      await addToWatchlistMutation.mutateAsync({ 
+        tconst,
+        added_from_ai_suggestion: true 
+      });
       setAddedSet(prev => new Set([...prev, tconst]));
     } catch (error) {
       // Error handling is done in the mutation (toast notifications)

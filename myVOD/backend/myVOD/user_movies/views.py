@@ -139,19 +139,22 @@ class UserMovieViewSet(viewsets.ModelViewSet):
 
         tconst = command_serializer.validated_data['tconst']
         mark_as_watched = command_serializer.validated_data.get('mark_as_watched', False)
+        added_from_ai_suggestion = command_serializer.validated_data.get('added_from_ai_suggestion', False)
 
         try:
             # Use service layer for business logic
             if mark_as_watched:
                 user_movie, created = add_movie_as_watched(
                     user=request.user,
-                    tconst=tconst
+                    tconst=tconst,
+                    added_from_ai_suggestion=added_from_ai_suggestion
                 )
                 status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
             else:
                 user_movie = add_movie_to_watchlist(
                     user=request.user,
-                    tconst=tconst
+                    tconst=tconst,
+                    added_from_ai_suggestion=added_from_ai_suggestion
                 )
                 status_code = status.HTTP_201_CREATED
 
