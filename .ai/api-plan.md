@@ -156,7 +156,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 
 #### `POST /api/user-movies/`
 
--   **Description**: Adds a new movie to the user's watchlist.
+-   **Description**: Adds a new movie to the user's watchlist. Optionally tracks if the movie was added from an AI suggestion via the `added_from_ai_suggestion` flag.
 -   **Authentication**: Required.
 -   **Request Body**:
     ```json
@@ -164,6 +164,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
       "tconst": "tt0816692"
     }
     ```
+    -   **Note**: The backend service supports an optional `added_from_ai_suggestion` parameter (default: `False`) to track whether movies were added from AI suggestions for analytics purposes.
 
 -   **Success Response** (201 Created): Returns the newly created `user-movie` object.
   ```json
@@ -215,9 +216,14 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 
 #### `DELETE /api/user-movies/<id>/`
 
--   **Description**: Soft-deletes a movie from the user's watchlist.
+-   **Description**: Deletes a user-movie entry from watchlist or watched history. The behavior depends on whether the movie is marked as watched:
+    - **For watched movies** (`watched_at IS NOT NULL`): Performs a hard delete by setting `watched_at = NULL`. This removes the movie from the watched history. The operation is irreversible (no undo).
+    - **For watchlist movies** (`watched_at IS NULL`): Performs a soft delete by setting `watchlist_deleted_at` to the current timestamp. This removes the movie from the watchlist but preserves the entry in the database.
 -   **Authentication**: Required.
 -   **Success Response** (204 No Content).
+-   **Error Responses**:
+    -   `401 Unauthorized`: Not authenticated.
+    -   `404 Not Found`: UserMovie not found or doesn't belong to the authenticated user.
 
 ### 3.4. AI Suggestions
 
@@ -253,3 +259,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 -   **Password Strength**: The `/api/register/` endpoint will use a Django validator to enforce the password policy (min 8 chars, letters, and numbers).
 -   **Background Tasks**: VOD availability checks will be run periodically by a Celery task, not triggered via the API. This task will populate the `movie_availability` table.
 -   **Data Scoping**: All queries for user-specific data (watchlist, profile) will be implicitly filtered by the authenticated `user_id`, enforced by database Row Level Security.
+-   **Delete Behavior**: The `DELETE /api/user-movies/<id>/` endpoint implements different deletion strategies based on movie status:
+    -   **Watched movies**: Hard delete (`watched_at = NULL`) - irreversible operation. The movie is removed from watched history but can be re-added if it was previously on the watchlist.
+    -   **Watchlist movies**: Soft delete (`watchlist_deleted_at = NOW()`) - reversible operation. The movie can be restored by adding it back to the watchlist.
+-   **AI Suggestion Tracking**: When adding movies via `POST /api/user-movies/`, the backend service accepts an optional `added_from_ai_suggestion` parameter to track which movies were added from AI suggestions for analytics and adoption metrics.

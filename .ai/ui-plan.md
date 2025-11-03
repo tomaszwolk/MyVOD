@@ -64,20 +64,21 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - Kluczowe komponenty widoku: App header, `MediaLibraryLayout` + `MediaToolbar` z osadzonymi elementami sterującymi (Search Combobox, Toggle widoków, wspólny SortDropdown, `FiltersBar` z przyciskiem „Ukryj niedostępne” i licznikiem), Karta/Wiersz filmu z akcjami (Oznacz obejrzane, Usuń), Toastery, Paginacja/wirtualizacja (opcjonalnie), Przycisk „Zasugeruj filmy”.
 - UX, dostępność i względy bezpieczeństwa: szybkie akcje z confirm dla usuwania, optimistic updates z opcją Undo, wyraźne stany filtrów, zapamiętywanie preferencji widoku/sortowania w sesji, focus states, minimalizacja skoków layoutu (lazy image + stałe wymiary).
 
-7) Widok: Zakładka „Obejrzane”
+7) Widok: Zakładka „Obejrzane"
 - Ścieżka widoku: `/app/watched`
-- Główny cel: Przegląd historii obejrzanych filmów i opcja przywrócenia do watchlisty.
+- Główny cel: Przegląd historii obejrzanych filmów, opcja przywrócenia do watchlisty oraz usuwania z historii obejrzanych.
 - Kluczowe informacje do wyświetlenia: lista filmów z datą obejrzenia, te same pola co w watchliście, sort po dacie (najnowsze pierwsze).
-- Kluczowe komponenty widoku: ten sam `MediaLibraryLayout` i `MediaToolbar` co w watchliście (re-użycie Search Combobox, SortDropdown, przycisku „Zasugeruj filmy”), dedykowany `WatchedFiltersBar` (przycisk „Ukryj niedostępne / Pokaż niedostępne” + licznik), Karta/Wiersz filmu z akcją „Przywróć do watchlisty”, Empty state.
-- UX, dostępność i względy bezpieczeństwa: preferencje widoku i sortowania dziedziczone z watchlisty; filtr „Ukryj niedostępne” działa tylko przy skonfigurowanych platformach (profil) i zapamiętuje stan.
-- UX, dostępność i względy bezpieczeństwa: szybkie cofnięcie do listy, spójne skróty klawiaturowe/tabindex, brak ograniczeń na liczbę „Obejrzanych”.
+- Kluczowe komponenty widoku: ten sam `MediaLibraryLayout` i `MediaToolbar` co w watchliście (re-użycie Search Combobox, SortDropdown, przycisku „Zasugeruj filmy"), dedykowany `WatchedFiltersBar` (przycisk „Ukryj niedostępne / Pokaż niedostępne" + licznik), Karta/Wiersz filmu z akcjami „Przywróć do watchlisty" i „Usuń", `ConfirmDialog` dla potwierdzenia usunięcia, Empty state.
+- UX, dostępność i względy bezpieczeństwa: preferencje widoku i sortowania dziedziczone z watchlisty; filtr „Ukryj niedostępne" działa tylko przy skonfigurowanych platformach (profil) i zapamiętuje stan.
+- UX, dostępność i względy bezpieczeństwa: szybkie cofnięcie do listy, spójne skróty klawiaturowe/tabindex, brak ograniczeń na liczbę „Obejrzanych".
+- Usuwanie z historii: przycisk „Usuń" umieszczony w prawym dolnym rogu, z prawej strony przycisku „Przywróć" (widok listy) lub obok przycisku „Przywróć" (widok siatki). Operacja wymaga potwierdzenia przez `ConfirmDialog` z komunikatem o nieodwracalności. Hard delete (ustawienie `watched_at = NULL`) - operacja nieodwracalna, bez możliwości undo. Użytkownik może ponownie oznaczyć film jako watched, jeśli chce go przywrócić do historii.
 
-8) Widok: Sugestie AI (modal + deep link)
-- Ścieżka widoku: modal z `/app/watchlist` lub deep link: `/app/suggestions`
+8) Widok: Sugestie AI (modal)
+- Ścieżka widoku: modal otwierany przez URL param `?suggestions=true` z `/app/watchlist`, `/app/watched` lub `/app/profile`
 - Główny cel: Wyświetlenie do 5 sugestii (tytuł, rok, uzasadnienie, dostępność) i dodanie wybranych do watchlisty.
 - Kluczowe informacje do wyświetlenia: lista kart sugestii, licznik/czas do resetu dziennego, komunikaty o limicie/404.
-- Kluczowe komponenty widoku: Dialog/Modal (focus trap) lub pełnoekranowa strona re-używająca `MediaLibraryLayout` – oba warianty są utrzymywane do porównania UX; Lista kart sugestii (plakat, tytuł, uzasadnienie, ikony VOD), Button „Dodaj do watchlisty” (z blokadą po dodaniu), Badge z odliczaniem do resetu, Empty states, Toastery.
-- UX, dostępność i względy bezpieczeństwa: brak nadmiarowych informacji przy błędzie 429, jasny czas do kolejnej próby, nie duplikować filmów już na liście, obsługa klawiatury zarówno w modalnym, jak i pełnoekranowym wariancie; oba rozwiązania będą prototypowane i testowane w usability.
+- Kluczowe komponenty widoku: `AISuggestionsDialog` (modal z focus trap), `SuggestionList`, `SuggestionCard` (plakat, tytuł, uzasadnienie, ikony VOD), Button „Dodaj do watchlisty” (z blokadą po dodaniu), `RateLimitBadge` z odliczaniem do resetu, `AISuggestionsEmptyState`, Toastery.
+- UX, dostępność i względy bezpieczeństwa: brak nadmiarowych informacji przy błędzie 429, jasny czas do kolejnej próby, nie duplikować filmów już na liście, obsługa klawiatury w modalnym wariancie (Esc do zamknięcia, Tab navigation), routing przez URL params pozwala na bezpośrednie linkowanie.
 
 9) Widok: Profil użytkownika
 - Ścieżka widoku: `/app/profile`
@@ -111,16 +112,18 @@ Główne przepływy i przejścia między widokami:
 
 1) Główny przypadek użycia – Dodaj film i obejrzyj
 - Start: `/watchlist`.
-- Wyszukiwanie (Combobox) → GET `/api/movies?search=…` → wybór pozycji → POST `/api/user-movies/` → toast „Dodano”.
-- Przeglądanie dostępności (Watchmode) i filtr „Tylko dostępne”/„Ukryj niedostępne”.
-- Oznacz jako „Obejrzane” → PATCH `/api/user-movies/<id>/ {action: mark_as_watched}` → toast, film znika z watchlisty i pojawia się w `/app/watched`.
+- Wyszukiwanie (Combobox) → GET `/api/movies?search=…` → wybór pozycji → POST `/api/user-movies/` → toast „Dodano".
+- Przeglądanie dostępności (Watchmode) i filtr „Tylko dostępne"/„Ukryj niedostępne".
+- Oznacz jako „Obejrzane" → PATCH `/api/user-movies/<id>/ {action: mark_as_watched}` → toast, film znika z watchlisty i pojawia się w `/app/watched`.
+- Usuwanie z historii obejrzanych: `/app/watched` → klik „Usuń" → `ConfirmDialog` z potwierdzeniem → DELETE `/api/user-movies/<id>/` → hard delete (`watched_at = NULL`) → toast sukcesu, film znika z listy watched. Operacja nieodwracalna, bez undo.
 
 1) Sugestie AI – odkrywanie nowych tytułów
-- Z /app/watchlist: klik „Zasugeruj filmy” → modal lub `/app/suggestions`.
+- Z `/app/watchlist`, `/app/watched` lub `/app/profile`: klik „Zasugeruj filmy” → modal otwierany przez URL param `?suggestions=true`.
 - GET `/api/suggestions/`:
-  - 200: lista 1–5 sugestii → „Dodaj do watchlisty”: POST `/api/user-movies/` (z flagą po stronie backendu) → toast, disable przycisku.
-  - 429: pokazanie limitu i czasu do resetu.
+  - 200: lista 1–5 sugestii → „Dodaj do watchlisty”: POST `/api/user-movies/` (z flagą `added_from_ai_suggestion=true`) → toast, disable przycisku.
+  - 429: pokazanie limitu i czasu do resetu w `RateLimitBadge`.
   - 404: komunikat „Dodaj filmy do watchlisty lub oznacz jako obejrzane…”.
+- Zamknięcie modala usuwa URL param `?suggestions=true` z powrotem do poprzedniej strony.
 
 1) Edycja profilu – platformy i RODO
 - `/app/profile` → GET `/api/me/` i `/api/platforms/`.
@@ -147,12 +150,12 @@ Struktura tras (skrót):
 - `/` → redirect na `/app/watchlist` (jeśli zalogowany) albo `/auth/login`.
 - `/auth/login`, `/auth/register` (publiczne).
 - `/onboarding/platforms`, `/onboarding/add`, `/onboarding/watched` (chronione, tylko przy pierwszym logowaniu).
-- `/app/watchlist`, `/app/watched`, `/app/profile`, `/app/suggestions` (chronione).
+- `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
 - `/admin` (chronione, rola admin).
 - `*` (404) oraz dedykowane strony błędów.
 
 Nawigacja kluczowych akcji:
-- CTA „Zasugeruj filmy” z headera otwiera modal lub kieruje do `/app/suggestions`.
+- CTA „Zasugeruj filmy” z headera lub toolbaru otwiera modal przez dodanie URL param `?suggestions=true` do aktualnej trasy.
 - Akcje na elementach listy: oznacz jako obejrzane, usuń, przywróć – bez przeładowania, z tostem i ewentualnym Undo.
 - Linki pomocnicze w empty states (np. „Wyszukaj filmy”).
 
@@ -166,12 +169,17 @@ Nawigacja kluczowych akcji:
 - FiltersBar: checkbox „Tylko dostępne”, przycisk „Ukryj niedostępne”, selektor sortowania („Data dodania”, „Ocena IMDb”, „Rok”).
 - WatchedFiltersBar: toolbar obejrzanych z przyciskiem „Ukryj/Pokaż niedostępne” i licznikiem.
 - ViewToggle: przełącznik kafelki/lista (zapamiętanie preferencji w sesji).
-- SuggestionDialog / SuggestionCard: modal i karty sugestii AI (plakat, uzasadnienie, dostępność, CTA „Dodaj”).
+- `AISuggestionsDialog`: modal do wyświetlania sugestii AI z focus trap, routing przez URL params (`?suggestions=true`).
+- `SuggestionCard`: karta pojedynczej sugestii AI (plakat, tytuł, uzasadnienie, dostępność, CTA „Dodaj”).
+- `SuggestionList`: lista kart sugestii w responsywnym gridzie.
+- `RateLimitBadge`: badge z odliczaniem czasu do resetu limitu sugestii.
+- `AISuggestionsEmptyState`: komponenty empty state dla różnych wariantów (brak danych, limit, błąd).
 - ProfilePlatformsForm: checkboxy platform z ikonami, zapis zmian, odświeżenie danych listy.
 - DeleteAccountDialog: dialog RODO z mocnym ostrzeżeniem i akceptacją konsekwencji.
 - OnboardingProgress: pasek postępu 1/3, 2/3, 3/3 i nawigacja krokami (z „Skip”).
 - EmptyState: ilustracje i CTA dla pustych list (watchlista, obejrzane, brak sugestii).
-- ConfirmDialog: confirm dla usuwania i akcji destrukcyjnych.
+- ConfirmDialog: confirm dla usuwania i akcji destrukcyjnych. Używany zarówno w watchliście (soft delete z undo) jak i w watched movies (hard delete bez undo) z odpowiednim komunikatem o nieodwracalności operacji.
+- useDeleteFromWatched: hook React Query do obsługi usuwania filmów z historii obejrzanych. Implementuje optimistic updates, rollback przy błędzie oraz toast notyfikacje. Operacja hard delete (nieodwracalna).
 - Toasts/Alerts: komunikaty o sukcesie/błędach (w tym 401/409/429/404 dla odpowiednich scenariuszy).
 - ErrorBoundary / OfflineBoundary: przyjazne ekrany błędów i offline z retry.
 
