@@ -18,7 +18,7 @@ Zasady UX, dostępności i bezpieczeństwa:
 - Bezpieczeństwo: trasy chronione (auth guard), automatyczne odświeżanie JWT (interceptor), bezpieczne obchodzenie 401 (redirect po niepowodzeniu refresh), minimalizacja ujawnianych informacji o błędach logowania.
 - Wydajność: prefetch kluczowych danych, opcjonalna wirtualizacja list przy większych kolekcjach, cache kontrolowany dla sugestii (reset dzienny kalendarzowy po stronie UI).
 
-Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane endpointy: auth (`/api/token/`, `/api/register/`), profil (`/api/me/` GET/PATCH), listy i operacje filmów (`/api/movies/`, `/api/user-movies/` GET/POST/PATCH/DELETE), platformy (`/api/platforms/`), oraz sugestie AI (`/api/suggestions/`).
+Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane endpointy: auth (`/api/token/`, `/api/register/`), profil (`/api/me/` GET/PATCH - zwraca również `is_staff`), listy i operacje filmów (`/api/movies/`, `/api/user-movies/` GET/POST/PATCH/DELETE), platformy (`/api/platforms/`), sugestie AI (`/api/suggestions/`), oraz admin analytics (`/admin/analytics/api/*` - wymaga `is_staff = TRUE`).
 
 ## 2. Lista widoków
 
@@ -88,11 +88,31 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - UX, dostępność i względy bezpieczeństwa: confirm z jasnym ostrzeżeniem, odświeżenie ikon dostępności po zapisie, disabled filtr „Tylko dostępne”, gdy brak wybranych platform.
 
 10) Widok: Admin dashboard (MVP – podstawowy)
-- Ścieżka widoku: `/admin`
-- Główny cel: Podgląd metryk (overview, retention, AI adoption, growth) – wysokopoziomowo.
-- Kluczowe informacje do wyświetlenia: podstawowe wykresy/metryki z backendu lub z Django Admin; lista top 10 filmów, logi błędów (zależnie od zakresu w MVP).
-- Kluczowe komponenty widoku: Karty metryk, proste wykresy, tabele.
-- UX, dostępność i względy bezpieczeństwa: dostęp tylko dla roli admin (guard), paginacja tabel, czytelne etykiety wykresów.
+- Ścieżka widoku: `/app/admin/dashboard`
+- Główny cel: Podgląd metryk produktu (overview, retention, AI adoption, growth) oraz diagnostyka integracji (logi błędów). Dostępny tylko dla użytkowników ze statusem staff (`is_staff = TRUE` w bazie danych).
+- Kluczowe informacje do wyświetlenia:
+  - **Karty metryk**: łączna liczba użytkowników, nowi użytkownicy (dziś, ostatnie 7 dni, ostatnie 30 dni), retention 7d i 30d, procent użytkowników z min. 10 filmami, procent użytkowników korzystających z AI, procent użytkowników dodających filmy z AI, średnia liczba filmów na użytkownika
+  - **Wykresy**: wykres linii retention (7d i 30d) oraz wykres słupkowy wzrostu użytkowników (timeseries)
+  - **Top 10 filmów**: ranking filmów według liczby dodanych do watchlisty lub oznaczonych jako obejrzane, z filtrami typu (`watchlist`/`watched`) i zakresu czasowego (`7d`, `30d`, `all`), eksport CSV
+  - **Logi błędów integracji**: tabela z paginacją (50/strona), filtrami (typ API, data od/do, user_id), sortowaniem po dacie, eksport CSV
+- Kluczowe komponenty widoku:
+  - `AdminDashboardPage`: główny komponent strony wykorzystujący `MediaLibraryLayout` z zakładkami nawigacyjnymi
+  - `MetricsCardsGrid`: siatka kart metryk (8 kart) z tooltipami i ikonami
+  - `ChartsRow`: rząd z dwoma wykresami (retention line chart, users growth bar chart) używającymi Chart.js
+  - `TopMoviesSection`: sekcja z filtrami (`TopMoviesFilters`), tabelą (`TopMoviesTable`) i przyciskiem eksportu CSV
+  - `ErrorLogsSection`: sekcja z filtrami (`ErrorLogsFilters`), tabelą (`ErrorLogsTable`) z paginacją i sortowaniem, oraz przyciskiem eksportu CSV
+- Nawigacja: zakładka "Admin" pojawia się warunkowo w nawigacji (`MediaLibraryLayout`) tylko dla użytkowników ze statusem staff. Sprawdzanie uprawnień odbywa się przez hook `useIsStaff()`, który korzysta z pola `is_staff` zwracanego przez endpoint `/api/me/`.
+- UX, dostępność i względy bezpieczeństwa:
+  - Dostęp kontrolowany przez backend (`IsStaffUser` permission class) - endpointy zwracają 403 dla nie-staff użytkowników
+  - Frontend sprawdza uprawnienia przez `is_staff` z profilu użytkownika - zakładka "Admin" nie jest widoczna dla zwykłych użytkowników
+  - Responsywne karty metryk (grid 1-4 kolumny w zależności od rozmiaru ekranu)
+  - Wykresy Chart.js z responsywnym skalowaniem
+  - Paginacja tabel (50 rekordów/strona), sortowanie po kolumnach
+  - Filtry z walidacją i debounce dla pól tekstowych (300ms)
+  - Eksport CSV z aktywnymi filtrami
+  - Tooltips z objaśnieniami metryk
+  - Obsługa błędów z czytelnymi komunikatami
+  - Loading states podczas pobierania danych
 
 11) Widoki błędów i fallbacki
 - Ścieżki widoków: `*` (404), dedykowane: `/error/unauthorized`, `/error/offline`.
@@ -132,7 +152,15 @@ Główne przepływy i przejścia między widokami:
 
 1) Sesja i bezpieczeństwo
 - Każdy request z access tokenem. Na 401: próba refresh (`/api/token/refresh/`); gdy refresh niepowodzenie → redirect do `/auth/login` z komunikatem „Twoja sesja wygasła…”.
-- Ochrona tras: guard dla `/app/*` i `/admin`.
+- Ochrona tras: guard dla `/app/*` i `/app/admin/*`. Dodatkowa kontrola uprawnień dla admin dashboard - endpointy backend zwracają 403 dla nie-staff użytkowników.
+- Sprawdzanie uprawnień staff: frontend sprawdza pole `is_staff` z profilu użytkownika (`/api/me/`) przez hook `useIsStaff()`. Zakładka "Admin" jest wyświetlana warunkowo tylko dla użytkowników ze statusem staff.
+
+1) Admin dashboard – przegląd metryk i diagnostyka
+- Z `/app/watchlist`, `/app/watched` lub `/app/profile`: kliknięcie zakładki "Admin" (widoczna tylko dla staff) → `/app/admin/dashboard`.
+- GET `/admin/analytics/api/metrics/` → wyświetlenie kart metryk i wykresów (retention, wzrost użytkowników).
+- GET `/admin/analytics/api/top-movies/?type=watchlist&range=7d` → wyświetlenie top 10 filmów z możliwością filtrowania i eksportu CSV.
+- GET `/admin/analytics/api/error-logs/?page=1&page_size=50&sort=-occurred_at` → wyświetlenie logów błędów z paginacją, filtrami i eksportem CSV.
+- Wszystkie endpointy wymagają autoryzacji JWT i uprawnień staff (`is_staff = TRUE`).
 
 ## 4. Układ i struktura nawigacji
 
@@ -141,17 +169,17 @@ Layouty i nawigacja:
 - OnboardingLayout: nagłówek z progressem (1/3, 2/3, 3/3), główna treść kroku, przyciski „Dalej/Skip/Zakończ”.
 - AppShell (Private):
   - Header: logo, przycisk „Zasugeruj filmy”, link do profilu, „Wyloguj”.
-  - Main nav (Tabs): „Watchlista” (`/app/watchlist`), „Obejrzane” (`/app/watched`).
+  - Main nav (Tabs): „Watchlista” (`/app/watchlist`), „Obejrzane” (`/app/watched`), „Profil” (`/app/profile`), „Admin” (`/app/admin/dashboard` - warunkowo, tylko dla staff).
   - Sub-bar nad listami: wyszukiwarka, sortowanie, filtry, przełącznik widoków.
-  - Content: grid/lista filmów z akcjami.
-- AdminLayout: sekcja metryk i tabel (tylko admin).
+  - Content: grid/lista filmów z akcjami (dla watchlisty/obejrzanych) lub sekcje metryk i tabel (dla admin dashboard).
+- AdminLayout: wykorzystuje wspólny `MediaLibraryLayout` z zakładkami nawigacyjnymi. Sekcja metryk i tabel dostępna tylko dla użytkowników ze statusem staff.
 
 Struktura tras (skrót):
 - `/` → redirect na `/app/watchlist` (jeśli zalogowany) albo `/auth/login`.
 - `/auth/login`, `/auth/register` (publiczne).
 - `/onboarding/platforms`, `/onboarding/add`, `/onboarding/watched` (chronione, tylko przy pierwszym logowaniu).
 - `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
-- `/admin` (chronione, rola admin).
+- `/app/admin/dashboard` (chronione, wymaga `is_staff = TRUE`). Admin dashboard z metrykami, wykresami, top filmami i logami błędów.
 - `*` (404) oraz dedykowane strony błędów.
 
 Nawigacja kluczowych akcji:
@@ -180,7 +208,17 @@ Nawigacja kluczowych akcji:
 - EmptyState: ilustracje i CTA dla pustych list (watchlista, obejrzane, brak sugestii).
 - ConfirmDialog: confirm dla usuwania i akcji destrukcyjnych. Używany zarówno w watchliście (soft delete z undo) jak i w watched movies (hard delete bez undo) z odpowiednim komunikatem o nieodwracalności operacji.
 - useDeleteFromWatched: hook React Query do obsługi usuwania filmów z historii obejrzanych. Implementuje optimistic updates, rollback przy błędzie oraz toast notyfikacje. Operacja hard delete (nieodwracalna).
-- Toasts/Alerts: komunikaty o sukcesie/błędach (w tym 401/409/429/404 dla odpowiednich scenariuszy).
+- useIsStaff: hook do sprawdzania uprawnień staff użytkownika. Wykorzystuje pole `is_staff` z profilu użytkownika (`/api/me/`). Używany do warunkowego wyświetlania zakładki "Admin" w nawigacji.
+- AdminDashboardPage: główny komponent admin dashboard wykorzystujący `MediaLibraryLayout` z zakładkami nawigacyjnymi.
+- MetricsCardsGrid: komponent siatki kart metryk z tooltipami i ikonami. Wyświetla 8 metryk w responsywnym gridzie.
+- ChartsRow: komponent zawierający dwa wykresy (retention line chart, users growth bar chart) używające Chart.js.
+- TopMoviesSection: sekcja z filtrami typu i zakresu czasowego, tabelą top 10 filmów oraz eksportem CSV.
+- ErrorLogsSection: sekcja z filtrami (API type, data od/do, user_id), tabelą z paginacją i sortowaniem, oraz eksportem CSV.
+- ErrorLogsFilters: komponenty filtrów dla logów błędów z debounce dla pola user_id (300ms).
+- ErrorLogsTable: tabela logów błędów z paginacją (50/strona), sortowaniem po kolumnach oraz możliwością kliknięcia user_id do filtrowania.
+- TopMoviesFilters: filtry dla sekcji top filmów (typ: watchlist/watched, zakres: 7d/30d/all).
+- TopMoviesTable: tabela top 10 filmów z kolumnami: pozycja, tytuł, rok, liczba.
+- Toasts/Alerts: komunikaty o sukcesie/błędach (w tym 401/403/409/429/404 dla odpowiednich scenariuszy).
 - ErrorBoundary / OfflineBoundary: przyjazne ekrany błędów i offline z retry.
 
 

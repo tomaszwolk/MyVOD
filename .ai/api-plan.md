@@ -48,7 +48,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 
 #### `GET /api/me/`
 
--   **Description**: Retrieves the profile of the currently authenticated user, including their selected platforms.
+-   **Description**: Retrieves the profile of the currently authenticated user, including their selected platforms and staff status.
 -   **Authentication**: Required.
 -   **Success Response** (200 OK):
     ```json
@@ -57,9 +57,11 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
       "platforms": [
         {"id": 1, "platform_slug": "netflix", "platform_name": "Netflix"},
         {"id": 2, "platform_slug": "hbo-max", "platform_name": "HBO Max"}
-      ]
+      ],
+      "is_staff": false
     }
     ```
+    -   **Note**: The `is_staff` field indicates whether the user has admin dashboard access. Used by frontend to conditionally display the "Admin" tab in navigation.
 
 
 #### `PATCH /api/me/`
@@ -80,9 +82,11 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
       "platforms": [
         {"id": 1, "platform_slug": "netflix", "platform_name": "Netflix"},
         {"id": 3, "platform_slug": "disney-plus", "platform_name": "Disney+"}
-      ]
+      ],
+      "is_staff": false
     }
     ```
+    -   **Note**: The `is_staff` field is read-only and cannot be modified via this endpoint. It reflects the user's staff status from the database.
 
 
 ### 3.2. Movies & Platforms
@@ -253,6 +257,122 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     -   `429 Too Many Requests`: User has already received suggestions today.
     -   `404 Not Found`: User has no movies on their watchlist or watched history to base suggestions on.
 
+### 3.5. Admin Analytics (Staff Only)
+
+All endpoints in this section require staff permissions (`is_staff = TRUE`). Endpoints return `403 Forbidden` for non-staff users.
+
+#### `GET /admin/analytics/api/metrics/`
+
+-   **Description**: Retrieves aggregated metrics for the admin dashboard, including user counts, retention percentages, AI adoption metrics, and timeseries data for charts.
+-   **Authentication**: Required (JWT with staff permissions).
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "total_users": 1250,
+      "new_users": {
+        "today": 5,
+        "last_7_days": 42,
+        "last_30_days": 180
+      },
+      "retention_7d_percent": 65.5,
+      "retention_30d_percent": 45.2,
+      "pct_users_with_min_10_movies": 32.8,
+      "pct_users_used_ai": 18.5,
+      "pct_users_added_ai_movies": 12.3,
+      "avg_movies_per_user": 8.5,
+      "retention_timeseries": [
+        {"date": "2025-01-01", "retention_7d": 60.0, "retention_30d": 40.0},
+        {"date": "2025-01-02", "retention_7d": 62.5, "retention_30d": 41.2}
+      ],
+      "new_users_timeseries": [
+        {"date": "2025-01-01", "count": 12},
+        {"date": "2025-01-02", "count": 15}
+      ],
+      "last_updated_at": "2025-01-15T10:30:00Z"
+    }
+    ```
+-   **Error Responses**:
+    -   `401 Unauthorized`: Missing or invalid authentication.
+    -   `403 Forbidden`: User does not have staff permissions.
+
+#### `GET /admin/analytics/api/top-movies/`
+
+-   **Description**: Retrieves top 10 movies by watchlist or watched count, with optional filtering by time range.
+-   **Authentication**: Required (JWT with staff permissions).
+-   **Query Parameters**:
+    -   `type` (string, required): `watchlist` or `watched`.
+    -   `range` (string, required): `7d` (last 7 days), `30d` (last 30 days), or `all` (all time).
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "type": "watchlist",
+      "range": "7d",
+      "items": [
+        {
+          "tconst": "tt0816692",
+          "primary_title": "Interstellar",
+          "start_year": 2014,
+          "count": 45
+        }
+      ]
+    }
+    ```
+-   **Error Responses**:
+    -   `400 Bad Request`: Missing or invalid `type` or `range` parameters.
+    -   `401 Unauthorized`: Missing or invalid authentication.
+    -   `403 Forbidden`: User does not have staff permissions.
+
+#### `GET /admin/analytics/api/top-movies/export.csv`
+
+-   **Description**: Exports top movies data as CSV file. Respects the same query parameters as `GET /admin/analytics/api/top-movies/`.
+-   **Authentication**: Required (JWT with staff permissions).
+-   **Query Parameters**: Same as `GET /admin/analytics/api/top-movies/`.
+-   **Success Response** (200 OK): CSV file with headers: `tconst`, `primary_title`, `start_year`, `count`.
+-   **Error Responses**: Same as `GET /admin/analytics/api/top-movies/`.
+
+#### `GET /admin/analytics/api/error-logs/`
+
+-   **Description**: Retrieves paginated integration error logs with optional filtering and sorting.
+-   **Authentication**: Required (JWT with staff permissions).
+-   **Query Parameters**:
+    -   `page` (integer, optional): Page number (default: 1).
+    -   `page_size` (integer, optional): Number of items per page (default: 50, max: 100).
+    -   `sort` (string, optional): Sort order. Use `-occurred_at` for descending (default), `occurred_at` for ascending.
+    -   `api_type` (string, optional): Filter by API type (`tmdb`, `watchmode`, `gemini`). Can be specified multiple times.
+    -   `date_from` (string, optional): Filter logs from this date (ISO format: `YYYY-MM-DD`).
+    -   `date_to` (string, optional): Filter logs until this date (ISO format: `YYYY-MM-DD`).
+    -   `user_id` (string, optional): Filter by user UUID.
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "items": [
+        {
+          "id": 123,
+          "occurred_at": "2025-01-15T10:30:00Z",
+          "api_type": "tmdb",
+          "error_message": "Rate limit exceeded",
+          "user_id": "825a4a42-9fe2-4607-8a2f-53e4935cf271"
+        }
+      ],
+      "page": 1,
+      "page_size": 50,
+      "total": 1250,
+      "total_pages": 25
+    }
+    ```
+-   **Error Responses**:
+    -   `400 Bad Request`: Invalid query parameters (e.g., invalid date format, invalid sort value).
+    -   `401 Unauthorized**: Missing or invalid authentication.
+    -   `403 Forbidden`: User does not have staff permissions.
+
+#### `GET /admin/analytics/api/error-logs/export.csv`
+
+-   **Description**: Exports error logs data as CSV file. Respects the same query parameters as `GET /admin/analytics/api/error-logs/` (except pagination).
+-   **Authentication**: Required (JWT with staff permissions).
+-   **Query Parameters**: Same as `GET /admin/analytics/api/error-logs/` (filters and sorting), but pagination is ignored for export.
+-   **Success Response** (200 OK): CSV file with headers: `id`, `occurred_at`, `api_type`, `error_message`, `user_id`.
+-   **Error Responses**: Same as `GET /admin/analytics/api/error-logs/`.
+
 ## 4. Validation and Business Logic
 
 -   **Unique Movies**: The API will rely on the database's `unique("user_id", "tconst")` constraint and handle the resulting `IntegrityError` to prevent duplicate entries.
@@ -263,3 +383,5 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     -   **Watched movies**: Hard delete (`watched_at = NULL`) - irreversible operation. The movie is removed from watched history but can be re-added if it was previously on the watchlist.
     -   **Watchlist movies**: Soft delete (`watchlist_deleted_at = NOW()`) - reversible operation. The movie can be restored by adding it back to the watchlist.
 -   **AI Suggestion Tracking**: When adding movies via `POST /api/user-movies/`, the backend service accepts an optional `added_from_ai_suggestion` parameter to track which movies were added from AI suggestions for analytics and adoption metrics.
+-   **Staff Permissions**: Admin analytics endpoints (`/admin/analytics/api/*`) require staff permissions (`is_staff = TRUE`). The `is_staff` field is included in the user profile response (`GET /api/me/`) and is used by the frontend to conditionally display admin features. The field is read-only and cannot be modified via the API.
+-   **Admin Analytics Data**: Metrics are calculated in real-time from database queries. Timeseries data is generated on-demand for retention and user growth charts. Top movies rankings are calculated based on aggregation of `user_movie` table entries. Error logs are retrieved from the partitioned `integration_error_log` table with efficient filtering and pagination.
