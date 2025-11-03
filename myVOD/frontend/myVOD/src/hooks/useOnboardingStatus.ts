@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { getUserProfile } from "@/lib/api/auth";
 import { listUserMovies } from "@/lib/api/movies";
 import type { UserMovieDto, UserProfileDto } from "@/types/api.types";
@@ -35,6 +36,11 @@ export function getNextOnboardingPath(
     add: progress.hasWatchlistMovies,
     watched: progress.hasWatchedMovies,
   };
+
+  // Handle unknown fromStep - always start from the beginning
+  if (fromStep && ONBOARDING_SEQUENCE.findIndex((step) => step.key === fromStep) === -1) {
+    return ONBOARDING_SEQUENCE[0].path;
+  }
 
   const startIndex = fromStep
     ? ONBOARDING_SEQUENCE.findIndex((step) => step.key === fromStep) + 1
@@ -89,28 +95,32 @@ export function useOnboardingStatus() {
   const hasWatchlistMovies = watchlistMovies.length >= 3;
   const hasWatchedMovies = watchedMovies.length >= 3;
 
-  // Determine which step user should be on
+  // Determine which step user should be on (only when data is loaded)
   let requiredStep: string | null = null;
-  
-  if (!hasPlatforms) {
-    requiredStep = "/onboarding/platforms";
-  } else if (!hasWatchlistMovies) {
-    requiredStep = "/onboarding/add";
-  } else if (!hasWatchedMovies) {
-    requiredStep = "/onboarding/watched";
+
+  if (!isLoading) {
+    if (!hasPlatforms) {
+      requiredStep = "/onboarding/platforms";
+    } else if (!hasWatchlistMovies) {
+      requiredStep = "/onboarding/add";
+    } else if (!hasWatchedMovies) {
+      requiredStep = "/onboarding/watched";
+    }
   }
 
   const isOnboardingComplete = hasPlatforms && hasWatchlistMovies && hasWatchedMovies;
+
+  const progress = useMemo(() => ({
+    hasPlatforms,
+    hasWatchlistMovies,
+    hasWatchedMovies,
+  }), [hasPlatforms, hasWatchlistMovies, hasWatchedMovies]);
 
   return {
     isLoading,
     isOnboardingComplete,
     requiredStep,
-    progress: {
-      hasPlatforms,
-      hasWatchlistMovies,
-      hasWatchedMovies,
-    },
+    progress,
     profile,
     watchlistMovies,
     watchedMovies,

@@ -1194,6 +1194,8 @@ Sekcja 5: Growth
 7.1.4 Możliwość zalogowania jako mock user.
 - dla nowych użytkowników, by sprawdzić jak działa aplikacja dodana zostanie opcja "Zaloguj jako ..."
 - typy użytkowników: fan anime, fan kina akcji, romantyk, entyzjasta horrorów, fan komedii
+
+7.1.5 Reset hasła na stronie głównej. Forgot Password?
 ---
 
 Koniec dokumentu PRD
