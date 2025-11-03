@@ -18,7 +18,7 @@ import type { AddedMovieVM, SearchOptionVM } from "@/types/api.types";
 /**
  * Onboarding page for adding movies to watchlist.
  * Step 2 of 3 in the onboarding flow.
- * Allows users to search and add up to 3 movies to their watchlist.
+ * Allows users to search and add unlimited movies to their watchlist, but requires at least 3.
  */
 export function OnboardingAddPage() {
   const navigate = useNavigate();
@@ -33,8 +33,7 @@ export function OnboardingAddPage() {
   const { progress, watchlistMovies } = useOnboardingStatus();
   const queryClient = useQueryClient();
 
-  const MAX_MOVIES = 3;
-  const canAddMore = added.length < MAX_MOVIES;
+  const REQUIRED_MOVIES = 3;
 
   // Prefill with existing watchlist movies (if available)
   useEffect(() => {
@@ -47,7 +46,7 @@ export function OnboardingAddPage() {
     }
 
     const prefilled = watchlistMovies
-      .slice(0, MAX_MOVIES)
+      .slice(0, REQUIRED_MOVIES)
       .map<AddedMovieVM>((movie) => ({
         userMovieId: movie.id,
         tconst: movie.movie.tconst,
@@ -58,15 +57,15 @@ export function OnboardingAddPage() {
 
     setAdded(prefilled);
     setAddedSet(new Set(prefilled.map((movie) => movie.tconst)));
-    if (prefilled.length >= MAX_MOVIES) {
+    if (prefilled.length >= REQUIRED_MOVIES) {
       setValidationError(null);
     }
     hasPrefilledFromWatchlistRef.current = true;
-  }, [watchlistMovies, MAX_MOVIES]);
+  }, [watchlistMovies, REQUIRED_MOVIES]);
 
   const handleAddMovie = async (searchOption: SearchOptionVM) => {
-    // Prevent adding if already at limit or duplicate in session
-    if (!canAddMore || addedSet.has(searchOption.tconst)) {
+    // Prevent adding if duplicate in session
+    if (addedSet.has(searchOption.tconst)) {
       return;
     }
 
@@ -82,7 +81,7 @@ export function OnboardingAddPage() {
 
       setAdded(prev => {
         const updated = [...prev, tempAddedMovie];
-        if (updated.length >= MAX_MOVIES) {
+        if (updated.length >= REQUIRED_MOVIES) {
           setValidationError(null);
         }
         return updated;
@@ -183,8 +182,8 @@ export function OnboardingAddPage() {
   };
 
   const handleNext = () => {
-    if (added.length < MAX_MOVIES) {
-      setValidationError("Dodaj przynajmniej 3 filmy, aby przejść dalej.");
+    if (added.length < REQUIRED_MOVIES) {
+      setValidationError(`Dodaj przynajmniej ${REQUIRED_MOVIES} filmy, aby przejść dalej.`);
       errorSectionRef.current?.focus();
       return;
     }
@@ -198,11 +197,11 @@ export function OnboardingAddPage() {
   );
 
   return (
-    <OnboardingLayout title="Dodaj pierwsze 3 filmy do watchlisty" headerActions={headerActions}>
+    <OnboardingLayout title="Dodaj filmy do watchlisty" headerActions={headerActions}>
       <ProgressBar current={2} total={3} />
 
       <OnboardingHeader
-        title="Dodaj pierwsze 3 filmy do watchlisty"
+        title="Dodaj przynajmniej 3 filmy do watchlisty"
         hint="Wyszukaj filmy i dodaj je do swojej watchlisty, aby rozpocząć"
       />
 
@@ -210,7 +209,6 @@ export function OnboardingAddPage() {
         {/* Movie search combobox */}
         <div className="max-w-md mx-auto">
           <MovieSearchCombobox
-            maxSelectable={MAX_MOVIES}
             disabledTconsts={addedSet}
             onSelectOption={handleAddMovie}
           />

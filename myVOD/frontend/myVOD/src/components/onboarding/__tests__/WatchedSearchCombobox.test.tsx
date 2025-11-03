@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@/test/utils';
+import { render, screen, fireEvent, act, waitFor } from '@/test/utils';
 import { WatchedSearchCombobox } from '../WatchedSearchCombobox';
 import { useMovieSearch } from '@/hooks/useMovieSearch';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -241,7 +241,7 @@ describe('WatchedSearchCombobox', () => {
     expect(onPick).toHaveBeenCalledWith(mockSearchOption);
   });
 
-  it('should clear input after picking', () => {
+  it('should keep search results visible after picking', () => {
     const onChange = vi.fn();
     const onPick = vi.fn();
     mockUseMovieSearch.mockReturnValue({
@@ -262,7 +262,10 @@ describe('WatchedSearchCombobox', () => {
     const resultItem = screen.getByText('The Shawshank Redemption');
     fireEvent.click(resultItem);
 
-    expect(onChange).toHaveBeenCalledWith('');
+    // Search results should remain visible after adding a movie
+    // onChange should not be called with empty string
+    expect(onChange).not.toHaveBeenCalledWith('');
+    expect(onPick).toHaveBeenCalledWith(mockSearchOption);
   });
 
   it('should disable already selected movies', () => {

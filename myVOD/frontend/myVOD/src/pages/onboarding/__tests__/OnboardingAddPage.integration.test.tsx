@@ -117,7 +117,7 @@ describe('OnboardingAddPage Integration Tests', () => {
 
     // Check main title in header
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 2, name: 'Dodaj pierwsze 3 filmy do watchlisty' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 2, name: 'Dodaj przynajmniej 3 filmy do watchlisty' })).toBeInTheDocument();
     });
 
     // Check step indicator

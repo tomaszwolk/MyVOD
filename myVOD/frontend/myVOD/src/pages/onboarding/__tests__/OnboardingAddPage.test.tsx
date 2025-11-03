@@ -85,18 +85,11 @@ describe('OnboardingAddPage', () => {
     expect(screen.getByTestId('onboarding-footer-nav')).toBeInTheDocument();
   });
 
-  it('should pass maxSelectable=3 to MovieSearchCombobox', () => {
-    render(<OnboardingAddPage />, { wrapper: createWrapper() });
-
-    const combobox = screen.getByTestId('movie-search-combobox');
-    expect(combobox).toHaveAttribute('data-max-selectable', '3');
-  });
-
   it('should display correct title and progress', () => {
     render(<OnboardingAddPage />, { wrapper: createWrapper() });
 
     const layout = screen.getByTestId('onboarding-layout');
-    expect(layout).toHaveAttribute('data-title', 'Dodaj pierwsze 3 filmy do watchlisty');
+    expect(layout).toHaveAttribute('data-title', 'Dodaj filmy do watchlisty');
 
     const progressBar = screen.getByTestId('progress-bar');
     expect(progressBar).toHaveAttribute('data-current', '2');

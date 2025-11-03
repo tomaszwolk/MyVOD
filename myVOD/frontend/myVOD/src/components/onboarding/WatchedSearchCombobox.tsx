@@ -89,9 +89,8 @@ export function WatchedSearchCombobox({
     if (disabled || selectedTconsts.has(movie.tconst)) return;
 
     onPick(movie);
-    onChange("");
-    setIsOpen(false);
-    setActiveIndex(-1);
+    // Keep search results visible after adding a movie to allow adding multiple movies
+    // Don't clear query, close popover, or reset active index
   };
 
   const activeId = activeIndex >= 0 ? `result-${results[activeIndex]?.tconst}` : undefined;

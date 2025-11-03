@@ -12,7 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 /**
  * Onboarding page for marking movies as watched.
  * Step 3 of 3 in the onboarding flow.
- * Allows users to search and mark 0-3 movies as watched.
+ * Allows users to search and mark unlimited movies as watched, but requires at least 3.
  * Both Skip and Finish buttons are always enabled.
  */
 export function OnboardingWatchedPage() {
@@ -20,7 +20,7 @@ export function OnboardingWatchedPage() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const errorSectionRef = useRef<HTMLDivElement>(null);
 
-  const canAddMore = viewModel.selected.length < viewModel.maxSelected;
+  const hasMinimumMovies = viewModel.selected.length >= viewModel.requiredSelected;
   const selectedTconsts = new Set(viewModel.selected.map(item => item.tconst));
 
   const handleSkip = () => {
@@ -29,8 +29,8 @@ export function OnboardingWatchedPage() {
   };
 
   const handleNext = () => {
-    if (viewModel.selected.length < viewModel.maxSelected) {
-      setValidationError("Oznacz 3 filmy jako obejrzane, aby zakończyć onboarding.");
+    if (viewModel.selected.length < viewModel.requiredSelected) {
+      setValidationError(`Oznacz przynajmniej ${viewModel.requiredSelected} filmy jako obejrzane, aby zakończyć onboarding.`);
       errorSectionRef.current?.focus();
       return;
     }
@@ -43,13 +43,21 @@ export function OnboardingWatchedPage() {
     <ThemeToggle key="theme-toggle" />
   );
 
+  const title = hasMinimumMovies
+    ? "Idź dalej lub dodaj kolejne filmy"
+    : "Oznacz przynajmniej 3 filmy które już widziałeś";
+
+  const hint = hasMinimumMovies
+    ? "Możesz dodać więcej filmów lub przejść dalej"
+    : "Wyszukaj i oznacz filmy które oglądałeś, aby dostosować rekomendacje";
+
   return (
     <OnboardingLayout title="Oznacz filmy które już widziałeś" headerActions={headerActions}>
       <ProgressBar current={3} total={3} />
 
       <OnboardingHeader
-        title="Oznacz 3 filmy które już widziałeś"
-        hint="Wyszukaj i oznacz filmy które oglądałeś, aby dostosować rekomendacje"
+        title={title}
+        hint={hint}
       />
 
       <div className="space-y-8">
@@ -59,7 +67,7 @@ export function OnboardingWatchedPage() {
             value={viewModel.query}
             onChange={setQuery}
             onPick={pick}
-            disabled={!canAddMore || viewModel.isSubmitting}
+            disabled={viewModel.isSubmitting}
             selectedTconsts={selectedTconsts}
           />
         </div>
@@ -68,7 +76,7 @@ export function OnboardingWatchedPage() {
         <div className="max-w-lg mx-auto">
           <SelectedMoviesList
             items={viewModel.selected}
-            maxItems={viewModel.maxSelected}
+            maxItems={viewModel.requiredSelected}
             onUndo={undo}
           />
         </div>

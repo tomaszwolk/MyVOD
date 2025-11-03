@@ -11,7 +11,6 @@ import { Loader2 } from "lucide-react";
  * Props for MovieSearchCombobox component.
  */
 type MovieSearchComboboxProps = {
-  maxSelectable: number;
   disabledTconsts: Set<string>;
   onSelectOption: (item: SearchOptionVM) => void;
 };
@@ -86,9 +85,8 @@ export function MovieSearchCombobox({
     if (disabledTconsts.has(item.tconst)) return;
 
     onSelectOption(item);
-    setQuery("");
-    setIsOpen(false);
-    setActiveIndex(-1);
+    // Keep search results visible after adding a movie to allow adding multiple movies
+    // Don't clear query, close popover, or reset active index
   };
 
   const activeId = activeIndex >= 0 ? `result-${results[activeIndex]?.tconst}` : undefined;

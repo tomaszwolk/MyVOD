@@ -151,7 +151,7 @@ describe('useOnboardingWatchedController', () => {
       expect(result.current.viewModel.query).toBe('');
       expect(result.current.viewModel.isSubmitting).toBe(false);
       expect(result.current.viewModel.selected).toEqual([]);
-      expect(result.current.viewModel.maxSelected).toBe(3);
+      expect(result.current.viewModel.requiredSelected).toBe(3);
     });
 
     it('should prefill with existing watched movies', () => {
@@ -269,8 +269,8 @@ describe('useOnboardingWatchedController', () => {
   });
 
   describe('pick() - guards', () => {
-    it('should not add movie if limit reached (3/3)', async () => {
-      // Add 3 movies first
+    it('should allow adding more than 3 movies', async () => {
+      // Add 4 movies
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null,
@@ -282,20 +282,16 @@ describe('useOnboardingWatchedController', () => {
         wrapper: Wrapper,
       });
 
-      // Add 3 movies
+      // Add 4 movies
       await act(async () => {
         await result.current.pick({ ...mockMovie, tconst: 'tt001' });
         await result.current.pick({ ...mockMovie, tconst: 'tt002' });
         await result.current.pick({ ...mockMovie, tconst: 'tt003' });
-      });
-
-      // Try to add 4th movie - should show toast and not add
-      await act(async () => {
         await result.current.pick({ ...mockMovie, tconst: 'tt004' });
       });
 
-      expect(result.current.viewModel.selected).toHaveLength(3);
-      expect(mockToast.info).toHaveBeenCalledWith('Możesz oznaczyć maksymalnie 3 filmy');
+      expect(result.current.viewModel.selected).toHaveLength(4);
+      expect(mockToast.info).not.toHaveBeenCalledWith('Możesz oznaczyć maksymalnie 3 filmy');
     });
 
     it('should not add duplicate movie', async () => {

@@ -37,7 +37,7 @@ export type OnboardingSelectedItem = {
 export type OnboardingWatchedViewModel = {
   query: string;
   isSubmitting: boolean; // Global lock during navigation/finish
-  selected: OnboardingSelectedItem[]; // Max 3
-  maxSelected: number; // Always 3 for MVP
+  selected: OnboardingSelectedItem[]; // At least 3 required
+  requiredSelected: number; // Always 3 for MVP
 };
 

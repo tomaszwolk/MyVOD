@@ -387,7 +387,7 @@ describe('MovieSearchCombobox', () => {
     });
   });
 
-  it('should clear input after picking', async () => {
+  it('should keep search results visible after picking', async () => {
     const mockResults = [
       { tconst: 'tt0111161', primaryTitle: 'Movie 1', startYear: 1994, avgRating: '9.3', posterUrl: '/poster.jpg' },
     ];
@@ -414,7 +414,9 @@ describe('MovieSearchCombobox', () => {
       fireEvent.click(resultItem);
     });
 
-    expect(input).toHaveValue('');
+    // Search results should remain visible after adding a movie
+    expect(input).toHaveValue('mo');
+    expect(screen.getByRole('option')).toBeInTheDocument();
   });
 
   it('should call onChange when typing', () => {

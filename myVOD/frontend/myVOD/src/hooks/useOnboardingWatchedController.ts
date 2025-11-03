@@ -23,7 +23,7 @@ import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardin
  */
 export function useOnboardingWatchedController() {
   const navigate = useNavigate();
-  const MAX_SELECTED = 3;
+  const REQUIRED_SELECTED = 3;
 
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
@@ -52,7 +52,7 @@ export function useOnboardingWatchedController() {
     }
 
     const prefilledItems = watchedMovies
-      .slice(0, MAX_SELECTED)
+      .slice(0, REQUIRED_SELECTED)
       .map<OnboardingSelectedItem>((movie) => ({
         tconst: movie.movie.tconst,
         primary_title: movie.movie.primary_title,
@@ -65,7 +65,7 @@ export function useOnboardingWatchedController() {
 
     setSelected(prefilledItems);
     hasPrefilledFromWatchedRef.current = true;
-  }, [watchedMovies, MAX_SELECTED]);
+  }, [watchedMovies, REQUIRED_SELECTED]);
 
   // Mutation for patching user movie
   const patchUserMovieMutation = useMutation({
@@ -89,12 +89,6 @@ export function useOnboardingWatchedController() {
    * Handles the complex flow: POST → (409→lookup) → PATCH
    */
   const pick = async (movie: SearchOptionVM) => {
-    // Guard: check if already at limit
-    if (selected.length >= MAX_SELECTED) {
-      toast.info(`Możesz oznaczyć maksymalnie ${MAX_SELECTED} filmy`);
-      return;
-    }
-
     // Guard: check if already selected in this session
     if (selected.some(item => item.tconst === movie.tconst)) {
       toast.info("Ten film został już wybrany");
@@ -268,7 +262,7 @@ export function useOnboardingWatchedController() {
     query,
     isSubmitting,
     selected,
-    maxSelected: MAX_SELECTED,
+    requiredSelected: REQUIRED_SELECTED,
   };
 
   return {

@@ -92,7 +92,7 @@ const mockViewModel = {
   query: '',
   isSubmitting: false,
   selected: [] as OnboardingSelectedItem[],
-  maxSelected: 3,
+  requiredSelected: 3,
 };
 
 const mockController = {
@@ -133,11 +133,11 @@ describe('OnboardingWatchedPage', () => {
     expect(screen.getByTestId('progress-bar')).toHaveAttribute('data-total', '3');
 
     // Check header content
-    expect(screen.getByText('Oznacz 3 filmy które już widziałeś')).toBeInTheDocument();
+    expect(screen.getByText('Oznacz przynajmniej 3 filmy które już widziałeś')).toBeInTheDocument();
     expect(screen.getByText('Wyszukaj i oznacz filmy które oglądałeś, aby dostosować rekomendacje')).toBeInTheDocument();
   });
 
-  it('should disable search when 3/3 movies selected', () => {
+  it('should keep search enabled when 3 movies selected', () => {
     const selectedMovies: OnboardingSelectedItem[] = [
       {
         tconst: 'tt0111161',
@@ -173,7 +173,7 @@ describe('OnboardingWatchedPage', () => {
     render(<OnboardingWatchedPage />);
 
     const searchCombobox = screen.getByTestId('watched-search-combobox');
-    expect(searchCombobox).toHaveAttribute('data-disabled', 'true');
+    expect(searchCombobox).toHaveAttribute('data-disabled', 'false');
   });
 
   it('should call controller.pick when movie selected', () => {
@@ -282,7 +282,7 @@ describe('OnboardingWatchedPage', () => {
 
     // Check that validation error is shown
     expect(screen.getByText('Brakuje filmów')).toBeInTheDocument();
-    expect(screen.getByText('Oznacz 3 filmy jako obejrzane, aby zakończyć onboarding.')).toBeInTheDocument();
+    expect(screen.getByText('Oznacz przynajmniej 3 filmy jako obejrzane, aby zakończyć onboarding.')).toBeInTheDocument();
 
     // Check that controller.finish was NOT called
     expect(mockController.finish).not.toHaveBeenCalled();
