@@ -3,5 +3,6 @@
 .env
 IMDB_data_set/*
 __pycache__/*
+__pycache__/
 .VSCodeCounter
 */__pycache__
