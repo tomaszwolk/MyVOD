@@ -114,20 +114,32 @@ WSGI_APPLICATION = "myVOD.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Tymczasowa konfiguracja bazy danych do pracy lokalnej
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': os.getenv('SUPABASE_DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
-        'HOST': os.getenv('SUPABASE_DB_HOST'),
-        'PORT': os.getenv('SUPABASE_DB_PORT'),
-        'TEST': {
-            'MIRROR': 'default',
+if os.getenv('USE_E2E_TEST_DATABASE') == 'true':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('SUPABASE_DB_NAME', 'postgres'),
+            'USER': os.getenv('SUPABASE_DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
+            'HOST': os.getenv('SUPABASE_DB_HOST'),
+            'PORT': os.getenv('SUPABASE_DB_PORT'),
         }
     }
-}
+else:
+    # Tymczasowa konfiguracja bazy danych do pracy lokalnej
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': os.getenv('SUPABASE_DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
+            'HOST': os.getenv('SUPABASE_DB_HOST'),
+            'PORT': os.getenv('SUPABASE_DB_PORT'),
+            'TEST': {
+                'MIRROR': 'default',
+            }
+        }
+    }
 
 
 # Password validation

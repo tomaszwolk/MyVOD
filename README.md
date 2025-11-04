@@ -44,7 +44,10 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
 - Tooling & DevOps
   - Python 3.12+ with [uv](https://github.com/astral-sh/uv)
   - Linting/formatting with Ruff (planned)
-  - Testing: pytest (+ pytest-django)
+  - Testing: 
+    - Backend (Unit/Integration): pytest (+ pytest-django)
+    - Frontend (Unit/Component): Vitest, React Testing Library (planned)
+    - E2E: Playwright (planned)
   - Containerization: Docker + Docker Compose (planned)
   - CI/CD: GitHub Actions (planned)
   - Hosting: DigitalOcean + Nginx (planned)

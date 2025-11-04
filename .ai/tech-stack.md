@@ -89,10 +89,10 @@
 - **Import sorting**: `ruff` (built-in)
 
 ### Testing:
-- **Backend**: `pytest` + `pytest-django`
-- **Coverage**: `coverage.py` + `pytest-cov`
-- **Frontend**: `Vitest` + `React Testing Library`
+- **Backend (Unit & Integration)**: `pytest` + `pytest-django`
+- **Frontend (Unit & Component)**: `Vitest` + `React Testing Library`, `axios-mock-adapter`
 - **E2E**: `Playwright` (opcjonalnie dla MVP)
+- **Coverage**: `pytest-cov` (backend), `Vitest Coverage` (frontend)
 
 ---
 

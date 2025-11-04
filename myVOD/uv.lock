@@ -1001,6 +1001,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "celery" },
+    { name = "coverage" },
     { name = "dj-database-url" },
     { name = "django" },
     { name = "django-celery-beat" },
@@ -1031,6 +1032,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "celery", specifier = ">=5.5.3" },
+    { name = "coverage", specifier = ">=7.10.7" },
     { name = "dj-database-url", specifier = ">=3.0.1" },
     { name = "django", specifier = ">=5.2.7" },
     { name = "django-celery-beat", specifier = ">=2.8.1" },
