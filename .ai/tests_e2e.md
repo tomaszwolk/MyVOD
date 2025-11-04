@@ -46,9 +46,68 @@ Aby zapewnić czytelność i łatwość utrzymania testów, należy stosować wz
 
 ### **1.3. Zarządzanie Stanem Bazy Danych i Konfiguracja**
 
-**Kluczowe jest zapewnienie izolacji i spójności danych testowych.**
+**Kluczowe jest zapewnienie izolacji i spójności danych testowych.** Poniższa procedura opisuje, jak skonfigurować dedykowaną, testową bazę danych na Supabase od zera.
 
--   **Konfiguracja Bazy Testowej:** Wszystkie testy E2E muszą być uruchamiane na dedykowanej, testowej bazie danych Supabase. Należy upewnić się, że konfiguracja połączenia (np. `DATABASE_URL`) jest wczytywana z pliku `.env.tests`, aby uniknąć przypadkowego działania na danych produkcyjnych.
+#### **Krok 1: Utworzenie Bazy Testowej w Supabase**
+
+1.  Zaloguj się na swoje konto [Supabase](https://app.supabase.com).
+2.  Utwórz nowy, pusty projekt, który będzie przeznaczony wyłącznie do testów E2E.
+3.  **Ważne:** W wersji darmowej Supabase nie oferuje łatwych backupów. Jeśli baza testowa ulegnie uszkodzeniu lub będzie wymagała "wyczyszczenia", najprostszą metodą jest jej usunięcie i stworzenie nowej.
+
+#### **Krok 2: Konfiguracja Pliku `.env.tests`**
+
+W katalogu `myVOD/frontend/myVOD/` znajduje się plik `.env.tests`, który przechowuje dane dostępowe do bazy testowej. Po utworzeniu nowego projektu w Supabase, należy go uzupełnić.
+
+1.  W panelu Supabase przejdź do `Project Settings` (ikona zębatki) -> `Database`.
+2.  W sekcji `Connection info` znajdziesz wszystkie potrzebne dane. Skopiuj je do pliku `.env.tests`.
+
+**Struktura pliku `.env.tests`:**
+```env
+# Wartości należy umieścić w cudzysłowie
+SUPABASE_DB_HOST="db.<ID-PROJEKTU>.supabase.co"
+SUPABASE_DB_PORT="5432" # Używaj portu 5432 do bezpośredniego połączenia
+SUPABASE_DB_USER="postgres.<ID-PROJEKTU>"
+SUPABASE_DB_PASSWORD="<TWOJE-HASŁO-DO-BAZY>"
+SUPABASE_DB_NAME="postgres"
+```
+
+#### **Krok 3: Wgranie Początkowego Schematu Bazy (Migracje Supabase)**
+
+Projekt wykorzystuje natywne migracje SQL Supabase do zdefiniowania podstawowego schematu bazy danych. Pliki te znajdują się w `myVOD/supabase/migrations`. Muszą one zostać zastosowane na czystej bazie **przed** migracjami Django.
+
+Masz dwie możliwości, aby to zrobić:
+
+**Opcja A (Zalecana): Użycie Supabase CLI**
+1.  Zainstaluj i skonfiguruj [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started).
+2.  Z głównego katalogu projektu uruchom komendę, podając pełny connection string do Twojej nowej bazy testowej:
+    ```bash
+    supabase db push --db-url "postgresql://postgres.<ID>:[HASŁO]@db.<ID>.supabase.co:5432/postgres"
+    ```
+
+**Opcja B (Ręczna): Użycie SQL Editora**
+1.  W panelu Supabase przejdź do `SQL Editor`.
+2.  Otwórz każdy z trzech plików migracji z folderu `myVOD/supabase/migrations`.
+3.  Skopiuj zawartość każdego pliku i wklej ją do edytora SQL, a następnie uruchom (`Run`).
+4.  **Ważne:** Zachowaj odpowiednią kolejność, zgodną z datami w nazwach plików (od najstarszej do najnowszej).
+
+#### **Krok 4: Synchronizacja Bazy z Django (Migracje Django)**
+
+Gdy schemat bazy został już utworzony przez Supabase, musimy poinformować o tym Django, aby zsynchronizowało z nim swój wewnętrzny stan.
+
+1.  **"Sfałszuj" pierwszą migrację:** Migracja `0001_initial.py` w aplikacji `movies` próbuje stworzyć tabele, które już istnieją. Użyjemy flagi `--fake`, aby Django jedynie "oznaczyło" ją jako wykonaną, bez próby jej uruchamiania.
+    ```bash
+    # Będąc w katalogu myVOD/frontend/myVOD/
+    cd ../../backend/myVOD && npx dotenv-cli -e ../../frontend/myVOD/.env.tests -- python manage.py migrate movies 0001 --fake
+    ```
+
+2.  **Uruchom pozostałe migracje:** Po sfałszowaniu problematycznej migracji, uruchom standardową komendę, aby Django mogło zająć się resztą (np. tabelami dla aplikacji `auth`, `sessions` itd.).
+    ```bash
+    # Będąc w katalogu myVOD/backend/myVOD/
+    npx dotenv-cli -e ../../frontend/myVOD/.env.tests -- python manage.py migrate
+    ```
+    *Dla ułatwienia, oba te kroki można zautomatyzować w jednym skrypcie w `package.json`.*
+
+Po wykonaniu tych czterech kroków, Twoja baza testowa jest w pełni skonfigurowana i gotowa do pracy z Playwright.
 
 -   **Czyszczenie Danych po Testach:** Po zakończeniu całej suity testowej, baza danych musi zostać przywrócona do stanu początkowego. Należy zaimplementować globalny mechanizm `teardown` (określony jako `@E2E_teardown`), który usunie wszystkie dane utworzone podczas testów (użytkowników, watchlisty itp.).
 
