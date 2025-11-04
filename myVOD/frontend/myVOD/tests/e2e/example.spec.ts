@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
+test('has correct page title', async ({ page }) => {
+  // 1. Navigate to the home page.
   await page.goto('/');
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Vite \+ React \+ TS/);
+  // 2. Assert that the page has the correct title.
+  await expect(page).toHaveTitle(/myvod/);
 });

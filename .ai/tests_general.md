@@ -61,7 +61,8 @@ Proces testowania zostanie podzielony na następujące typy:
     *   Przeprowadzenie manualnych testów kluczowych ścieżek użytkownika (happy paths) w celu weryfikacji poprawnego działania całej aplikacji w zintegrowanym środowisku. Obejmuje to proces od rejestracji, przez onboarding, aż po korzystanie z głównych funkcji.
 
 *   **Zautomatyzowane Testy E2E (Playwright):**
-    *   Zautomatyzowane testy symulujące pełne ścieżki użytkownika w przeglądarce. Będą weryfikować kluczowe przepływy, takie jak rejestracja, onboarding i dodawanie filmu do watchlisty, od interfejsu użytkownika aż po bazę danych. Zakres tych testów zostanie rozszerzony w miarę rozwoju projektu.
+    *   Zautomatyzowane testy symulujące pełne ścieżki użytkownika w przeglądarce. Będą weryfikować kluczowe przepływy, takie jak rejestracja, onboarding i dodawanie filmu do watchlisty, od interfejsu użytkownika aż po bazę danych.
+    *   **Szczegółowe scenariusze, wytyczne implementacyjne oraz lista wymaganych selektorów `data-testid` znajdują się w dedykowanym dokumencie: `.ai/tests_e2e.md`**.
 
 *   **Testy bezpieczeństwa:**
     *   **IDOR (Insecure Direct Object Reference):** Weryfikacja, czy użytkownik A nie może uzyskać dostępu ani modyfikować danych użytkownika B poprzez manipulację identyfikatorami w URL-ach lub ciałach zapytań.
