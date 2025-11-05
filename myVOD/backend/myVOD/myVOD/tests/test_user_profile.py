@@ -191,8 +191,8 @@ class UserProfileGetAPITests(APITestCase):
         # Should return 401 Unauthorized
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_get_user_profile_only_accepts_get_and_patch(self):
-        """Test that endpoint only accepts GET and PATCH methods."""
+    def test_get_user_profile_only_accepts_get_patch_and_delete(self):
+        """Test that endpoint only accepts GET, PATCH and DELETE methods."""
         url = reverse('user-profile')
         self.client.force_authenticate(user=self.user)
 
@@ -204,8 +204,8 @@ class UserProfileGetAPITests(APITestCase):
         response = self.client.put(url, {})
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-        # DELETE should not be allowed
-        response = self.client.delete(url)
+        # TRACE should not be allowed
+        response = self.client.trace(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_get_user_profile_database_error(self):
