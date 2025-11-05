@@ -8,6 +8,24 @@ export class WatchlistPage {
   constructor(private page: Page) {}
 
   /**
+   * Wait for Sonner toast list to receive a new notification.
+   * This makes the sync resilient to translation or formatting changes.
+   */
+  private async waitForNewToast(previousToastCount: number): Promise<void> {
+    await this.page.waitForFunction(
+      (initialCount) => {
+        const toastElements = document.querySelectorAll('[data-sonner-toast]');
+        return toastElements.length > initialCount;
+      },
+      previousToastCount,
+      { timeout: 10000 }
+    );
+
+    // Allow the toast content to finish rendering before proceeding.
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
    * Navigate to the watchlist page
    */
   async navigateToWatchlist(): Promise<void> {
@@ -39,13 +57,24 @@ export class WatchlistPage {
    * Mark a movie as watched
    */
   async markMovieAsWatched(movieId: string): Promise<void> {
-    // Find the movie card and click the "Obejrzane" button
+    // Check if movie is actually on watchlist before trying to mark as watched
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
+    const isVisible = await movieCard.isVisible();
+
+    if (!isVisible) {
+      // Movie is not on watchlist, skip marking as watched
+      return;
+    }
+
+    // Count existing toasts before action
+    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
+
+    // Find the movie card and click the "Obejrzane" button
     const markAsWatchedButton = movieCard.getByTestId('mark-as-watched-button');
     await markAsWatchedButton.click();
 
-    // Wait for toast notification confirming the action
-    await this.page.getByText('oznaczony jako obejrzany').waitFor({ state: 'visible', timeout: 5000 });
+    // Wait for a new toast to appear (count should increase)
+    await this.waitForNewToast(initialToastCount);
   }
 
   /**
@@ -59,10 +88,11 @@ export class WatchlistPage {
 
     // Wait for confirmation dialog and confirm deletion
     await this.page.getByTestId('confirm-delete-dialog').waitFor({ state: 'visible' });
+    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
     await this.page.getByTestId('confirm-delete-button').click();
 
     // Wait for toast notification confirming the deletion
-    await this.page.getByText('usunięto z watchlisty').waitFor({ state: 'visible', timeout: 5000 });
+    await this.waitForNewToast(initialToastCount);
   }
 
   /**

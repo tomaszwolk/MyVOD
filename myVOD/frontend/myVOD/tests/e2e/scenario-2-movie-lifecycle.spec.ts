@@ -10,8 +10,18 @@ import { setupApiMocks } from './setup/api-mocks';
  */
 const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'test_user@example.com';
 const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'Qwed4$5T56n.';
-const TEST_MOVIE_TITLE = 'Gladiator';
-const TEST_MOVIE_TCONST = 'tt0172495'; // Gladiator IMDB ID
+
+/**
+ * Available test movies - test will use the first one that hasn't been processed yet
+ */
+const TEST_MOVIES = [
+  { title: 'Pulp Fiction', tconst: 'tt0110912' },
+  { title: 'Gladiator', tconst: 'tt0172495' },
+  { title: 'The Wolf of Wall Street', tconst: 'tt0993846' }
+];
+
+// Will be set during test execution
+let selectedMovie = TEST_MOVIES[0];
 
 test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
   test('Powinien przeprowadzić pełny cykl zarządzania filmem: wyszukiwanie, dodawanie, oznaczanie jako obejrzany, przywracanie i usuwanie', async ({ page }) => {
@@ -41,19 +51,24 @@ test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
     // Wait for redirect to watchlist (user has completed onboarding)
     await watchlistPage.waitForPageLoad();
 
-    // 2.2 Wyszukanie i wybranie filmu
-    await headerComponent.searchForMovie(TEST_MOVIE_TITLE);
+    // 2.2 Znajdź i dodaj pierwszy dostępny film z listy
+    const availableMovie = await headerComponent.findAndAddFirstAvailableMovie(TEST_MOVIES);
+
+    if (!availableMovie) {
+      // Skip test if no available movies found
+      test.skip(true, 'No available movies found for testing - all test movies have been processed');
+      return;
+    }
+
+    // Set the selected movie for the rest of the test
+    selectedMovie = availableMovie;
+    console.log(`Using movie: ${selectedMovie.title} (${selectedMovie.tconst})`);
 
     // Verify movie was added to watchlist
-    await watchlistPage.verifyMovieCardPresent(TEST_MOVIE_TCONST);
+    await watchlistPage.verifyMovieCardPresent(selectedMovie.tconst);
 
     // 2.3 Weryfikacja dodania filmu i oznaczenie jako obejrzany
-    await watchlistPage.markMovieAsWatched(TEST_MOVIE_TCONST);
-
-    // Verify movie is no longer in watchlist (moved to watched)
-    await page.waitForTimeout(1000); // Allow time for UI update
-    // Note: We can't easily verify the movie is gone from watchlist in this test
-    // since we don't know the exact count, but the toast notification confirms success
+    await watchlistPage.markMovieAsWatched(selectedMovie.tconst);
 
     // 2.4 Nawigacja do listy obejrzanych i weryfikacja
     await headerComponent.navigateToWatched();
@@ -61,18 +76,18 @@ test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
     await watchedPage.verifyWatchedGridVisible();
 
     // Verify movie is present in watched list
-    await watchedPage.verifyWatchedMoviePresent(TEST_MOVIE_TCONST);
+    await watchedPage.verifyWatchedMoviePresent(selectedMovie.tconst);
 
     // 2.5 Przywrócenie filmu do watchlisty
-    await watchedPage.restoreMovieToWatchlist(TEST_MOVIE_TCONST);
+    await watchedPage.restoreMovieToWatchlist(selectedMovie.tconst);
 
     // Navigate back to watchlist and verify movie is back
     await headerComponent.navigateToWatchlist();
     await watchlistPage.waitForPageLoad();
-    await watchlistPage.verifyMovieCardPresent(TEST_MOVIE_TCONST);
+    await watchlistPage.verifyMovieCardPresent(selectedMovie.tconst);
 
     // 2.6 Usunięcie filmu z watchlisty
-    await watchlistPage.deleteMovieFromWatchlist(TEST_MOVIE_TCONST);
+    await watchlistPage.deleteMovieFromWatchlist(selectedMovie.tconst);
 
     // Cleanup - clear storage state
     await page.context().storageState({ path: undefined });

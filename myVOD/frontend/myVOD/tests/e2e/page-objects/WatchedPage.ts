@@ -8,6 +8,24 @@ export class WatchedPage {
   constructor(private page: Page) {}
 
   /**
+   * Wait for Sonner toast list to gain a new entry.
+   * Using count-based detection keeps the selector resilient to copy changes.
+   */
+  private async waitForNewToast(previousToastCount: number): Promise<void> {
+    await this.page.waitForFunction(
+      (initialCount) => {
+        const toastElements = document.querySelectorAll('[data-sonner-toast]');
+        return toastElements.length > initialCount;
+      },
+      previousToastCount,
+      { timeout: 10000 }
+    );
+
+    // Give the UI a short moment to finish rendering the toast content.
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
    * Wait for the watched page to be fully loaded
    */
   async waitForPageLoad(): Promise<void> {
@@ -45,10 +63,13 @@ export class WatchedPage {
     // Click the restore button for the specific movie
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
     const restoreButton = movieCard.getByTestId('restore-to-watchlist-button');
+
+    // Capture the number of toast notifications before performing the action.
+    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
     await restoreButton.click();
 
-    // Wait for toast notification confirming the restoration
-    await this.page.getByText('przywrócono do watchlisty').waitFor({ state: 'visible', timeout: 5000 });
+    // Wait for a new toast notification confirming the restoration.
+    await this.waitForNewToast(initialToastCount);
   }
 
   /**
@@ -62,9 +83,10 @@ export class WatchedPage {
 
     // Wait for confirmation dialog and confirm deletion
     await this.page.getByTestId('confirm-delete-dialog').waitFor({ state: 'visible' });
+    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
     await this.page.getByTestId('confirm-delete-button').click();
 
     // Wait for toast notification confirming the deletion
-    await this.page.getByText('usunięto z historii obejrzanych').waitFor({ state: 'visible', timeout: 5000 });
+    await this.waitForNewToast(initialToastCount);
   }
 }

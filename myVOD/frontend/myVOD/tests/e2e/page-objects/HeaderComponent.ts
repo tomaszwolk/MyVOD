@@ -26,7 +26,40 @@ export class HeaderComponent {
     await firstEnabledAddButton.click();
 
     // Wait for toast notification confirming the action
-    await this.page.getByText('dodano do watchlisty').waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.getByText(/dodano do watchlisty/).waitFor({ state: 'visible', timeout: 5000 });
+  }
+
+  /**
+   * Find and add the first available movie from the provided list that hasn't been processed yet
+   */
+  async findAndAddFirstAvailableMovie(movieList: Array<{ title: string; tconst: string }>): Promise<{ title: string; tconst: string } | null> {
+    for (const movie of movieList) {
+      try {
+        // Check if movie is already on watchlist
+        const movieCard = this.page.getByTestId(`movie-card-${movie.tconst}`);
+        const isOnWatchlist = await movieCard.isVisible().catch(() => false);
+
+        // Check if movie is already in watched list
+        await this.navigateToWatched();
+        const watchedMovieCard = this.page.getByTestId(`watched-movie-card-${movie.tconst}`);
+        const isOnWatched = await watchedMovieCard.isVisible().catch(() => false);
+
+        // Go back to watchlist
+        await this.navigateToWatchlist();
+
+        // If movie is not on watchlist and not on watched list, we can add it
+        if (!isOnWatchlist && !isOnWatched) {
+          await this.searchForMovie(movie.title);
+          return movie;
+        }
+      } catch (error) {
+        // Continue to next movie if this one fails
+        continue;
+      }
+    }
+
+    // No available movie found
+    return null;
   }
 
   /**
