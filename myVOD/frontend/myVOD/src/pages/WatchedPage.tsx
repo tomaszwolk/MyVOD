@@ -23,7 +23,6 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
-import { ToastViewport } from "@/components/watchlist/ToastViewport";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 
 /**
@@ -367,7 +366,6 @@ export function WatchedPage() {
         onConfirm={confirmDialog.onConfirm}
       />
 
-      <ToastViewport />
     </>
   );
 }

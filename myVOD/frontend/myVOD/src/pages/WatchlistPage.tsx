@@ -22,7 +22,6 @@ import { WatchlistControlsBar } from "@/components/watchlist/WatchlistControlsBa
 import { WatchlistContent } from "@/components/watchlist/WatchlistContent";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 import { AISuggestionsDialog } from "@/components/suggestions/AISuggestionsDialog";
-import { ToastViewport } from "@/components/watchlist/ToastViewport";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
@@ -349,7 +348,6 @@ export function WatchlistPage() {
         watchlistTconstSet={watchlistTconstSet}
       />
 
-      <ToastViewport />
     </>
   );
 }

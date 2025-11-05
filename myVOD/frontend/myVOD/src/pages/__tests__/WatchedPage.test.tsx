@@ -49,10 +49,6 @@ vi.mock("@/components/watchlist/ConfirmDialog", () => ({
   ConfirmDialog: () => null,
 }));
 
-vi.mock("@/components/watchlist/ToastViewport", () => ({
-  ToastViewport: () => null,
-}));
-
 vi.mock("@/components/ui/theme-toggle", () => ({
   ThemeToggle: () => <div data-testid="theme-toggle" />,
 }));
