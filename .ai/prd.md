@@ -1196,6 +1196,10 @@ Sekcja 5: Growth
 - typy użytkowników: fan anime, fan kina akcji, romantyk, entyzjasta horrorów, fan komedii
 
 7.1.5 Reset hasła na stronie głównej. Forgot Password?
+
+7.1.6 Dodać ikony platform (Netflix etc)
+
+7.1.7 Plakaty
 ---
 
 Koniec dokumentu PRD

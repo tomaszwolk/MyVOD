@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 type OnboardingFooterNavProps = {
   onSkip: () => void;
   onNext: () => void;
+  nextButtonText?: string;
+  nextButtonTestId?: string;
 };
 
 /**
@@ -13,7 +15,12 @@ type OnboardingFooterNavProps = {
  * Provides Skip and Next buttons with proper alignment.
  * Next button is always enabled according to PRD requirements.
  */
-export function OnboardingFooterNav({ onSkip, onNext }: OnboardingFooterNavProps) {
+export function OnboardingFooterNav({
+  onSkip,
+  onNext,
+  nextButtonText = "Dalej",
+  nextButtonTestId = "onboarding-next-button"
+}: OnboardingFooterNavProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:justify-between" role="group" aria-label="Onboarding navigation">
       <Button
@@ -29,8 +36,9 @@ export function OnboardingFooterNav({ onSkip, onNext }: OnboardingFooterNavProps
         onClick={onNext}
         className="sm:order-2"
         aria-label="Continue to next onboarding step"
+        data-testid={nextButtonTestId}
       >
-        Dalej
+        {nextButtonText}
       </Button>
     </div>
   );

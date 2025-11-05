@@ -116,6 +116,7 @@ export function RegisterForm() {
                     form.formState.errors.email ? "email-error" : undefined
                   }
                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-slate-400"
+                  data-testid="register-email-input"
                   {...field}
                 />
               </FormControl>
@@ -144,6 +145,7 @@ export function RegisterForm() {
                         : "password-rules"
                     }
                     className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-slate-400 pr-10"
+                    data-testid="register-password-input"
                     {...field}
                   />
                   <button
@@ -188,6 +190,7 @@ export function RegisterForm() {
                         : undefined
                     }
                     className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-slate-400 pr-10"
+                    data-testid="register-confirm-password-input"
                     {...field}
                   />
                   <button
@@ -221,6 +224,7 @@ export function RegisterForm() {
           type="submit"
           disabled={isPending || !form.formState.isValid}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          data-testid="register-submit-button"
         >
           {isPending ? (
             <>

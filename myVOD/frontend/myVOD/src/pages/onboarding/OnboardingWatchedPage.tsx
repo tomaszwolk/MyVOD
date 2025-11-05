@@ -53,7 +53,8 @@ export function OnboardingWatchedPage() {
 
   return (
     <OnboardingLayout title="Oznacz filmy które już widziałeś" headerActions={headerActions}>
-      <ProgressBar current={3} total={3} />
+      <div data-testid="onboarding-step-3">
+        <ProgressBar current={3} total={3} />
 
       <OnboardingHeader
         title={title}
@@ -86,6 +87,8 @@ export function OnboardingWatchedPage() {
           <OnboardingFooterNav
             onSkip={handleSkip}
             onNext={handleNext}
+            nextButtonText="Zakończ"
+            nextButtonTestId="onboarding-finish-button"
           />
         </div>
       </div>
@@ -96,6 +99,7 @@ export function OnboardingWatchedPage() {
           <AlertDescription>{validationError}</AlertDescription>
         </Alert>
       )}
+      </div>
     </OnboardingLayout>
   );
 }

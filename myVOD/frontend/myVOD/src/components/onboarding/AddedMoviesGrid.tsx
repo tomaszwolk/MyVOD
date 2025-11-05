@@ -30,7 +30,7 @@ export function AddedMoviesGrid({ items, onRemove, removingTconsts }: AddedMovie
         <h3 className="text-sm font-medium text-muted-foreground">
           Dodane filmy
         </h3>
-        <Badge variant="secondary">
+        <Badge variant="secondary" data-testid="added-movies-counter">
           {items.length}/3
         </Badge>
       </div>

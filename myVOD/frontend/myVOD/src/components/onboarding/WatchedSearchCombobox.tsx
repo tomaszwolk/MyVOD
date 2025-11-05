@@ -115,6 +115,7 @@ export function WatchedSearchCombobox({
               aria-autocomplete="list"
               aria-activedescendant={activeId}
               className="w-full"
+              data-testid="watched-search-combobox"
             />
             {isLoading && !disabled && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">

@@ -44,6 +44,7 @@ export const PlatformCheckboxCard = forwardRef<
       role="checkbox"
       aria-checked={checked}
       aria-disabled={disabled}
+      data-testid={`platform-checkbox-${slug}`}
     >
       <div className="flex items-center space-x-3">
         {/* Platform icon/logo */}

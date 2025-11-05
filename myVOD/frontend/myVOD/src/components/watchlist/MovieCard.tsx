@@ -31,6 +31,7 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({ item, platfor
       className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
       aria-labelledby={`movie-title-${item.id}`}
       role="article"
+      data-testid={`movie-card-${item.movie.tconst}`}
     >
       {/* Poster */}
       <div className="aspect-[2/3] bg-muted relative">

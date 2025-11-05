@@ -30,6 +30,7 @@ export function ActionBar({
         disabled={isBusy}
         className="sm:order-2"
         aria-label={isBusy ? "Saving platform selection..." : "Save platform selection and continue"}
+        data-testid="onboarding-next-button"
       >
         {isBusy ? "Saving..." : "Next"}
       </Button>

@@ -109,6 +109,7 @@ export function MovieSearchCombobox({
               aria-autocomplete="list"
               aria-activedescendant={activeId}
               className="w-full"
+              data-testid="movie-search-combobox"
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">

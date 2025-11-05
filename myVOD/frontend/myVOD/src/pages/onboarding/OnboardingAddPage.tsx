@@ -198,7 +198,8 @@ export function OnboardingAddPage() {
 
   return (
     <OnboardingLayout title="Dodaj filmy do watchlisty" headerActions={headerActions}>
-      <ProgressBar current={2} total={3} />
+      <div data-testid="onboarding-step-2">
+        <ProgressBar current={2} total={3} />
 
       <OnboardingHeader
         title="Dodaj przynajmniej 3 filmy do watchlisty"
@@ -238,6 +239,7 @@ export function OnboardingAddPage() {
           <AlertDescription>{validationError}</AlertDescription>
         </Alert>
       )}
+      </div>
     </OnboardingLayout>
   );
 }

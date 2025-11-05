@@ -54,6 +54,7 @@ export const AvailabilityIcons = memo<AvailabilityIconsProps>(function Availabil
                       : 'bg-gray-100 text-gray-500'
                   }`}
                   title={tooltipText}
+                  data-testid={`streaming-provider-icon-${platform.platform_slug}`}
                 >
                   {IconComponent && <IconComponent className="w-4 h-4" />}
                 </div>

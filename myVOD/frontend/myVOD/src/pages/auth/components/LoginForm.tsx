@@ -95,6 +95,7 @@ export function LoginForm() {
                     form.formState.errors.email ? "email-error" : undefined
                   }
                   className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring"
+                  data-testid="login-email-input"
                   {...field}
                 />
               </FormControl>
@@ -123,6 +124,7 @@ export function LoginForm() {
                         : undefined
                     }
                     className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring pr-10"
+                    data-testid="login-password-input"
                     {...field}
                   />
                   <button
@@ -149,6 +151,7 @@ export function LoginForm() {
           type="submit"
           disabled={isPending}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          data-testid="login-submit-button"
         >
           {isPending ? (
             <>

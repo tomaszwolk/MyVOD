@@ -237,7 +237,8 @@ export function OnboardingPlatformsPage() {
 
   return (
     <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
-      <ProgressBar current={1} total={3} />
+      <div data-testid="onboarding-step-1">
+        <ProgressBar current={1} total={3} />
 
       <OnboardingHeader
         title="Choose your platforms"
@@ -273,6 +274,7 @@ export function OnboardingPlatformsPage() {
           </AlertDescription>
         </Alert>
       )}
+      </div>
     </OnboardingLayout>
   );
 }
