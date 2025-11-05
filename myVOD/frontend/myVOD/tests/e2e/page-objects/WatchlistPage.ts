@@ -59,12 +59,15 @@ export class WatchlistPage {
   async markMovieAsWatched(movieId: string): Promise<void> {
     // Check if movie is actually on watchlist before trying to mark as watched
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
-    const isVisible = await movieCard.isVisible();
+    const movieExists = await movieCard.count() > 0;
 
-    if (!isVisible) {
+    if (!movieExists) {
       // Movie is not on watchlist, skip marking as watched
       return;
     }
+
+    // Ensure the movie card is fully visible before interacting
+    await movieCard.waitFor({ state: 'visible', timeout: 5000 });
 
     // Count existing toasts before action
     const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
@@ -83,12 +86,15 @@ export class WatchlistPage {
   async deleteMovieFromWatchlist(movieId: string): Promise<void> {
     // Check if movie is actually on watchlist before trying to delete
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
-    const isVisible = await movieCard.isVisible();
+    const movieExists = await movieCard.count() > 0;
 
-    if (!isVisible) {
+    if (!movieExists) {
       // Movie is not on watchlist, skip deletion
       return;
     }
+
+    // Ensure the movie card is fully visible and interactive before clicking
+    await movieCard.waitFor({ state: 'visible', timeout: 5000 });
 
     // Find the movie card and click the delete button
     const deleteButton = movieCard.getByTestId('delete-movie-button');

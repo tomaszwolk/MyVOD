@@ -86,6 +86,9 @@ test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
     await watchlistPage.waitForPageLoad();
     await watchlistPage.verifyMovieCardPresent(selectedMovie.tconst);
 
+    // Wait a moment for UI to fully stabilize after restore
+    await page.waitForTimeout(1000);
+
     // 2.6 Usunięcie filmu z watchlisty
     await watchlistPage.deleteMovieFromWatchlist(selectedMovie.tconst);
 
