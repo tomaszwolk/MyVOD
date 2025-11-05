@@ -42,6 +42,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: '**/scenario-4-profile-management.spec.ts', // Wyklucz scenariusz 4 (wymaga storageState)
     },
     {
       name: 'scenario-4',

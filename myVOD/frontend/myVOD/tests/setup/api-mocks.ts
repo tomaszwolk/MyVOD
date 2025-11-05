@@ -130,4 +130,76 @@ export async function setupScenario4Mocks(page: Page): Promise<void> {
       }),
     });
   });
+
+  // Mock user profile endpoint (GET) - returns user profile with platforms
+  await page.route('**/api/me/', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          email: 'scenario4-user@example.com',
+          platforms: [
+            { id: 1, platform_slug: 'netflix', platform_name: 'Netflix' }
+          ],
+          is_staff: false
+        }),
+      });
+    }
+  });
+
+  // Mock user movies endpoint (GET) - returns watchlist and watched movies
+  await page.route('**/api/user-movies/', async (route) => {
+    if (route.request().method() === 'GET') {
+      const url = new URL(route.request().url());
+      const status = url.searchParams.get('status');
+
+      let responseBody;
+      if (status === 'watchlist') {
+        responseBody = [
+          {
+            id: 1,
+            movie: {
+              tconst: 'tt11564570',
+              primary_title: 'Glass Onion',
+              start_year: 2022,
+              genres: ['Comedy', 'Crime', 'Drama'],
+              avg_rating: '7.2',
+              poster_path: '/poster1.jpg'
+            },
+            availability: [
+              { platform_id: 1, platform_name: 'Netflix', is_available: true }
+            ],
+            watchlisted_at: '2025-01-01T10:00:00Z'
+          }
+        ];
+      } else if (status === 'watched') {
+        responseBody = [
+          {
+            id: 2,
+            movie: {
+              tconst: 'tt0468569',
+              primary_title: 'The Dark Knight',
+              start_year: 2008,
+              genres: ['Action', 'Crime', 'Drama'],
+              avg_rating: '9.0',
+              poster_path: '/poster2.jpg'
+            },
+            availability: [
+              { platform_id: 1, platform_name: 'Netflix', is_available: false }
+            ],
+            watched_at: '2025-01-01T12:00:00Z'
+          }
+        ];
+      } else {
+        responseBody = [];
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(responseBody),
+      });
+    }
+  });
 }
