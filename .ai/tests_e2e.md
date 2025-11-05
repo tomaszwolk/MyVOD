@@ -180,3 +180,16 @@ W celu przyspieszenia wykonania testów E2E, można zaimplementować mechanizm j
 | 4.2 | Weryfikacja zmian na watchliście. | - Powrót na watchlistę i sprawdzenie, czy ikony `streaming-provider-icon-*` na kafelkach filmów (`movie-card-*`) uległy zmianie. | `WatchlistPage` |
 | 4.3 | Inicjacja i potwierdzenie usunięcia konta. | - Sekcja "Danger Zone": `danger-zone-card`<br>- Przycisk "Usuń konto": `delete-account-button`<br>- Okno dialogowe: `confirm-delete-account-dialog`<br>- Przycisk potwierdzający usunięcie: `confirm-delete-account-button` | `ProfilePage` |
 | 4.4 | Weryfikacja wylogowania i braku dostępu. | - Sprawdzenie przekierowania na stronę logowania.<br>- Próba ponownego zalogowania z danymi usuniętego konta i weryfikacja błędu. | `LoginPage` |
+
+## **3. Dodatkowe informacje**
+Na potrzeby testu dodano do bazy danych użytkownika.
+e-mail: test_user@example.com
+hasło: Qwed4$5T56n.
+- Watchlist
+	- Glass Onion (tt11564570) - On Netflix
+	- The Godfather (tt0068646) - Not available on streaming
+	- Interstellar (tt0816692) - Not available on streaming
+- Watched
+	- The Dark Knight (tt0468569) - On HBO Max
+	- All Quiet on the Western Front (tt1016150) - On Netflix
+	- Schindler's List (tt0108052) - Not available on streaming

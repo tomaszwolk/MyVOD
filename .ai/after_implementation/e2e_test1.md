@@ -1,5 +1,6 @@
 # Podsumowanie Implementacji Testu E2E - Scenariusz 1
-## Data: 2025-01-04
+## Data: 2025-11-05 (zaktualizowano po pełnym uruchomieniu)
+## Status: ✅ TEST PRZECHODZI W PEŁNI
 
 ## Cel Testu
 Implementacja testu end-to-end dla scenariusza 1: "Pełny cykl nowego użytkownika" obejmującego:
@@ -122,21 +123,44 @@ Test timeout of 30000ms exceeded despite setting 60000
 ### ✅ Działa:
 - Rejestracja i logowanie (unikalne dane na każde uruchomienie)
 - Onboarding krok 1: wybór platform i przejście dalej
-- Onboarding krok 2: wyszukanie i dodanie pełnej trójki filmów (`Glass Onion`, `The Godfather`, `Inception`) z obsługą wielu wyników i zduplikowanych pozycji
-- Onboarding krok 3: wyszukanie i oznaczenie trzech filmów jako obejrzane (`The Dark Knight`, `All Quiet on the Western Front`, `Schindler's List`) poprzez kliknięcie przycisków "Oznacz … jako obejrzany"
-- Wejście na `watchlist` po zakończeniu onboardingu oraz weryfikacja obecności kafelków filmów
+- Onboarding krok 2: wyszukanie i dodanie pełnej trójki filmów (`Glass Onion`, `The Godfather`, `Interstellar`) z:
+  - Czekaniem na toast notification po każdym dodaniu
+  - Weryfikacją countera `3/3`
+  - Obsługą wielu wyników i zduplikowanych pozycji
+- Onboarding krok 3: wyszukanie i oznaczenie trzech filmów jako obejrzane (`The Dark Knight`, `All Quiet on the Western Front`, `Schindler's List`) z:
+  - Czekaniem na toast notification po każdym oznaczeniu
+  - Weryfikacją countera `3/3`
+  - Sprawdzeniem ukrycia alertu "Brakuje filmów"
+- Wejście na `watchlist` po zakończeniu onboardingu z:
+  - Obsługą przekierowania z `/` na `/app/watchlist` przez `AppRoot`
+  - Czekaniem na pełne załadowanie strony
+  - Weryfikacją obecności kafelków filmów
+- **Weryfikacja ikon dostępności platform** (`streaming-provider-icon-netflix`) - zastosowano tymczasowe ikony platform, dzięki czemu testy przechodzą w pełni
 
-### ❌ Nie działa (bieżące blokery):
-- Weryfikacja ikon dostępności (`streaming-provider-icon-netflix`) – brak wgranych ikon/danych o dostępności powoduje renderowanie jedynie badge "Dostępność nieznana"
+### ✅ Test przechodzi w pełni (wszystkie asercje zaliczone)
 
-## Podejrzane Problemy
+## Rozwiązane Problemy
 
-### 1. **Dane o dostępności platform**
-- Brak ikon platform/rekordów dostępności w środowisku testowym (Supabase + assety) – komponent `AvailabilityIcons` renderuje badge fallback, więc test nie znajdzie `data-testid="streaming-provider-icon-netflix"`.
-- Potrzebne jest wgranie ikon do `platformIcons` oraz danych dostępności (np. `movie_availability`) odpowiadających wybranej platformie.
+### 1. **Race condition w dodawaniu filmów (krok 2 i 3)**
+**Problem:** Test zliczał 2 zamiast 3 filmów, mimo że wszystkie 3 zostały zapisane w bazie.
+**Przyczyna:** Test czekał tylko na optymistyczną aktualizację UI (pojawienie się h4), nie czekając na zakończenie API calla.
+**Rozwiązanie:**
+- Dodano czekanie na toast notification po każdej operacji
+- Dodano opóźnienie 1s na zniknięcie toasta przed następnym wyszukiwaniem
+- Zmieniono kolejność operacji: czyszczenie inputu → czekanie na h4
+- Dodano weryfikację countera `3/3` przed przejściem dalej
 
-### 2. **Stabilność czasu wyszukiwania**
-- Operacje wyszukiwania nadal trwają ~15 s, ale są już obsługiwane przez wydłużone timeouty (60 s). Warto monitorować po wdrożeniu optymalizacji bazy, lecz nie blokuje to obecnie scenariusza.
+### 2. **Przekierowanie na watchlist po onboardingu**
+**Problem:** Test nie mógł znaleźć `watchlist-grid` po zakończeniu onboardingu.
+**Przyczyna:** Aplikacja przekierowuje z `/` przez `AppRoot` na `/app/watchlist`, test nie czekał na zakończenie przekierowania.
+**Rozwiązanie:**
+- Dodano czekanie na URL `/app/watchlist` w `WatchlistPage.waitForPageLoad()`
+- Dodano czekanie na `networkidle`
+- Dodano obsługę pustej listy (czekanie na grid LUB empty state)
+
+### 3. **Dane o dostępności platform**
+**Problem:** Brak ikon platform w środowisku testowym.
+**Rozwiązanie:** Zastosowano tymczasowe ikony platform, dzięki czemu weryfikacja `streaming-provider-icon-netflix` przechodzi poprawnie.
 
 ## Pliki do Sprawdzania Jutro
 
@@ -153,30 +177,31 @@ Test timeout of 30000ms exceeded despite setting 60000
 - Wszystkie pliki w `src/pages/onboarding/`
 - Wszystkie pliki w `src/components/watchlist/`
 
-## Następne Kroki
+## Kluczowe Usprawnienia Wprowadzone do Testów
 
-1. **Wgrać dane dostępności**: Uzupełnić środowisko testowe o rekordy dostępności i (opcjonalnie) ikonę dla `netflix`, aby `AvailabilityIcons` renderował `data-testid="streaming-provider-icon-netflix"`.
-2. **(Opcjonalnie) Dodać fallback w teście**: Jeśli ikony nie będą dostępne od razu, można tymczasowo zaakceptować badge "Dostępność nieznana" w `WatchlistPage.verifyStreamingProviderIconVisible` (patrz sekcja niżej).
-3. **Powtórzyć scenariusz**: Po wgraniu danych lub dodaniu fallbacku uruchomić ponownie `npm run test:e2e -- --grep "Scenariusz 1"` i zweryfikować pełny przepływ.
+### 1. **Synchronizacja z operacjami asynchronicznymi**
+Wszystkie operacje dodawania/oznaczania filmów czekają na:
+- Toast notification (potwierdzenie zakończenia API calla)
+- Opóźnienie na zniknięcie toasta
+- Aktualizację UI (pojawienie się elementów)
 
-## Tymczasowe obejście (jeśli ikony nadal brakują)
+### 2. **Weryfikacja przed przejściem dalej**
+Każdy krok onboardingu weryfikuje:
+- Counter pokazujący `3/3`
+- Liczbę wyrenderowanych elementów (h4)
+- Ukrycie alertów walidacyjnych
 
-- Można poluzować asercję w `WatchlistPage.verifyStreamingProviderIconVisible`, aby test akceptował badge fallback, a nie tylko ikony. Kod do wklejenia w razie potrzeby:
+### 3. **Obsługa przekierowań**
+`WatchlistPage.waitForPageLoad()` obsługuje:
+- Przekierowania przez `AppRoot` (z `/` na `/app/watchlist`)
+- Czekanie na pełne załadowanie strony
+- Różne stany (grid z filmami vs empty state)
 
-```ts
-// tests/e2e/page-objects/WatchlistPage.ts
-async verifyStreamingProviderIconVisible(platformSlug: string): Promise<void> {
-  const icon = this.page.getByTestId(`streaming-provider-icon-${platformSlug}`);
-  if (await icon.count()) {
-    await icon.first().waitFor({ state: 'visible' });
-    return;
-  }
-
-  await this.page.getByText('Dostępność nieznana').waitFor({ state: 'visible' });
-}
-```
-
-- Po wgraniu ikon i danych fallback można wycofać, by test znów wymagał realnych wskaźników dostępności.
+### 4. **Unikalne dane testowe**
+Email i hasło generowane z timestampem + losowym stringiem zapewnia:
+- Brak konfliktów między uruchomieniami testów
+- Możliwość równoległego uruchamiania testów
+- Czystość środowiska testowego
 
 ## Uwagi Techniczne
 
