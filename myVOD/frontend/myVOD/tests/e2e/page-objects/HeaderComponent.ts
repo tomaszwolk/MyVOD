@@ -77,4 +77,12 @@ export class HeaderComponent {
     await this.page.getByRole('button', { name: 'Watchlista' }).click();
     await this.page.waitForURL('**/app/watchlist**');
   }
+
+  /**
+   * Navigate to profile page
+   */
+  async navigateToProfile(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Profil' }).click();
+    await this.page.waitForURL('**/app/profile**');
+  }
 }

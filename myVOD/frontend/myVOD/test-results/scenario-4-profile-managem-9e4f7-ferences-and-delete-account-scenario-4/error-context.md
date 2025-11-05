@@ -1,0 +1,109 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - heading "Profil" [level=1] [ref=e7]
+        - paragraph [ref=e8]: scenario4-1762376626074-0byb45@example.com
+        - generic [ref=e9]:
+          - button "Watchlista" [ref=e10] [cursor=pointer]
+          - button "Obejrzane" [ref=e11] [cursor=pointer]
+          - button "Profil" [ref=e12] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Ciemny
+          - button "Przełącz na tryb jasny" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+            - generic [ref=e24]: Przełącz na tryb jasny
+        - button "Wyloguj się" [ref=e25] [cursor=pointer]:
+          - img
+          - text: Wyloguj się
+    - generic [ref=e29]:
+      - generic [ref=e32]:
+        - img [ref=e33]
+        - combobox "Wyszukaj film" [ref=e36]
+      - button "Zasugeruj filmy" [ref=e38] [cursor=pointer]:
+        - img
+        - text: Zasugeruj filmy
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - heading "Moje platformy VOD" [level=2] [ref=e45]
+            - paragraph [ref=e46]: Wybierz platformy, które posiadasz. To pozwoli nam pokazać dostępność filmów na Twoich platformach.
+            - generic [ref=e47]: "5"
+            - generic [ref=e48]: "2"
+          - group "Wybrane platformy (2 z 5)" [ref=e49]:
+            - generic [ref=e50]: Wybrane platformy (2 z 5)
+            - generic [ref=e51]:
+              - checkbox "Netflix" [checked] [ref=e52] [cursor=pointer]:
+                - generic [ref=e53]:
+                  - img [ref=e55]
+                  - generic [ref=e57]: Netflix
+                  - checkbox [checked] [ref=e58]
+                  - img [ref=e60]
+              - checkbox "HBO Max" [checked] [ref=e62] [cursor=pointer]:
+                - generic [ref=e63]:
+                  - img [ref=e65]
+                  - generic [ref=e67]: HBO Max
+                  - checkbox [checked] [ref=e68]
+                  - img [ref=e70]
+              - checkbox "Disney+" [ref=e72] [cursor=pointer]:
+                - generic [ref=e73]:
+                  - img [ref=e75]
+                  - generic [ref=e77]: Disney+
+                  - checkbox [ref=e78]
+              - checkbox "Amazon Prime Video" [ref=e80] [cursor=pointer]:
+                - generic [ref=e81]:
+                  - img [ref=e83]
+                  - generic [ref=e85]: Amazon Prime Video
+                  - checkbox [ref=e86]
+              - checkbox "Apple TV+" [ref=e88] [cursor=pointer]:
+                - generic [ref=e89]:
+                  - img [ref=e91]
+                  - generic [ref=e93]: Apple TV+
+                  - checkbox [ref=e94]
+        - generic [ref=e96]:
+          - generic [ref=e97]: Wszystkie zmiany zostały zapisane
+          - generic [ref=e98]:
+            - button "Anuluj" [disabled]
+            - button "Zapisz zmiany" [disabled]
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - heading "Zmień hasło" [level=2] [ref=e103]
+          - paragraph [ref=e104]: Aby zmienić hasło, podaj obecne hasło oraz nowe hasło spełniające wymagania bezpieczeństwa.
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - text: Obecne hasło
+            - generic [ref=e107]:
+              - textbox "Obecne hasło" [ref=e108]
+              - button [ref=e109] [cursor=pointer]:
+                - img [ref=e110]
+          - generic [ref=e113]:
+            - text: Nowe hasło
+            - generic [ref=e114]:
+              - textbox "Nowe hasło" [ref=e115]
+              - button [ref=e116] [cursor=pointer]:
+                - img [ref=e117]
+            - paragraph [ref=e120]: Hasło musi mieć co najmniej 8 znaków i zawierać litery oraz cyfry
+          - generic [ref=e121]:
+            - text: Potwierdź nowe hasło
+            - generic [ref=e122]:
+              - textbox "Potwierdź nowe hasło" [ref=e123]
+              - button [ref=e124] [cursor=pointer]:
+                - img [ref=e125]
+          - generic [ref=e128]:
+            - button "Anuluj" [ref=e129] [cursor=pointer]
+            - button "Zmień hasło" [ref=e130] [cursor=pointer]
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - heading "Strefa zagrożenia" [level=2] [ref=e135]
+          - paragraph [ref=e136]: Nieodwracalne i destrukcyjne akcje. Użyj z ostrożnością.
+        - generic [ref=e138]:
+          - heading "Usuń konto" [level=3] [ref=e139]
+          - paragraph [ref=e140]: Trwale usuń swoje konto i wszystkie powiązane dane. Ta akcja jest zgodna z RODO i nie może zostać cofnięta.
+          - button "Usuń konto" [ref=e141] [cursor=pointer]
+  - region "Notifications alt+T"
+```

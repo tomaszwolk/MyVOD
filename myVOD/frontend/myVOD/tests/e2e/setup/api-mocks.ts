@@ -77,3 +77,57 @@ export async function setupApiMocks(page: Page, userEmail?: string, userPassword
   // Note: Using real backend for registration, login, movie search, adding movies, user profile, etc.
   // AI suggestions and onboarding status are mocked to control the test flow
 }
+
+/**
+ * Setup additional API mocks specifically for Scenario 4 (Profile Management)
+ */
+export async function setupScenario4Mocks(page: Page): Promise<void> {
+  // Mock user preferences endpoint (GET) - returns current platform preferences
+  await page.route('**/api/user/preferences/', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          platforms: ['netflix']  // Initially only Netflix is selected
+        }),
+      });
+    }
+  });
+
+  // Mock user preferences endpoint (PUT) - updates platform preferences
+  await page.route('**/api/user/preferences/', async (route) => {
+    if (route.request().method() === 'PUT') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Preferences updated successfully',
+          platforms: ['netflix', 'hbo-max']  // Updated preferences
+        }),
+      });
+    }
+  });
+
+  // Mock account deletion endpoint
+  await page.route('**/api/user/delete/', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: 'Account deleted successfully'
+      }),
+    });
+  });
+
+  // Mock logout endpoint (called after account deletion)
+  await page.route('**/api/auth/logout/', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: 'Logged out successfully'
+      }),
+    });
+  });
+}

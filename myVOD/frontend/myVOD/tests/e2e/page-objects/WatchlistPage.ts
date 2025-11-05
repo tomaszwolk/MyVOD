@@ -152,4 +152,22 @@ export class WatchlistPage {
       throw new Error('Expected AI suggestions button to be disabled due to rate limiting');
     }
   }
+
+  /**
+   * Verify that platform icons have changed after profile preferences update
+   */
+  async verifyPlatformIconChanges(expectedPlatforms: string[]): Promise<void> {
+    // Wait for page to stabilize after navigation
+    await this.page.waitForTimeout(1000);
+
+    // Check that expected platform icons are now visible on movie cards
+    for (const platform of expectedPlatforms) {
+      const platformIcon = this.page.getByTestId(`streaming-provider-icon-${platform}`);
+      await platformIcon.waitFor({ state: 'visible', timeout: 10000 });
+    }
+
+    // Optionally verify that previously available platforms are no longer shown
+    // This depends on the specific movie data and available platforms
+    // For now, we just ensure expected platforms are visible
+  }
 }

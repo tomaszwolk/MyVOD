@@ -43,12 +43,21 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'scenario-4',
+      testDir: './tests/e2e',
+      testMatch: 'scenario-4-profile-management.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: './tests/e2e/setup/scenario-4-auth-state.json',
+      },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd ../../backend/myVOD && python manage.py runserver',
+      command: 'cd ../../ && uv run python backend/myVOD/manage.py runserver',
       url: 'http://localhost:8000',
       reuseExistingServer: false,   // !process.env.CI,
       env: {
