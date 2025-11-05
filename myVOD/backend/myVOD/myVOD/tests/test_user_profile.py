@@ -511,3 +511,91 @@ class UserProfilePatchAPITests(APITestCase):
         except Exception as e:
             # If cleanup fails, log but don't fail the test
             print(f"Warning: tearDown cleanup failed: {e}")
+
+
+class UserProfileDeleteAPITests(APITestCase):
+    """
+    Integration tests for DELETE /api/me/ endpoint.
+
+    Tests cover:
+    - Successful account deletion (204)
+    - Authentication required (401)
+    - GDPR compliance - permanent deletion
+    """
+
+    def setUp(self):
+        """Set up test data."""
+        # Use a unique test user for delete tests
+        self.test_user_id = uuid.UUID('87654321-4321-4321-4321-123456789abc')
+
+        # Clean up any leftover data
+        UserPlatform.objects.filter(user_id=self.test_user_id).delete()
+
+        # Get or create test user with UUID
+        self.user, _ = User.objects.get_or_create(
+            id=self.test_user_id,
+            defaults={
+                'email': 'delete-test@example.com',
+                'username': 'delete-test-user',
+            }
+        )
+        # Set a password for the user
+        self.user.set_password('testpass123')
+        self.user.save()
+
+    def tearDown(self):
+        """Clean up after tests."""
+        try:
+            # Note: User is deleted during the delete test, so we don't clean it up
+            # Clean up any user platforms that might remain
+            UserPlatform.objects.filter(user_id=self.test_user_id).delete()
+        except Exception as e:
+            # If cleanup fails, log but don't fail the test
+            print(f"Warning: tearDown cleanup failed: {e}")
+
+    def test_delete_user_profile_success(self):
+        """Test successful account deletion returns 204 No Content."""
+        url = reverse('user-profile')
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.delete(url)
+
+        # Should return 204 No Content
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify user is actually deleted from database
+        with self.assertRaises(User.DoesNotExist):
+            User.objects.get(id=self.test_user_id)
+
+    def test_delete_user_profile_requires_authentication(self):
+        """Test that account deletion requires authentication."""
+        url = reverse('user-profile')
+
+        # Make request without authentication
+        self.client.force_authenticate(user=None)
+        response = self.client.delete(url)
+
+        # Should return 401 Unauthorized
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Verify user still exists
+        self.user.refresh_from_db()
+
+    def test_delete_user_profile_cascades_to_related_data(self):
+        """Test that deleting user also removes related data (GDPR compliance)."""
+        # Create some platform associations for the user
+        UserPlatform.objects.create(user_id=self.user.id, platform_id=1)
+        UserPlatform.objects.create(user_id=self.user.id, platform_id=2)
+
+        # Verify associations exist
+        self.assertEqual(UserPlatform.objects.filter(user_id=self.user.id).count(), 2)
+
+        # Delete user
+        url = reverse('user-profile')
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify user platforms are also deleted (CASCADE delete)
+        self.assertEqual(UserPlatform.objects.filter(user_id=self.test_user_id).count(), 0)
