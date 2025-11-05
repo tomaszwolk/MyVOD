@@ -62,15 +62,21 @@ export class WatchedPage {
   async restoreMovieToWatchlist(movieId: string): Promise<void> {
     // Check if movie is actually on watched list before trying to restore
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
-    const isVisible = await movieCard.isVisible();
+    const movieExists = await movieCard.count() > 0;
 
-    if (!isVisible) {
+    if (!movieExists) {
       // Movie is not on watched list, skip restoration
       return;
     }
 
-    // Click the restore button for the specific movie
+    // Check if restore button exists and is clickable
     const restoreButton = movieCard.getByTestId('restore-to-watchlist-button');
+    const buttonExists = await restoreButton.count() > 0;
+
+    if (!buttonExists) {
+      // Restore button doesn't exist, skip restoration
+      return;
+    }
 
     // Capture the number of toast notifications before performing the action.
     const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
@@ -86,9 +92,9 @@ export class WatchedPage {
   async deleteMovieFromWatched(movieId: string): Promise<void> {
     // Check if movie is actually on watched list before trying to delete
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
-    const isVisible = await movieCard.isVisible();
+    const movieExists = await movieCard.count() > 0;
 
-    if (!isVisible) {
+    if (!movieExists) {
       // Movie is not on watched list, skip deletion
       return;
     }

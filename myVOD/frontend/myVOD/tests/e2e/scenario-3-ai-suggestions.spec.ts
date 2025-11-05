@@ -15,12 +15,7 @@ test.describe('Scenario 3: AI Suggestions Generation and Usage', () => {
     password: 'Qwed4$5T56n.'
   };
 
-  // Movies already in test user's watchlist (based on .env.tests setup)
-  const existingWatchlistMovies = [
-    'tt11564570', // Glass Onion
-    'tt0068646',  // The Godfather
-    'tt0816692'   // Interstellar
-  ];
+// Note: Test user's existing movies are handled by checking button state in AI suggestions dialog
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
@@ -39,12 +34,10 @@ test.describe('Scenario 3: AI Suggestions Generation and Usage', () => {
 
   test('should generate AI suggestions, add movie to watchlist, and verify rate limiting', async ({ page }) => {
     // Step 3.1: Log in existing test user
-    await loginPage.navigateToLogin();
-    await loginPage.fillLoginForm(testUser.email, testUser.password);
-    await loginPage.submitLogin();
+    await loginPage.login(testUser.email, testUser.password);
 
-    // Navigate to watchlist and wait for it to load
-    await watchlistPage.navigateToWatchlist();
+    // Wait for redirect to watchlist (user has completed onboarding)
+    await watchlistPage.waitForPageLoad();
 
     // Step 3.1: Click "Get AI Suggestions" button
     await watchlistPage.clickGetSuggestionsButton();
@@ -60,14 +53,17 @@ test.describe('Scenario 3: AI Suggestions Generation and Usage', () => {
     const suggestionCards = await aiSuggestionsDialog.getSuggestionCards();
     test.expect(suggestionCards.length).toBeGreaterThan(0);
 
-    // Step 3.2: Find and add a suggestion that is NOT already on watchlist
-    const addedMovieId = await aiSuggestionsDialog.addFirstAvailableSuggestionToWatchlist(existingWatchlistMovies);
+    // Step 3.2: Find and add a suggestion that has an enabled add button
+    const addedMovieId = await aiSuggestionsDialog.addFirstAvailableSuggestionToWatchlist();
 
     // Verify that we found and added a suggestion
     test.expect(addedMovieId).not.toBeNull();
 
     if (addedMovieId) {
       // Toast notification is handled by AISuggestionsDialog.addSuggestionToWatchlist()
+
+      // Close the suggestions dialog first
+      await aiSuggestionsDialog.closeDialog();
 
       // Step 3.3: Verify the movie was added to watchlist
       await watchlistPage.verifyMovieCardPresent(addedMovieId);
@@ -85,6 +81,11 @@ test.describe('Scenario 3: AI Suggestions Generation and Usage', () => {
 
       // Close the dialog
       await aiSuggestionsDialog.closeDialog();
+    }
+
+    // Cleanup: Remove the movie that was added from AI suggestions
+    if (addedMovieId) {
+      await watchlistPage.deleteMovieFromWatchlist(addedMovieId);
     }
   });
 });

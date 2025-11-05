@@ -52,19 +52,19 @@ export async function setupApiMocks(page: Page, userEmail?: string, userPassword
             ]
           },
           {
-            tconst: "tt0068646",
-            primary_title: "The Godfather",
-            start_year: 1972,
-            justification: "Based on your interest in crime films, this masterpiece about mafia family dynamics should appeal to you.",
+            tconst: "tt0076759",
+            primary_title: "Star Wars: Episode IV - A New Hope",
+            start_year: 1977,
+            justification: "Based on your interest in adventure films, you might enjoy this epic space opera.",
             availability: [
               { platform_id: 1, platform_name: "Amazon Prime", is_available: true }
             ]
           },
           {
-            tconst: "tt0071562",
-            primary_title: "The Godfather: Part II",
-            start_year: 1974,
-            justification: "Continuing your interest in organized crime sagas, this sequel explores the rise of a young Vito Corleone.",
+            tconst: "tt0080684",
+            primary_title: "Star Wars: Episode V - The Empire Strikes Back",
+            start_year: 1980,
+            justification: "Continuing your interest in space adventures, this sequel delivers intense action and emotional depth.",
             availability: [
               { platform_id: 2, platform_name: "HBO Max", is_available: true }
             ]

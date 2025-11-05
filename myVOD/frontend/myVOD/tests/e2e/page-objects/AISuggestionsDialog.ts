@@ -56,21 +56,32 @@ export class AISuggestionsDialog {
   }
 
   /**
-   * Find and return a suggestion that is NOT already on the watchlist
+   * Find and return a suggestion that can be added to watchlist (button is not disabled)
    * Returns the movie ID and locator of the first available suggestion
    */
-  async findAvailableSuggestion(existingMovieIds: string[]): Promise<{ movieId: string; card: Locator } | null> {
+  async findAvailableSuggestion(): Promise<{ movieId: string; card: Locator } | null> {
     const cards = await this.getSuggestionCards();
 
     for (const card of cards) {
-      const cardTestId = await card.getAttribute('data-testid');
-      if (!cardTestId) continue;
+      // Check if the add button is enabled (not disabled)
+      const addButton = this.getAddToWatchlistButton(card);
+      const isDisabled = await addButton.getAttribute('disabled');
 
-      // Extract movie ID from data-testid (format: "suggestion-card-tt0111161")
-      const movieId = cardTestId.replace('suggestion-card-', '');
+      if (!isDisabled) {
+        // Try to get movie ID from data-testid
+        const cardTestId = await card.getAttribute('data-testid');
+        let movieId = '';
 
-      // Check if this movie is already on the watchlist
-      if (!existingMovieIds.includes(movieId)) {
+        if (cardTestId && cardTestId.startsWith('suggestion-card-')) {
+          movieId = cardTestId.replace('suggestion-card-', '');
+        } else {
+          // Fallback: try to extract from heading text or other attributes
+          const heading = card.locator('h3').first();
+          const headingText = await heading.textContent();
+          // We can't reliably extract movie ID without data-testid, skip this card
+          continue;
+        }
+
         return { movieId, card };
       }
     }
@@ -89,10 +100,10 @@ export class AISuggestionsDialog {
   }
 
   /**
-   * Add the first available suggestion to watchlist (that is not already on watchlist)
+   * Add the first available suggestion to watchlist (that has an enabled add button)
    */
-  async addFirstAvailableSuggestionToWatchlist(existingMovieIds: string[]): Promise<string | null> {
-    const availableSuggestion = await this.findAvailableSuggestion(existingMovieIds);
+  async addFirstAvailableSuggestionToWatchlist(): Promise<string | null> {
+    const availableSuggestion = await this.findAvailableSuggestion();
 
     if (availableSuggestion) {
       await this.addSuggestionToWatchlist(availableSuggestion.card);

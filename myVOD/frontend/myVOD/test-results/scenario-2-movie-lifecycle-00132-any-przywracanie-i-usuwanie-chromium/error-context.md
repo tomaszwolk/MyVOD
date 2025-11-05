@@ -1,0 +1,99 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - heading "Moja lista filmów" [level=1] [ref=e7]
+        - paragraph [ref=e8]: Zarządzaj swoimi filmami do obejrzenia
+        - generic [ref=e9]:
+          - button "Watchlista" [ref=e10] [cursor=pointer]
+          - button "Obejrzane" [ref=e11] [cursor=pointer]
+          - button "Profil" [ref=e12] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Ciemny
+          - button "Przełącz na tryb jasny" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+            - generic [ref=e24]: Przełącz na tryb jasny
+        - button "Wyloguj się" [ref=e25] [cursor=pointer]:
+          - img
+          - text: Wyloguj się
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - combobox "Wyszukaj film" [ref=e36]
+        - button "Zasugeruj filmy" [ref=e38] [cursor=pointer]:
+          - img
+          - text: Zasugeruj filmy
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - button "Widok kafelkowy" [pressed] [ref=e42] [cursor=pointer]:
+              - img
+            - button "Widok listy" [ref=e43] [cursor=pointer]:
+              - img
+          - button "Najnowsze" [ref=e44] [cursor=pointer]:
+            - text: Najnowsze
+            - img
+        - generic [ref=e45]:
+          - button "Ukryj niedostępne" [ref=e46] [cursor=pointer]
+          - generic [ref=e47]: "Wyświetlane: 3/3"
+    - generic [ref=e50]:
+      - article "Interstellar" [ref=e51]:
+        - generic [ref=e52]:
+          - img "Interstellar" [ref=e53]
+          - generic [ref=e55]: Niedostępny
+        - generic [ref=e56]:
+          - heading "Interstellar" [level=3] [ref=e57]
+          - generic [ref=e58]:
+            - generic [ref=e59]: "2014"
+            - generic [ref=e60]: •
+            - generic [ref=e61]: Adventure, Drama
+          - generic [ref=e62]: 8.7/10
+          - generic [ref=e64]: Dostępność nieznana
+          - generic [ref=e65]:
+            - button "Oznacz \"Interstellar\" jako obejrzany" [ref=e66] [cursor=pointer]:
+              - img
+              - text: Obejrzane
+            - button "Usuń \"Interstellar\" z watchlisty" [ref=e67] [cursor=pointer]:
+              - img
+      - article "The Godfather" [ref=e68]:
+        - generic [ref=e69]:
+          - img "The Godfather" [ref=e70]
+          - generic [ref=e72]: Niedostępny
+        - generic [ref=e73]:
+          - heading "The Godfather" [level=3] [ref=e74]
+          - generic [ref=e75]:
+            - generic [ref=e76]: "1972"
+            - generic [ref=e77]: •
+            - generic [ref=e78]: Crime, Drama
+          - generic [ref=e79]: 9.2/10
+          - generic [ref=e81]: Dostępność nieznana
+          - generic [ref=e82]:
+            - button "Oznacz \"The Godfather\" jako obejrzany" [ref=e83] [cursor=pointer]:
+              - img
+              - text: Obejrzane
+            - button "Usuń \"The Godfather\" z watchlisty" [ref=e84] [cursor=pointer]:
+              - img
+      - article "Glass Onion" [ref=e85]:
+        - img "Glass Onion" [ref=e87]
+        - generic [ref=e88]:
+          - heading "Glass Onion" [level=3] [ref=e89]
+          - generic [ref=e90]:
+            - generic [ref=e91]: "2022"
+            - generic [ref=e92]: •
+            - generic [ref=e93]: Comedy, Crime
+          - generic [ref=e94]: 7.1/10
+          - 'generic "Netflix: Dostępny" [ref=e97]':
+            - img [ref=e98]
+          - generic [ref=e100]:
+            - button "Oznacz \"Glass Onion\" jako obejrzany" [ref=e101] [cursor=pointer]:
+              - img
+              - text: Obejrzane
+            - button "Usuń \"Glass Onion\" z watchlisty" [ref=e102] [cursor=pointer]:
+              - img
+  - region "Notifications alt+T"
+```
