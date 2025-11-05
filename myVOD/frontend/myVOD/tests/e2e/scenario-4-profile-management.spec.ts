@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
-import { HeaderComponent } from './page-objects/HeaderComponent';
-import { ProfilePage } from './page-objects/ProfilePage';
-import { WatchlistPage } from './page-objects/WatchlistPage';
-import { LoginPage } from './page-objects/LoginPage';
-import { setupScenario4Mocks } from './setup/api-mocks';
+import { HeaderComponent } from '../page-objects/HeaderComponent';
+import { ProfilePage } from '../page-objects/ProfilePage';
+import { WatchlistPage } from '../page-objects/WatchlistPage';
+import { LoginPage } from '../page-objects/LoginPage';
+import { setupScenario4Mocks } from '../setup/api-mocks';
 
 /**
  * Scenario 4: Profile Management and Account Deletion (GDPR Compliance)

@@ -43,6 +43,14 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'scenario-4',
+      testMatch: '**/scenario-4-profile-management.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: './tests/e2e/setup/scenario-4-auth-state.json',
+      },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
