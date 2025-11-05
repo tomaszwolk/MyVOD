@@ -26,8 +26,8 @@ export function useDeleteAccount() {
       // Clear authentication tokens
       logout();
       
-      // Redirect to home page
-      navigate("/", { replace: true });
+      // Redirect to login page
+      navigate("/auth/login", { replace: true });
       
       // Show success toast (may not be visible due to redirect, but included for completeness)
       toast.success("Konto zostało usunięte");

@@ -5,6 +5,7 @@ Views for myVOD project root.
 import logging
 from django.shortcuts import redirect
 from django.db import DatabaseError, IntegrityError
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -136,10 +137,11 @@ class PlatformListView(APIView):
 
 class UserProfileView(APIView):
     """
-    API view for retrieving and updating user profile.
+    API view for retrieving, updating, and deleting user profile.
 
     GET /api/me/ - Retrieve current user's profile with selected platforms
     PATCH /api/me/ - Update current user's platform selections
+    DELETE /api/me/ - Permanently delete current user's account (GDPR compliant)
 
     Authentication required for all operations.
 
@@ -153,6 +155,10 @@ class UserProfileView(APIView):
         PATCH 401: Missing or invalid authentication
         PATCH 500: Internal server error
 
+        DELETE 204: Account deleted successfully
+        DELETE 401: Missing or invalid authentication
+        DELETE 500: Internal server error
+
     Business Logic:
         GET:
         - Returns authenticated user's email and selected platforms
@@ -165,6 +171,12 @@ class UserProfileView(APIView):
         - Deletes platforms not in request
         - Inserts missing platforms
         - Keeps existing unchanged
+
+        DELETE:
+        - Permanently deletes user account and all associated data
+        - Uses CASCADE delete to remove related records
+        - Operation is irreversible
+        - Logs deletion for audit purposes
     """
     permission_classes = [IsAuthenticated]
 
@@ -283,6 +295,63 @@ class UserProfileView(APIView):
         except Exception as e:
             logger.error(
                 f"Unexpected error while updating user profile: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Delete current user account",
+        description=(
+            "Permanently deletes the authenticated user's account and all associated data. "
+            "This operation is irreversible and complies with GDPR requirements. "
+            "Requires JWT authentication."
+        ),
+        responses={
+            204: None,
+            401: OpenApiTypes.OBJECT,
+            500: OpenApiTypes.OBJECT,
+        },
+        tags=['User Profile'],
+    )
+    def delete(self, request):
+        """
+        Handle DELETE request for user account deletion (GDPR compliant).
+
+        Implements guard clauses for early error returns:
+        1. User is already authenticated (permission class)
+        2. Delete user account (cascades to all related data)
+        3. Return 204 No Content
+        """
+        try:
+            # Store user info for logging before deletion
+            user_email = request.user.email
+            user_id = request.user.id
+
+            # Delete the user account (cascades to all related data)
+            request.user.delete()
+
+            logger.info(
+                f"User account deleted successfully: {user_email} (ID: {user_id})"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except DatabaseError as e:
+            logger.error(
+                f"Database error while deleting user account {request.user.email}: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "An error occurred while deleting your account. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error while deleting user account {request.user.email}: {str(e)}",
                 exc_info=True
             )
             return Response(

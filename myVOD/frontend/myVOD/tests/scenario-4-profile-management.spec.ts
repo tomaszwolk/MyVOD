@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
-import { HeaderComponent } from './page-objects/HeaderComponent';
-import { ProfilePage } from './page-objects/ProfilePage';
-import { WatchlistPage } from './page-objects/WatchlistPage';
-import { LoginPage } from './page-objects/LoginPage';
-import { setupScenario4Mocks } from './setup/api-mocks';
+import { HeaderComponent } from './e2e/page-objects/HeaderComponent';
+import { ProfilePage } from './e2e/page-objects/ProfilePage';
+import { WatchlistPage } from './e2e/page-objects/WatchlistPage';
+import { LoginPage } from './e2e/page-objects/LoginPage';
+import { setupScenario4Mocks } from './e2e/setup/api-mocks';
 
 /**
  * Scenario 4: Profile Management and Account Deletion (GDPR Compliance)
@@ -35,7 +35,7 @@ test.describe('Scenario 4: Profile Management and Account Deletion', () => {
 
     // Load saved authentication state for scenario 4 user
     try {
-      await page.context().storageState({ path: './tests/e2e/setup/scenario-4-auth-state.json' });
+      await page.context().storageState({ path: './e2e/setup/scenario-4-auth-state.json' });
     } catch (error) {
       console.log('Auth state file not found, user may need to be recreated');
       throw error;

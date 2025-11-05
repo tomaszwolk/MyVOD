@@ -45,10 +45,10 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
             try:
                 user = User.objects.get(username=email)
             except User.DoesNotExist:
-                raise serializers.ValidationError('No active account found with the given credentials')
+                raise serializers.ValidationError('Account not found or invalid credentials')
 
         if not user.check_password(password):
-            raise serializers.ValidationError('No active account found with the given credentials')
+            raise serializers.ValidationError('Account not found or invalid credentials')
 
         # Check if user is active
         if not user.is_active:

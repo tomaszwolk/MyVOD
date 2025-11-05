@@ -88,6 +88,14 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     ```
     -   **Note**: The `is_staff` field is read-only and cannot be modified via this endpoint. It reflects the user's staff status from the database.
 
+#### `DELETE /api/me/`
+
+-   **Description**: Permanently deletes the authenticated user's account and all associated data (GDPR compliant).
+-   **Authentication**: Required.
+-   **Success Response** (204 No Content).
+-   **Error Responses**:
+    -   `401 Unauthorized`: Not authenticated.
+-   **Note**: This operation is irreversible and deletes all user data including watchlist, watched history, and preferences.
 
 ### 3.2. Movies & Platforms
 
