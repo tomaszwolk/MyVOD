@@ -39,6 +39,17 @@ export class WatchlistPage {
    * Wait for the page to be fully loaded
    */
   async waitForPageLoad(): Promise<void> {
+    // Wait for URL to be /app/watchlist (handles redirects from /)
+    await this.page.waitForURL('**/app/watchlist**', { timeout: 60000 });
+    
+    // Wait for network to be idle
     await this.page.waitForLoadState('networkidle');
+    
+    // Wait for the page to finish loading (skeleton should disappear)
+    // We wait for either watchlist-grid (if there are movies) or empty state
+    await Promise.race([
+      this.page.getByTestId('watchlist-grid').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {}),
+      this.page.getByText('Twoja watchlista jest pusta').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
+    ]);
   }
 }

@@ -50,7 +50,7 @@ export default defineConfig({
     {
       command: 'cd ../../backend/myVOD && python manage.py runserver',
       url: 'http://localhost:8000',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,   // !process.env.CI,
       env: {
         USE_E2E_TEST_DATABASE: 'true',
         SUPABASE_DB_HOST: process.env.SUPABASE_DB_HOST,

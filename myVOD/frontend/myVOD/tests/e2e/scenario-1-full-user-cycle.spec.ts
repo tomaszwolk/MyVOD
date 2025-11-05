@@ -69,7 +69,7 @@ test.describe('Scenariusz 1: Pełny cykl nowego użytkownika', () => {
     // Verify movies are present in watchlist
     await watchlistPage.verifyMovieCardPresent('tt11564570'); // Glass Onion
     await watchlistPage.verifyMovieCardPresent('tt0068646'); // The Godfather
-    await watchlistPage.verifyMovieCardPresent('tt1375666'); // The Godfather: Part II
+    await watchlistPage.verifyMovieCardPresent('tt0816692'); // Interstellar
 
     // Verify streaming provider icons are visible
     await watchlistPage.verifyStreamingProviderIconVisible('netflix');

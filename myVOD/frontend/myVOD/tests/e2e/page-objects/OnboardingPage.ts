@@ -17,8 +17,15 @@ export class OnboardingPage {
     // Select Netflix platform
     await this.page.getByTestId('platform-checkbox-netflix').click();
 
-    // Click Next button
-    await this.page.getByTestId('onboarding-next-button').click();
+    // Click Next button and handle potential save error (retry once)
+    const nextButton = this.page.getByTestId('onboarding-next-button');
+    await nextButton.click();
+
+    const saveError = this.page.getByText('Network error. Please check your connection and try again.', { exact: false });
+    if (await saveError.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await saveError.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+      await nextButton.click();
+    }
   }
 
   /**
@@ -26,20 +33,19 @@ export class OnboardingPage {
    */
   async addMoviesToWatchlist(): Promise<void> {
     // Wait for step 2 to be visible
-    await this.page.getByTestId('onboarding-step-2').waitFor({ state: 'visible' });
+    const step2Container = this.page.getByTestId('onboarding-step-2');
+    await step2Container.waitFor({ state: 'visible' });
 
     // Search for and add movies to reach the required count (3)
     const moviesToAdd = [
       'Glass Onion',
       'The Godfather',
-      'Inception'
+      'Interstellar'
     ];
-
-    let addedMoviesCount = 0;
 
     for (const movieTitle of moviesToAdd) {
       // Type in search box
-      const searchInput = this.page.getByTestId('movie-search-combobox');
+      const searchInput = step2Container.getByTestId('movie-search-combobox');
       await searchInput.fill(movieTitle);
 
       // Wait for search results to appear (longer timeout for database search)
@@ -58,16 +64,26 @@ export class OnboardingPage {
       }
 
       await addMovieButton.click();
-      addedMoviesCount += 1;
 
-      // Wait for the counter badge to reflect the new total
-      await expect(this.page.getByTestId('added-movies-counter'))
-        .toHaveText(`${addedMoviesCount}/3`, { timeout: 10000 });
+      // Wait for success toast to ensure the movie was fully added
+      await this.page.getByText(`"${movieTitle}" został dodany do Twojej watchlisty`).waitFor({ 
+        state: 'visible', 
+        timeout: 20000 
+      });
+      
+      // Wait a bit for toast to disappear before next search
+      await this.page.waitForTimeout(1000);
+
+      // Close the search popover by clearing the search input
+      await searchInput.fill('');
+      
+      // Wait for the card with matching heading to appear in the grid
+      await step2Container.getByRole('heading', { level: 4, name: movieTitle }).waitFor({ state: 'visible', timeout: 20000 });
     }
 
-    // Verify we have at least 3 movies
-    await expect(this.page.getByTestId('added-movies-counter'))
-      .toHaveText('3/3', { timeout: 10000 });
+    // Verify counter shows 3/3 and three cards are rendered
+    await expect(step2Container.getByRole('heading', { level: 4 })).toHaveCount(3, { timeout: 15000 });
+    await expect(step2Container.getByTestId('added-movies-counter')).toHaveText('3/3', { timeout: 15000 });
 
     // Click Next button
     await this.page.getByTestId('onboarding-next-button').click();
@@ -78,7 +94,8 @@ export class OnboardingPage {
    */
   async markMoviesAsWatched(): Promise<void> {
     // Wait for step 3 to be visible
-    await this.page.getByTestId('onboarding-step-3').waitFor({ state: 'visible' });
+    const step3Container = this.page.getByTestId('onboarding-step-3');
+    await step3Container.waitFor({ state: 'visible' });
 
     // Search for and mark movies as watched to reach the required count (3)
     const moviesToMark = [
@@ -89,7 +106,7 @@ export class OnboardingPage {
 
     for (const movieTitle of moviesToMark) {
       // Type in search box
-      const searchInput = this.page.getByTestId('watched-search-combobox');
+      const searchInput = step3Container.getByTestId('watched-search-combobox');
       await searchInput.fill('');
       await searchInput.fill(movieTitle);
 
@@ -105,9 +122,26 @@ export class OnboardingPage {
       await markButton.waitFor({ state: 'visible', timeout: 20000 });
       await markButton.click();
 
+      // Wait for success toast to ensure the movie was fully marked
+      await this.page.getByText(`"${movieTitle}" oznaczono jako obejrzany`).waitFor({ 
+        state: 'visible', 
+        timeout: 20000 
+      });
+      
+      // Wait a bit for toast to disappear before next search
+      await this.page.waitForTimeout(1000);
+
+      // Clear input before next iteration
+      await searchInput.fill('');
+      
       // Wait for the selected movie to appear in the list with heading level 4
-      await this.page.getByRole('heading', { level: 4, name: movieTitle }).waitFor({ state: 'visible', timeout: 30000 });
+      await step3Container.getByRole('heading', { level: 4, name: movieTitle }).waitFor({ state: 'visible', timeout: 20000 });
     }
+
+    // Ensure validation counter reached 3/3 before finishing
+    await expect(step3Container.getByRole('heading', { level: 4 })).toHaveCount(3, { timeout: 15000 });
+    await expect(step3Container.getByText('3/3', { exact: true })).toBeVisible({ timeout: 15000 });
+    await step3Container.getByText('Brakuje filmów').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Click finish button
     await this.page.getByTestId('onboarding-finish-button').click();
