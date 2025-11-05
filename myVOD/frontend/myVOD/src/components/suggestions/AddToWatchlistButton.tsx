@@ -36,6 +36,7 @@ export function AddToWatchlistButton({
       variant={added ? "secondary" : "default"}
       aria-label={getAriaLabel()}
       aria-disabled={disabled || loading}
+      data-testid="add-suggestion-to-watchlist-button"
     >
       {loading ? (
         <>

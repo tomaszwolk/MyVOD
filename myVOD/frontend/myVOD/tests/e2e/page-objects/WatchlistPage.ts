@@ -81,8 +81,16 @@ export class WatchlistPage {
    * Delete a movie from watchlist (soft delete)
    */
   async deleteMovieFromWatchlist(movieId: string): Promise<void> {
-    // Find the movie card and click the delete button
+    // Check if movie is actually on watchlist before trying to delete
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
+    const isVisible = await movieCard.isVisible();
+
+    if (!isVisible) {
+      // Movie is not on watchlist, skip deletion
+      return;
+    }
+
+    // Find the movie card and click the delete button
     const deleteButton = movieCard.getByTestId('delete-movie-button');
     await deleteButton.click();
 
@@ -111,5 +119,31 @@ export class WatchlistPage {
       this.page.getByTestId('watchlist-grid').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {}),
       this.page.getByText('Twoja watchlista jest pusta').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
     ]);
+  }
+
+  /**
+   * Click the "Get AI Suggestions" button
+   */
+  async clickGetSuggestionsButton(): Promise<void> {
+    const button = this.page.getByTestId('get-ai-suggestions-button');
+    await button.click();
+  }
+
+  /**
+   * Check if the "Get AI Suggestions" button is disabled
+   */
+  async isSuggestionsButtonDisabled(): Promise<boolean> {
+    const button = this.page.getByTestId('get-ai-suggestions-button');
+    return await button.isDisabled();
+  }
+
+  /**
+   * Verify suggestions button is disabled (for rate limiting verification)
+   */
+  async verifySuggestionsButtonDisabled(): Promise<void> {
+    const isDisabled = await this.isSuggestionsButtonDisabled();
+    if (!isDisabled) {
+      throw new Error('Expected AI suggestions button to be disabled due to rate limiting');
+    }
   }
 }

@@ -164,9 +164,9 @@ W celu przyspieszenia wykonania testów E2E, można zaimplementować mechanizm j
 | Krok | Akcja Użytkownika | Kluczowe Elementy i Wymagane `data-testid` | Sugerowana Klasa POM |
 | :-- | :--- | :--- | :--- |
 | 3.1 | Inicjacja generowania sugestii. | - Przycisk "Zasugeruj filmy": `get-ai-suggestions-button` | `WatchlistPage` |
-| 3.2 | Interakcja z oknem sugestii. | - Okno modalne/dialog z sugestiami: `ai-suggestions-dialog`<br>- Karta sugestii: `suggestion-card-<movie-id>`<br>- Przycisk "Dodaj do watchlisty": `add-suggestion-to-watchlist-button` | `AISuggestionsDialog` (jako komponent) |
+| 3.2 | Wybór i dodanie sugestii do watchlisty. | - Okno modalne/dialog z sugestiami: `ai-suggestions-dialog`<br>- Karta sugestii: `suggestion-card-<movie-id>`<br>- Przycisk "Dodaj do watchlisty": `add-suggestion-to-watchlist-button`<br>- *Uwaga: Wybrać sugestię filmu, który nie jest jeszcze na watchliście użytkownika* | `AISuggestionsDialog` (jako komponent) |
 | 3.3 | Weryfikacja dodania filmu do watchlisty. | - Sprawdzenie, czy nowy film (`movie-card-<suggested-movie-id>`) pojawił się na `watchlist-grid`. | `WatchlistPage` |
-| 3.4 | Weryfikacja działania limitu. | - Przycisk "Zasugeruj filmy" (ponowne kliknięcie): `get-ai-suggestions-button`<br>- Sprawdzenie, czy przycisk jest nieaktywny (`disabled`) lub czy pojawia się komunikat o limicie. | `WatchlistPage` |
+| 3.4 | Weryfikacja działania limitu. | - Przycisk "Zasugeruj filmy" (ponowne kliknięcie): `get-ai-suggestions-button`<br>- Przycisk pozostaje aktywny, ale wyświetlane są te same rekomendacje co wcześniej (limit 1 raz dziennie). | `WatchlistPage` |
 
 ---
 

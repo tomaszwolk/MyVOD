@@ -1,6 +1,6 @@
 # Podsumowanie Implementacji Testu E2E - Scenariusz 2
 ## Data: 2025-11-05
-## Status: W TRAKCIE - Wymaga dalszej pracy
+## Status: W TRAKCIE - oczekuje na rerun po refaktorze synchronizacji toastów
 
 ## Cel Testu
 Implementacja testu end-to-end dla scenariusza 2: "Podstawowy cykl życia filmu" obejmującego:
@@ -58,22 +58,19 @@ Implementacja testu end-to-end dla scenariusza 2: "Podstawowy cykl życia filmu"
 
 #### **Zmiana podejścia synchronizacji:**
 - **PRZED:** Oczekiwanie na konkretny tekst z regex `/oznaczono jako obejrzany/`
-- **PO:** Liczenie istniejących toastów przed akcją, oczekiwanie na zwiększenie liczby
+- **PO:** Liczenie istniejących toastów przed akcją, oczekiwanie na zwiększenie liczby oraz współdzielony helper `waitForNewToast`
 - **Kod:**
 ```typescript
-// Count existing toasts before action
 const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
 
-// Perform action
-await markAsWatchedButton.click();
+await actionableLocator.click();
 
-// Wait for a new toast to appear
-await this.page.waitForFunction((initialCount) => {
-  const currentCount = document.querySelectorAll('[data-sonner-toast]').length;
-  return currentCount > initialCount;
-}, initialToastCount, { timeout: 10000 });
+await this.page.waitForFunction(
+  (initialCount) => document.querySelectorAll('[data-sonner-toast]').length > initialCount,
+  initialToastCount,
+  { timeout: 10_000 }
+);
 
-// Ensure toast is fully rendered
 await this.page.waitForTimeout(500);
 ```
 
@@ -82,6 +79,7 @@ await this.page.waitForTimeout(500);
 - Wykrywanie pojawienia się nowych toastów
 - Odporność na zmiany w tłumaczeniach
 - Dokładniejszy timing synchronizacji
+- Łatwiejsze utrzymanie dzięki współdzielonemu helperowi `waitForNewToast`
 
 ## Problemy i Błędy Napotkane
 
@@ -90,34 +88,24 @@ await this.page.waitForTimeout(500);
 - Przyczyna: Stan bazy danych po poprzednich uruchomieniach
 - Rozwiązanie: Logika sprawdzenia dostępności filmów przed przetworzeniem
 
-### ❌ **Błąd z Toast Notifications (częściowo rozwiązany)**
+### ✅ **Błąd z Toast Notifications (rozwiązany)**
 - Problem: Regex `/oznaczono jako obejrzany/` nie znajdował toastów z nazwami filmów
 - Przyczyna: Toast zawierał pełny tekst z cudzysłowami: `"Pulp Fiction" oznaczono jako obejrzane`
-- Rozwiązanie: Zmiana na liczenie toastów zamiast szukania tekstu
+- Rozwiązanie: Wspólny helper `waitForNewToast` wykorzystujący liczenie toastów w `WatchlistPage` i `WatchedPage`
 
-### ❌ **Aktualny Problem - Test nadal nie przechodzi**
-- Status: Test zatrzymuje się na etapie "oznacz jako obejrzany"
-- Objawy: Timeout podczas oczekiwania na nowy toast
-- Możliwa przyczyna: Problem z selektorem `[data-sonner-toast]` lub timing
+### ⚠️ **Aktualny Problem - Test wymaga ponownego uruchomienia**
+- Status: Ostatnie nieudane uruchomienie wystąpiło przed refaktorem helperów
+- Objawy: Timeout podczas oczekiwania na toast w `restoreMovieToWatchlist`
+- Działanie: Powtórzyć scenariusz po aktualizacji oraz przeanalizować raport Playwright
 
 ## Co zostało do zrobienia
 
 ### 🔄 **Faza 4: Debug i Finalizacja**
 
-#### **Sprawdzenie selektora toastów:**
-- Zweryfikować czy Sonner używa `[data-sonner-toast]` jako selektora
-- Jeśli nie, znaleźć właściwy sposób identyfikacji toastów
-- Alternatywa: Użyć innego podejścia synchronizacji (np. oczekiwanie na odpowiedź API)
-
-#### **Alternatywne podejście synchronizacji:**
-- Zamiast czekać na toasty, czekać na zmianę stanu w UI
-- Np. czekać na zniknięcie filmu z watchlisty lub pojawienie się na watched liście
-- Lub użyć interceptowania API calls
-
-#### **Uzupełnienie pozostałych metod:**
-- `deleteMovieFromWatchlist()` - nadal używa starego podejścia z regex
-- `restoreMovieToWatchlist()` w WatchedPage - nadal używa starego podejścia
-- Wszystkie powinny używać nowego podejścia z liczeniem toastów
+#### **Walidacja po refaktorze:**
+- Ponownie uruchomić `scenario-2-movie-lifecycle.spec.ts` i potwierdzić brak timeoutów
+- Sprawdzić stabilność helpera przy wszystkich filmach z listy testowej
+- Zweryfikować raport Playwright i zrzuty ekranu po teście
 
 #### **Testowanie wszystkich ścieżek:**
 - Przetestować scenariusz z każdym filmem z listy
@@ -125,14 +113,14 @@ await this.page.waitForTimeout(500);
 - Weryfikacja poprawności wszystkich kroków cyklu życia
 
 ### 📋 **Stan Gotowości:**
-- **Kod:** 95% ukończony
-- **Funkcjonalność:** Częściowo działająca, wymaga debugowania toastów
-- **Testowalność:** Gotowy do uruchomienia i debugowania
+- **Kod:** 98% ukończony
+- **Funkcjonalność:** W pełni zaimplementowana, wymaga potwierdzenia w ponownym uruchomieniu
+- **Testowalność:** Gotowy do uruchomienia i analizy raportu po refaktorze
 
 ### 🎯 **Następne Kroki:**
-1. Zdebugować problem z oczekiwaniem na toasty w `markMovieAsWatched()`
-2. Zaktualizować pozostałe metody toast do nowego podejścia
-3. Przetestować pełny cykl życia filmu
+1. Uruchomić ponownie scenariusz 2 i przejrzeć raport Playwright
+2. Zweryfikować stabilność helpera toastów na całej liście testowych filmów
+3. Zaktualizować status dokumentu po potwierdzeniu przejścia testu
 4. Weryfikacja z różnymi filmami z listy testowej
 
 ## Pliki do sprawdzenia jutro

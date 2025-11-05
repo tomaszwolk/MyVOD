@@ -124,10 +124,11 @@ export function AISuggestionsDialog({
   if (suggestionsQuery.isLoading) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent 
+        <DialogContent
           className="max-w-4xl max-h-[80vh] overflow-y-auto"
           aria-describedby="suggestions-loading-description"
           style={{ backgroundColor: 'var(--search-popover-background)' }}
+          data-testid="ai-suggestions-dialog"
         >
           <DialogHeader>
             <DialogTitle>Sugestie filmów od AI</DialogTitle>
@@ -148,10 +149,11 @@ export function AISuggestionsDialog({
   if (viewModel.items.length === 0) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent 
+        <DialogContent
           className="max-w-4xl max-h-[80vh] overflow-y-auto"
           aria-describedby="suggestions-empty-description"
           style={{ backgroundColor: 'var(--search-popover-background)' }}
+          data-testid="ai-suggestions-dialog"
         >
           <DialogHeader>
             <DialogTitle>Sugestie filmów od AI</DialogTitle>
@@ -183,10 +185,11 @@ export function AISuggestionsDialog({
   // Show suggestions list
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="max-w-4xl max-h-[80vh] overflow-y-auto"
         aria-describedby="suggestions-description"
         style={{ backgroundColor: 'var(--search-popover-background)' }}
+        data-testid="ai-suggestions-dialog"
       >
         <DialogHeader>
           <DialogTitle id="suggestions-title">

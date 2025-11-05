@@ -30,9 +30,10 @@ export const SuggestionCard = memo<SuggestionCardProps>(function SuggestionCard(
   const isDisabled = isAlreadyOnWatchlist || isAdding;
 
   return (
-    <article 
+    <article
       className="border rounded-lg p-4 bg-card hover:bg-accent/50 transition-colors"
       aria-labelledby={`suggestion-title-${item.tconst}`}
+      data-testid={`suggestion-card-${item.tconst}`}
     >
       <div className="flex gap-4">
         {/* Poster */}

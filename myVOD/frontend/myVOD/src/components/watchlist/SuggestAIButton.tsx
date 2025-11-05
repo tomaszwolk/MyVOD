@@ -47,6 +47,7 @@ export function SuggestAIButton({ onClick, disabled, nextAvailableAt }: SuggestA
             variant="outline"
             size="sm"
             className="flex items-center gap-2"
+            data-testid="get-ai-suggestions-button"
           >
             <Sparkles className="h-4 w-4" />
             Zasugeruj filmy

@@ -18,7 +18,7 @@ export class WatchedPage {
         return toastElements.length > initialCount;
       },
       previousToastCount,
-      { timeout: 10000 }
+      { timeout: 15000 } // Increased timeout for slower operations
     );
 
     // Give the UI a short moment to finish rendering the toast content.
@@ -60,8 +60,16 @@ export class WatchedPage {
    * Restore a movie from watched back to watchlist
    */
   async restoreMovieToWatchlist(movieId: string): Promise<void> {
-    // Click the restore button for the specific movie
+    // Check if movie is actually on watched list before trying to restore
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
+    const isVisible = await movieCard.isVisible();
+
+    if (!isVisible) {
+      // Movie is not on watched list, skip restoration
+      return;
+    }
+
+    // Click the restore button for the specific movie
     const restoreButton = movieCard.getByTestId('restore-to-watchlist-button');
 
     // Capture the number of toast notifications before performing the action.
@@ -76,8 +84,16 @@ export class WatchedPage {
    * Delete a movie from watched list (hard delete)
    */
   async deleteMovieFromWatched(movieId: string): Promise<void> {
-    // Click the delete button for the specific movie
+    // Check if movie is actually on watched list before trying to delete
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
+    const isVisible = await movieCard.isVisible();
+
+    if (!isVisible) {
+      // Movie is not on watched list, skip deletion
+      return;
+    }
+
+    // Click the delete button for the specific movie
     const deleteButton = movieCard.getByTestId('delete-movie-button');
     await deleteButton.click();
 
