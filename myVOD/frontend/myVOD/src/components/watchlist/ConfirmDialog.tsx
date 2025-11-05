@@ -39,6 +39,7 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         style={{ backgroundColor: 'var(--search-popover-background)' }}
+        data-testid="confirm-delete-dialog"
       >
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -46,7 +47,7 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">
+          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700" data-testid="confirm-delete-button">
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>

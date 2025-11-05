@@ -49,6 +49,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
       aria-labelledby={`movie-title-${item.id}`}
       role="article"
+      data-testid={`watched-movie-card-${item.tconst}`}
     >
       {/* Poster */}
       <div className="aspect-[2/3] bg-muted relative">
@@ -110,6 +111,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
             onClick={handleRestore}
             loading={isRestoring}
             ariaLabel={`Przywróć "${item.title}" do watchlisty`}
+            dataTestId="restore-to-watchlist-button"
           />
           <Button
             size="sm"
@@ -118,6 +120,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
             disabled={isDeleting}
             className="flex items-center gap-2"
             aria-label={`Usuń "${item.title}" z historii obejrzanych`}
+            data-testid="delete-movie-button"
           >
             <Trash2 className="w-4 h-4" aria-hidden="true" />
           </Button>

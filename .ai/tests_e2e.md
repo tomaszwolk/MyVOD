@@ -193,3 +193,4 @@ hasło: Qwed4$5T56n.
 	- The Dark Knight (tt0468569) - On HBO Max
 	- All Quiet on the Western Front (tt1016150) - On Netflix
 	- Schindler's List (tt0108052) - Not available on streaming
+Użytkownik ma oznaczone wszystkie 5 platform jako dostępne dla siebie.

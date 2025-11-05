@@ -3,6 +3,7 @@ import { WatchedList } from "./WatchedList";
 import { WatchedEmptyState } from "./WatchedEmptyState";
 import { SkeletonList } from "../watchlist/SkeletonList";
 import type { WatchedViewMode, WatchedMovieItemVM } from "@/types/view/watched.types";
+import type { PlatformDto } from "@/types/api.types";
 
 /**
  * Props for WatchedContent component.
@@ -10,7 +11,7 @@ import type { WatchedViewMode, WatchedMovieItemVM } from "@/types/view/watched.t
 type WatchedContentProps = {
   items: WatchedMovieItemVM[];
   viewMode: WatchedViewMode;
-  platforms: import("../api.types").PlatformDto[];
+  platforms: PlatformDto[];
   isLoading: boolean;
   isEmpty: boolean;
   onRestore: (id: number) => void;

@@ -36,7 +36,7 @@ test.describe('Scenariusz 1: Pełny cykl nowego użytkownika', () => {
     const userEmail = generateUniqueEmail();
     const userPassword = generateUniquePassword();
 
-    await setupApiMocks(page, userEmail, userPassword);
+    await setupApiMocks(page, userEmail, userPassword, false); // mockOnboardingAsComplete = false for new users
 
     // Initialize Page Objects
     const registerPage = new RegisterPage(page);

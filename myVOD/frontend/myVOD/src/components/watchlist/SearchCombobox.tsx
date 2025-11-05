@@ -160,6 +160,7 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
               aria-autocomplete="list"
               aria-activedescendant={activeId}
               aria-label="Wyszukaj film"
+              data-testid="header-movie-search"
             />
             {isLoading && (
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
@@ -188,10 +189,11 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
           )}
 
           {results.length > 0 && (
-            <div 
-              className="max-h-60 overflow-y-auto divide-y divide-border" 
+            <div
+              className="max-h-60 overflow-y-auto divide-y divide-border"
               style={{ backgroundColor: 'var(--search-popover-background)' }}
               role="listbox"
+              data-testid="search-results-list"
             >
               {results.slice(0, 10).map((result, index) => {
                 const isActive = index === activeIndex;
@@ -215,6 +217,7 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                       event.preventDefault();
                     }}
                     aria-busy={isPending}
+                    data-testid={`search-result-item-${result.tconst}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-18 bg-muted rounded flex-shrink-0">

@@ -99,6 +99,7 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({ item, platfor
             onClick={() => onMarkWatched(item.id)}
             className="flex-1 flex items-center gap-2"
             aria-label={`Oznacz "${item.movie.primary_title}" jako obejrzany`}
+            data-testid="mark-as-watched-button"
           >
             <Eye className="w-4 h-4" aria-hidden="true" />
             Obejrzane
@@ -109,6 +110,7 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({ item, platfor
             onClick={() => onDelete(item.id)}
             className="flex items-center gap-2"
             aria-label={`Usuń "${item.movie.primary_title}" z watchlisty`}
+            data-testid="delete-movie-button"
           >
             <Trash2 className="w-4 h-4" aria-hidden="true" />
           </Button>

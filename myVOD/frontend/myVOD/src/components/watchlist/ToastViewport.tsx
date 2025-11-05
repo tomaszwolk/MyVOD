@@ -5,5 +5,5 @@ import { Toaster } from "@/components/ui/sonner";
  * Provides global toast notifications throughout the watchlist page.
  */
 export function ToastViewport() {
-  return <Toaster position="top-right" richColors />;
+  return <Toaster position="top-right" richColors data-testid="toast-notification" />;
 }

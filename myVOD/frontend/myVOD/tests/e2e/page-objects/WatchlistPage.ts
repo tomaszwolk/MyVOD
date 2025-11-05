@@ -36,15 +36,45 @@ export class WatchlistPage {
   }
 
   /**
+   * Mark a movie as watched
+   */
+  async markMovieAsWatched(movieId: string): Promise<void> {
+    // Find the movie card and click the "Obejrzane" button
+    const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
+    const markAsWatchedButton = movieCard.getByTestId('mark-as-watched-button');
+    await markAsWatchedButton.click();
+
+    // Wait for toast notification confirming the action
+    await this.page.getByText('oznaczony jako obejrzany').waitFor({ state: 'visible', timeout: 5000 });
+  }
+
+  /**
+   * Delete a movie from watchlist (soft delete)
+   */
+  async deleteMovieFromWatchlist(movieId: string): Promise<void> {
+    // Find the movie card and click the delete button
+    const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
+    const deleteButton = movieCard.getByTestId('delete-movie-button');
+    await deleteButton.click();
+
+    // Wait for confirmation dialog and confirm deletion
+    await this.page.getByTestId('confirm-delete-dialog').waitFor({ state: 'visible' });
+    await this.page.getByTestId('confirm-delete-button').click();
+
+    // Wait for toast notification confirming the deletion
+    await this.page.getByText('usunięto z watchlisty').waitFor({ state: 'visible', timeout: 5000 });
+  }
+
+  /**
    * Wait for the page to be fully loaded
    */
   async waitForPageLoad(): Promise<void> {
     // Wait for URL to be /app/watchlist (handles redirects from /)
     await this.page.waitForURL('**/app/watchlist**', { timeout: 60000 });
-    
+
     // Wait for network to be idle
     await this.page.waitForLoadState('networkidle');
-    
+
     // Wait for the page to finish loading (skeleton should disappear)
     // We wait for either watchlist-grid (if there are movies) or empty state
     await Promise.race([
