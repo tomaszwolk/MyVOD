@@ -126,20 +126,16 @@ if os.getenv('USE_E2E_TEST_DATABASE') == 'true':
         }
     }
 else:
-    # Tymczasowa konfiguracja bazy danych do pracy lokalnej
+    # Development/pytest configuration
+    # Tests will reuse the same database (see conftest.py for custom django_db_setup)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres',
+            'NAME': os.getenv('SUPABASE_DB_NAME', 'postgres'),
             'USER': os.getenv('SUPABASE_DB_USER', 'postgres'),
             'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
             'HOST': os.getenv('SUPABASE_DB_HOST'),
             'PORT': os.getenv('SUPABASE_DB_PORT'),
-            'TEST': {
-                # Use the same database for tests instead of creating test_postgres
-                # This ensures extensions (unaccent, pg_trgm) are available
-                'NAME': 'postgres',
-            }
         }
     }
 
