@@ -44,11 +44,6 @@ jobs:
     - name: Lint with ruff
       run: uv run ruff check .
 
-    - name: Enable PostgreSQL extensions
-      run: |
-        sudo apt-get update && sudo apt-get install -y postgresql-client
-        PGPASSWORD=$SUPABASE_DB_PASSWORD psql -h $SUPABASE_DB_HOST -p $SUPABASE_DB_PORT -U $SUPABASE_DB_USER -d $SUPABASE_DB_NAME -c "CREATE EXTENSION IF NOT EXISTS unaccent; CREATE EXTENSION IF NOT EXISTS pg_trgm;"
-
     - name: Test with pytest
       run: uv run pytest
 

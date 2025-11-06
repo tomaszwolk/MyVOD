@@ -12,6 +12,16 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+            RETURNS text LANGUAGE sql IMMUTABLE AS
+            $func$
+            SELECT unaccent('unaccent', $1)
+            $func$;
+            """,
+            reverse_sql="DROP FUNCTION IF EXISTS immutable_unaccent(text);",
+        ),
         UnaccentExtension(),
         TrigramExtension(),
         migrations.CreateModel(
@@ -156,6 +166,8 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
+            CREATE EXTENSION IF NOT EXISTS unaccent;
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
             CREATE INDEX movie_primary_title_trgm_idx
             ON movie
             USING gin (immutable_unaccent(lower(primary_title)) gin_trgm_ops);
