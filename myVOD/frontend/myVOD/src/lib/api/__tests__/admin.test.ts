@@ -69,16 +69,16 @@ describe("Admin API Functions", () => {
     localStorageMock.setItem.mockClear();
 
     // Reset URL mock
-    (window.URL.createObjectURL as any).mockClear();
-    (window.URL.revokeObjectURL as any).mockClear();
+    (window.URL.createObjectURL as vi.Mock).mockClear();
+    (window.URL.revokeObjectURL as vi.Mock).mockClear();
 
     // Reset document mock
-    (document.createElement as any).mockClear();
-    (document.body.appendChild as any).mockClear();
-    (document.body.removeChild as any).mockClear();
+    (document.createElement as vi.Mock).mockClear();
+    (document.body.appendChild as vi.Mock).mockClear();
+    (document.body.removeChild as vi.Mock).mockClear();
 
     // Reset fetch mock
-    (global.fetch as any).mockClear();
+    (global.fetch as vi.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -104,7 +104,7 @@ describe("Admin API Functions", () => {
 
     it("should call GET /admin/analytics/api/metrics/ with correct baseURL", async () => {
       const mockResponse = { data: mockAdminMetrics };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getAdminMetrics();
 
@@ -115,7 +115,7 @@ describe("Admin API Functions", () => {
 
     it("should return AdminMetricsDto on success", async () => {
       const mockResponse = { data: mockAdminMetrics };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await getAdminMetrics();
 
@@ -129,7 +129,7 @@ describe("Admin API Functions", () => {
           data: { detail: "Staff permissions required" },
         },
       };
-      (http.get as any).mockRejectedValueOnce(error);
+      (http.get as vi.Mock).mockRejectedValueOnce(error);
 
       await expect(getAdminMetrics()).rejects.toThrow();
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/metrics/", {
@@ -139,14 +139,14 @@ describe("Admin API Functions", () => {
 
     it("should handle network errors", async () => {
       const networkError = new Error("Network Error");
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getAdminMetrics()).rejects.toThrow("Network Error");
     });
 
     it("should use correct axios instance with interceptors", async () => {
       const mockResponse = { data: mockAdminMetrics };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getAdminMetrics();
 
@@ -166,14 +166,14 @@ describe("Admin API Functions", () => {
     it("should handle network connection refused (ECONNREFUSED)", async () => {
       const networkError = new Error("Network Error");
       networkError.name = "ECONNREFUSED";
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getAdminMetrics()).rejects.toThrow();
     });
 
     it("should handle network timeout (408)", async () => {
       const timeoutError = new Error("Request timeout");
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 408,
           data: { detail: "Request timeout" },
@@ -184,7 +184,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle server unavailable (503)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 503,
           data: { detail: "Service temporarily unavailable" },
@@ -195,7 +195,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle gateway timeout (504)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 504,
           data: { detail: "Gateway timeout" },
@@ -206,7 +206,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle malformed JSON response (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "Internal server error - not JSON",
@@ -217,7 +217,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle HTML error response instead of JSON (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "<html><body>Server Error</body></html>",
@@ -229,7 +229,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle too many requests (429)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 429,
           data: { detail: "Too many admin requests. Try again later." },
@@ -240,7 +240,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle conflict state (409)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 409,
           data: { detail: "Admin metrics conflict" },
@@ -251,7 +251,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle unprocessable entity (422)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 422,
           data: { detail: "Invalid admin metrics request" },
@@ -262,7 +262,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle bad gateway (502)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 502,
           data: { detail: "Bad gateway" },
@@ -299,7 +299,7 @@ describe("Admin API Functions", () => {
 
     it("should call GET /admin/analytics/api/top-movies/ with query params", async () => {
       const mockResponse = { data: mockTopMovies };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getTopMovies(mockQuery);
 
@@ -314,18 +314,18 @@ describe("Admin API Functions", () => {
 
     it("should send type and range as query params", async () => {
       const mockResponse = { data: mockTopMovies };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getTopMovies(mockQuery);
 
-      const callArgs = (http.get as any).mock.calls[0][1];
+      const callArgs = (http.get as vi.Mock).mock.calls[0][1];
       expect(callArgs.params.type).toBe("watchlist");
       expect(callArgs.params.range).toBe("30d");
     });
 
     it("should return TopMoviesDto on success", async () => {
       const mockResponse = { data: mockTopMovies };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await getTopMovies(mockQuery);
 
@@ -339,7 +339,7 @@ describe("Admin API Functions", () => {
           data: { detail: "Invalid parameters" },
         },
       };
-      (http.get as any).mockRejectedValueOnce(error);
+      (http.get as vi.Mock).mockRejectedValueOnce(error);
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow();
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/top-movies/", {
@@ -358,14 +358,14 @@ describe("Admin API Functions", () => {
           data: { detail: "Staff permissions required" },
         },
       };
-      (http.get as any).mockRejectedValueOnce(error);
+      (http.get as vi.Mock).mockRejectedValueOnce(error);
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow();
     });
 
     it("should handle network errors", async () => {
       const networkError = new Error("Network Error");
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow("Network Error");
     });
@@ -384,13 +384,13 @@ describe("Admin API Functions", () => {
     it("should handle network connection refused (ECONNREFUSED)", async () => {
       const networkError = new Error("Network Error");
       networkError.name = "ECONNREFUSED";
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow();
     });
 
     it("should handle network timeout (408)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 408,
           data: { detail: "Request timeout" },
@@ -401,7 +401,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle server unavailable (503)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 503,
           data: { detail: "Service temporarily unavailable" },
@@ -412,7 +412,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle gateway timeout (504)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 504,
           data: { detail: "Gateway timeout" },
@@ -423,7 +423,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle malformed JSON response (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "Internal server error - not JSON",
@@ -434,7 +434,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle HTML error response instead of JSON (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "<html><body>Server Error</body></html>",
@@ -446,7 +446,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle too many requests (429)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 429,
           data: { detail: "Too many top movies requests. Try again later." },
@@ -457,7 +457,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle conflict state (409)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 409,
           data: { detail: "Top movies conflict" },
@@ -468,7 +468,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle unprocessable entity (422)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 422,
           data: { detail: "Invalid top movies query" },
@@ -479,7 +479,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle bad gateway (502)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 502,
           data: { detail: "Bad gateway" },
@@ -520,7 +520,7 @@ describe("Admin API Functions", () => {
 
     it("should call GET /admin/analytics/api/error-logs/ with query params", async () => {
       const mockResponse = { data: mockErrorLogs };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getErrorLogs(mockQuery);
 
@@ -540,21 +540,21 @@ describe("Admin API Functions", () => {
 
     it("should send api_type as array query params", async () => {
       const mockResponse = { data: mockErrorLogs };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getErrorLogs(mockQuery);
 
-      const callArgs = (http.get as any).mock.calls[0][1];
+      const callArgs = (http.get as vi.Mock).mock.calls[0][1];
       expect(callArgs.params.api_type).toEqual(["tmdb", "watchmode"]);
     });
 
     it("should send date_from, date_to, user_id, page, page_size, sort", async () => {
       const mockResponse = { data: mockErrorLogs };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getErrorLogs(mockQuery);
 
-      const callArgs = (http.get as any).mock.calls[0][1];
+      const callArgs = (http.get as vi.Mock).mock.calls[0][1];
       expect(callArgs.params.date_from).toBe("2024-01-01");
       expect(callArgs.params.date_to).toBe("2024-01-31");
       expect(callArgs.params.user_id).toBe("123");
@@ -565,7 +565,7 @@ describe("Admin API Functions", () => {
 
     it("should handle empty query (defaults)", async () => {
       const mockResponse = { data: mockErrorLogs };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       await getErrorLogs();
 
@@ -577,7 +577,7 @@ describe("Admin API Functions", () => {
 
     it("should return PaginatedErrorLogsDto on success", async () => {
       const mockResponse = { data: mockErrorLogs };
-      (http.get as any).mockResolvedValueOnce(mockResponse);
+      (http.get as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await getErrorLogs(mockQuery);
 
@@ -591,7 +591,7 @@ describe("Admin API Functions", () => {
           data: { detail: "Invalid date format" },
         },
       };
-      (http.get as any).mockRejectedValueOnce(error);
+      (http.get as vi.Mock).mockRejectedValueOnce(error);
 
       await expect(getErrorLogs(mockQuery)).rejects.toThrow();
     });
@@ -603,14 +603,14 @@ describe("Admin API Functions", () => {
           data: { detail: "Staff permissions required" },
         },
       };
-      (http.get as any).mockRejectedValueOnce(error);
+      (http.get as vi.Mock).mockRejectedValueOnce(error);
 
       await expect(getErrorLogs(mockQuery)).rejects.toThrow();
     });
 
     it("should handle network errors", async () => {
       const networkError = new Error("Network Error");
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getErrorLogs(mockQuery)).rejects.toThrow("Network Error");
     });
@@ -630,13 +630,13 @@ describe("Admin API Functions", () => {
     it("should handle network connection refused (ECONNREFUSED)", async () => {
       const networkError = new Error("Network Error");
       networkError.name = "ECONNREFUSED";
-      (http.get as any).mockRejectedValueOnce(networkError);
+      (http.get as vi.Mock).mockRejectedValueOnce(networkError);
 
       await expect(getErrorLogs(mockQuery)).rejects.toThrow();
     });
 
     it("should handle network timeout (408)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 408,
           data: { detail: "Request timeout" },
@@ -647,7 +647,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle server unavailable (503)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 503,
           data: { detail: "Service temporarily unavailable" },
@@ -658,7 +658,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle gateway timeout (504)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 504,
           data: { detail: "Gateway timeout" },
@@ -669,7 +669,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle malformed JSON response (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "Internal server error - not JSON",
@@ -680,7 +680,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle HTML error response instead of JSON (500)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 500,
           data: "<html><body>Server Error</body></html>",
@@ -692,7 +692,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle too many requests (429)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 429,
           data: { detail: "Too many error logs requests. Try again later." },
@@ -703,7 +703,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle conflict state (409)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 409,
           data: { detail: "Error logs conflict" },
@@ -714,7 +714,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle unprocessable entity (422)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 422,
           data: { detail: "Invalid error logs query" },
@@ -725,7 +725,7 @@ describe("Admin API Functions", () => {
     });
 
     it("should handle bad gateway (502)", async () => {
-      (http.get as any).mockRejectedValueOnce({
+      (http.get as vi.Mock).mockRejectedValueOnce({
         response: {
           status: 502,
           data: { detail: "Bad gateway" },
@@ -753,14 +753,14 @@ describe("Admin API Functions", () => {
         download: "",
         click: vi.fn(),
       };
-      (document.createElement as any).mockReturnValue(mockLink);
+      (document.createElement as vi.Mock).mockReturnValue(mockLink);
 
       // Mock window.URL
-      (window.URL.createObjectURL as any).mockReturnValue(mockBlobUrl);
-      (window.URL.revokeObjectURL as any).mockImplementation(() => {});
+      (window.URL.createObjectURL as vi.Mock).mockReturnValue(mockBlobUrl);
+      (window.URL.revokeObjectURL as vi.Mock).mockImplementation(() => {});
 
       // Mock fetch
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         blob: () => Promise.resolve(mockBlob),
       });
@@ -771,7 +771,7 @@ describe("Admin API Functions", () => {
 
       await exportTopMoviesCSV(mockQuery);
 
-      const mockLink = (document.createElement as any).mock.results[0].value;
+      const mockLink = (document.createElement as vi.Mock).mock.results[0].value;
       expect(mockLink.href).toBe(mockBlobUrl);
       expect(mockLink.download).toBe("top-movies-watchlist-30d.csv");
     });
@@ -797,7 +797,7 @@ describe("Admin API Functions", () => {
 
       await exportTopMoviesCSV(mockQuery);
 
-      const mockLink = (document.createElement as any).mock.results[0].value;
+      const mockLink = (document.createElement as vi.Mock).mock.results[0].value;
       expect(mockLink.download).toBe("top-movies-watchlist-30d.csv");
       expect(mockLink.click).toHaveBeenCalled();
     });
@@ -806,7 +806,7 @@ describe("Admin API Functions", () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       localStorageMock.getItem.mockReturnValue("mock-token");
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -848,14 +848,14 @@ describe("Admin API Functions", () => {
         download: "",
         click: vi.fn(),
       };
-      (document.createElement as any).mockReturnValue(mockLink);
+      (document.createElement as vi.Mock).mockReturnValue(mockLink);
 
       // Mock window.URL
-      (window.URL.createObjectURL as any).mockReturnValue(mockBlobUrl);
-      (window.URL.revokeObjectURL as any).mockImplementation(() => {});
+      (window.URL.createObjectURL as vi.Mock).mockReturnValue(mockBlobUrl);
+      (window.URL.revokeObjectURL as vi.Mock).mockImplementation(() => {});
 
       // Mock fetch
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         blob: () => Promise.resolve(mockBlob),
       });
@@ -887,7 +887,7 @@ describe("Admin API Functions", () => {
 
       await exportErrorLogsCSV(mockQuery);
 
-      const mockLink = (document.createElement as any).mock.results[0].value;
+      const mockLink = (document.createElement as vi.Mock).mock.results[0].value;
       expect(mockLink.href).toBe(mockBlobUrl);
       expect(mockLink.download).toBe("error-logs-2024-01-15.csv");
     });
@@ -926,7 +926,7 @@ describe("Admin API Functions", () => {
 
       await exportErrorLogsCSV(mockQuery);
 
-      const mockLink = (document.createElement as any).mock.results[0].value;
+      const mockLink = (document.createElement as vi.Mock).mock.results[0].value;
       expect(mockLink.download).toBe("error-logs-2024-01-15.csv");
       expect(mockLink.click).toHaveBeenCalled();
     });
@@ -935,7 +935,7 @@ describe("Admin API Functions", () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       localStorageMock.getItem.mockReturnValue("mock-token");
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 403,
       });

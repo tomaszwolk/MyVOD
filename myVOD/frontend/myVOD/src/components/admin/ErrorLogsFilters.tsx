@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ type ErrorLogsFiltersProps = {
   onReset: () => void;
 };
 
-const API_TYPES: Array<{ value: ErrorLogsQuery["api_type"][number]; label: string }> = [
+const API_TYPES: Array<{ value: NonNullable<ErrorLogsQuery["api_type"]>[number]; label: string }> = [
   { value: "watchmode", label: "Watchmode" },
   { value: "tmdb", label: "TMDB" },
   { value: "gemini", label: "Gemini" },
@@ -61,16 +61,16 @@ export function ErrorLogsFilters({ value, onChange, onReset }: ErrorLogsFiltersP
     
     // Compare with current value using ref to avoid dependency on value
     if (currentUserIdRef.current !== newUserId) {
-      // Use functional update form to avoid dependency on value
-      onChange((prevValue) => ({
-        ...prevValue,
+      // Use current value to avoid dependency on value
+      onChange({
+        ...value,
         user_id: newUserId,
-      }));
+      });
     }
-  }, [debouncedUserId, onChange]); // onChange is stable (setQuery from useState)
+  }, [debouncedUserId, onChange, value]); // onChange is stable (setQuery from useState), value needed for current state
 
   const handleApiTypeToggle = useCallback(
-    (apiType: ErrorLogsQuery["api_type"][number]) => {
+    (apiType: NonNullable<ErrorLogsQuery["api_type"]>[number]) => {
       const currentTypes = value.api_type || [];
       const newTypes = currentTypes.includes(apiType)
         ? currentTypes.filter((t) => t !== apiType)

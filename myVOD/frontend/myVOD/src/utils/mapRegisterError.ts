@@ -57,6 +57,14 @@ const extractPayload = (error: unknown): ErrorPayload | null => {
   return candidate as ErrorPayload;
 };
 
+const getMessageForField = (payload: ErrorPayload | null, field: string): string | undefined => {
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+  const record = payload as Record<string, unknown>;
+  return pickFirstMessage(record[field]);
+};
+
 /**
  * Maps API error response to UI-friendly error structure.
  * Handles nested Axios-like shapes and string fallbacks safely.
@@ -70,10 +78,11 @@ export function mapRegisterError(error: unknown): RegisterErrorUI {
     return result;
   }
 
-  const emailMessage = pickFirstMessage((payload as RegisterApiError).email);
-  const passwordMessage = pickFirstMessage((payload as RegisterApiError).password);
+  // Try to extract field-specific errors
+  const emailMessage = getMessageForField(payload, "email");
+  const passwordMessage = getMessageForField(payload, "password");
   const globalMessage =
-    pickFirstMessage(payload.error) ||
+    getMessageForField(payload, "error") ||
     pickFirstMessage((payload as { detail?: unknown }).detail) ||
     pickFirstMessage(payload.message);
 
@@ -90,7 +99,10 @@ export function mapRegisterError(error: unknown): RegisterErrorUI {
   }
 
   if (!result.email && !result.password && !result.global) {
-    const fallback = pickFirstMessage((error as { message?: unknown })?.message);
+    const fallback =
+      typeof error === "object" && error !== null
+        ? pickFirstMessage((error as { message?: unknown }).message)
+        : undefined;
     result.global = fallback ?? "Nie udało się utworzyć konta. Spróbuj ponownie później.";
   }
 

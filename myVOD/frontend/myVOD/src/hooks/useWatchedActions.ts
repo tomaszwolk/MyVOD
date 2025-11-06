@@ -22,8 +22,8 @@ export function useRestoreToWatchlist() {
       const previousData = queryClient.getQueryData(["user-movies", "watched"]);
 
       // Optimistically remove the movie from watched list
-      queryClient.setQueryData(["user-movies", "watched"], (old: any[]) =>
-        old ? old.filter((movie: any) => movie.id !== id) : []
+      queryClient.setQueryData(["user-movies", "watched"], (old: UserMovieDto[] | undefined) =>
+        old ? old.filter((movie: UserMovieDto) => movie.id !== id) : []
       );
 
       // Return a context object with the snapshotted value
@@ -74,7 +74,7 @@ export function useDeleteFromWatched() {
       
       return { previousData, movieToDelete };
     },
-    onSuccess: (_, id, context) => {
+    onSuccess: (_, _id, context) => {
       const movieTitle = context?.movieToDelete?.movie.primary_title || "Film";
       toast.success(`"${movieTitle}" usunięto z historii obejrzanych`);
     },

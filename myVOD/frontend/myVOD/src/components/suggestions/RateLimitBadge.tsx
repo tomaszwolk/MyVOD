@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { useCountdownTo } from "@/hooks/useCountdownTo";
-import type { EmptyStateVariant } from "@/types/view/suggestions.types";
 
 /**
  * Props for RateLimitBadge component.

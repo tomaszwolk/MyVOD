@@ -8,7 +8,7 @@ export interface IntegrationError {
   integration: IntegrationType;
   operation: string;
   error: unknown;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -36,7 +36,7 @@ export function logIntegrationError(error: IntegrationError) {
 /**
  * Helper function for TMDB image loading errors
  */
-export function logTMDBImageError(src: string, alt: string, context?: Record<string, any>) {
+export function logTMDBImageError(src: string, alt: string, context?: Record<string, unknown>) {
   logIntegrationError({
     integration: 'tmdb',
     operation: 'image_load',
@@ -52,7 +52,7 @@ export function logTMDBImageError(src: string, alt: string, context?: Record<str
 /**
  * Helper function for Watchmode API errors
  */
-export function logWatchmodeError(operation: string, error: unknown, context?: Record<string, any>) {
+export function logWatchmodeError(operation: string, error: unknown, context?: Record<string, unknown>) {
   logIntegrationError({
     integration: 'watchmode',
     operation,
@@ -64,7 +64,7 @@ export function logWatchmodeError(operation: string, error: unknown, context?: R
 /**
  * Helper function for Gemini API errors
  */
-export function logGeminiError(operation: string, error: unknown, context?: Record<string, any>) {
+export function logGeminiError(operation: string, error: unknown, context?: Record<string, unknown>) {
   logIntegrationError({
     integration: 'gemini',
     operation,

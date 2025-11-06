@@ -3,6 +3,17 @@ import { toast } from "sonner";
 import { changePassword } from "@/lib/api/auth";
 import type { ChangePasswordCommand } from "@/lib/api/auth";
 
+interface ChangePasswordErrorResponse {
+  current_password?: string[];
+  new_password?: string[];
+}
+
+interface ChangePasswordApiError extends Error {
+  response?: {
+    data: ChangePasswordErrorResponse;
+  };
+}
+
 /**
  * Custom hook for changing user password.
  * Provides mutation state and helpers for password change process.
@@ -27,7 +38,7 @@ export function useChangePassword() {
       
       if (errorMessage.includes("400") || errorMessage.includes("Bad Request")) {
         // Try to extract specific error message from response
-        const responseData = (error as any).response?.data;
+        const responseData = (error as ChangePasswordApiError).response?.data;
         if (responseData?.current_password) {
           toast.error("Nieprawidłowe obecne hasło");
           return;

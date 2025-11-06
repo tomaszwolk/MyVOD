@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
 
 /**
  * Props for ChangePasswordCard component.
@@ -71,7 +70,7 @@ export function ChangePasswordCard({
       setNewPassword("");
       setConfirmPassword("");
       setErrors({});
-    } catch (error) {
+    } catch {
       // Error handling is done by parent component
     }
   };

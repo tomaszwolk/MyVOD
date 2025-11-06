@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
+import { isAxiosError } from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Dialog,
@@ -19,6 +20,12 @@ import { SuggestionList } from "./SuggestionList";
 import { AISuggestionsEmptyState } from "./AISuggestionsEmptyState";
 import type { AISuggestionsViewModel } from "@/types/view/suggestions.types";
 import type { EmptyStateVariant } from "@/types/view/suggestions.types";
+import type { AISuggestionsDto } from "@/types/api.types";
+
+type SuggestionsErrorResponse = {
+  detail?: string;
+  expires_at?: string;
+};
 
 /**
  * Props for AISuggestionsDialog component.
@@ -51,7 +58,7 @@ export function AISuggestionsDialog({
 
   // Add to watchlist mutation
   const addToWatchlistMutation = useAddToWatchlist();
-  const platformsQuery = usePlatforms();
+  const platformsQuery = usePlatforms(open);
 
   // Track added items and loading states
   const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
@@ -59,18 +66,16 @@ export function AISuggestionsDialog({
 
   // Map API response to ViewModel
   const viewModel: AISuggestionsViewModel = useMemo(() => {
-    return mapAISuggestionsToVM(
-      suggestionsQuery.data || null,
-      suggestionsQuery.error || null
-    );
+    const dto: AISuggestionsDto | null = suggestionsQuery.data ?? null;
+    return mapAISuggestionsToVM(dto, suggestionsQuery.error ?? null);
   }, [suggestionsQuery.data, suggestionsQuery.error]);
 
   // Determine empty state variant
   const emptyStateVariant: EmptyStateVariant = useMemo(() => {
-    if (suggestionsQuery.error) {
-      const status = (suggestionsQuery.error as any)?.response?.status;
-      if (status === 404) return 'no-data';
-      if (status === 429) return 'rate-limited';
+    const error = suggestionsQuery.error;
+    if (isAxiosError<SuggestionsErrorResponse>(error)) {
+      if (error.response?.status === 404) return 'no-data';
+      if (error.response?.status === 429) return 'rate-limited';
       return 'error';
     }
     if (viewModel.items.length === 0 && !suggestionsQuery.isLoading) {
@@ -93,7 +98,7 @@ export function AISuggestionsDialog({
         added_from_ai_suggestion: true 
       });
       setAddedSet(prev => new Set([...prev, tconst]));
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation (toast notifications)
       // Don't add to addedSet on error
     } finally {

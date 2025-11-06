@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
@@ -35,8 +35,9 @@ export function WatchedSearchCombobox({
   const debouncedQuery = useDebouncedValue(value, 450);
 
   const movieSearch = useMovieSearch(debouncedQuery);
-  const results = movieSearch.data ?? [];
   const { isLoading, error, metrics } = movieSearch;
+
+  const results = useMemo(() => movieSearch.data ?? [], [movieSearch.data]);
 
   // Reset active index when results change
   useEffect(() => {

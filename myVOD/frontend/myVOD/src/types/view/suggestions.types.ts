@@ -1,6 +1,6 @@
 // AI Suggestions View Model Types
 
-import type { MovieAvailabilityDto, SuggestionItemDto } from "../api.types";
+import type { MovieAvailabilityDto } from "../api.types";
 
 /**
  * ViewModel for a single suggestion card.

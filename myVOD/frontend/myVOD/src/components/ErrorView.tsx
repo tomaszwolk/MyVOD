@@ -1,4 +1,4 @@
-import { AlertTriangle, Wifi, WifiOff, Home, RefreshCw, LogIn, List } from "lucide-react";
+import { AlertTriangle, WifiOff, Home, RefreshCw, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ErrorKind, ErrorViewModel } from "@/types/view/error.types";
@@ -47,12 +47,25 @@ function ErrorIllustration({ variant }: { variant: ErrorKind }) {
  * ErrorActions component for rendering action buttons
  */
 function ErrorActions({ actions }: { actions: ErrorViewModel['actions'] }) {
+  const getButtonVariant = (variant?: 'primary' | 'secondary' | 'link') => {
+    switch (variant) {
+      case 'primary':
+        return 'default';
+      case 'secondary':
+        return 'secondary';
+      case 'link':
+        return 'link';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
       {actions.map((action) => (
         <Button
           key={action.id}
-          variant={action.variant || 'default'}
+          variant={getButtonVariant(action.variant)}
           onClick={action.onClick}
           className="min-w-[140px]"
         >

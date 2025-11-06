@@ -1,9 +1,16 @@
 import { useEffect, useRef } from "react";
 import type { UsersGrowthPoint } from "@/types/view/admin.types";
+import type { ChartConstructor, ChartInstance, ChartConfiguration } from "./chart-types";
 
 type UsersGrowthBarChartProps = {
   data: UsersGrowthPoint[];
 };
+
+declare global {
+  interface Window {
+    Chart?: ChartConstructor;
+  }
+}
 
 /**
  * UsersGrowthBarChart component.
@@ -11,7 +18,7 @@ type UsersGrowthBarChartProps = {
  */
 export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartInstanceRef = useRef<any>(null);
+  const chartInstanceRef = useRef<ChartInstance | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current || !data || data.length === 0) {
@@ -22,9 +29,9 @@ export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
     const initChart = async () => {
       try {
         // Try to use Chart.js from CDN if available in window
-        const Chart = (window as any).Chart;
+        let chartConstructor = window.Chart;
         
-        if (!Chart) {
+        if (!chartConstructor) {
           // Load Chart.js from CDN if not available
           await new Promise<void>((resolve, reject) => {
             if (document.querySelector('script[src*="chart.js"]')) {
@@ -37,9 +44,10 @@ export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
             script.onerror = () => reject(new Error("Failed to load Chart.js"));
             document.head.appendChild(script);
           });
+          chartConstructor = window.Chart;
         }
 
-        const ChartLib = (window as any).Chart;
+        const ChartLib = chartConstructor;
         if (!ChartLib) {
           console.error("Chart.js not available");
           return;
@@ -61,7 +69,7 @@ export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
 
         const counts = data.map((point) => point.count);
 
-        chartInstanceRef.current = new ChartLib(ctx, {
+        const chartConfig: ChartConfiguration<"bar"> = {
           type: "bar",
           data: {
             labels,
@@ -102,7 +110,9 @@ export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
               intersect: false,
             },
           },
-        });
+        };
+
+        chartInstanceRef.current = new ChartLib(ctx, chartConfig);
       } catch (error) {
         console.error("Error initializing chart:", error);
       }

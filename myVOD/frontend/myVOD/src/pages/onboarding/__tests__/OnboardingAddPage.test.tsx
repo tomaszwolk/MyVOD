@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock the onboarding components
 vi.mock('@/components/onboarding/OnboardingLayout', () => ({
-  OnboardingLayout: ({ children, title }: any) => (
+  OnboardingLayout: ({ children, title }: { children: React.ReactNode; title: string }) => (
     <div data-testid="onboarding-layout" data-title={title}>
       {children}
     </div>
@@ -14,13 +14,13 @@ vi.mock('@/components/onboarding/OnboardingLayout', () => ({
 }));
 
 vi.mock('@/components/onboarding/ProgressBar', () => ({
-  ProgressBar: ({ current, total }: any) => (
+  ProgressBar: ({ current, total }: { current: number; total: number }) => (
     <div data-testid="progress-bar" data-current={current} data-total={total} />
   ),
 }));
 
 vi.mock('@/components/onboarding/OnboardingHeader', () => ({
-  OnboardingHeader: ({ title, hint }: any) => (
+  OnboardingHeader: ({ title, hint }: { title: string; hint: string }) => (
     <div data-testid="onboarding-header">
       <h1>{title}</h1>
       <p>{hint}</p>
@@ -29,7 +29,7 @@ vi.mock('@/components/onboarding/OnboardingHeader', () => ({
 }));
 
 vi.mock('@/components/onboarding/MovieSearchCombobox', () => ({
-  MovieSearchCombobox: ({ maxSelectable, disabledTconsts }: any) => (
+  MovieSearchCombobox: ({ maxSelectable, disabledTconsts }: { maxSelectable?: number; disabledTconsts: Set<string> }) => (
     <div data-testid="movie-search-combobox" data-max-selectable={maxSelectable}>
       Search Combobox
     </div>
@@ -37,7 +37,7 @@ vi.mock('@/components/onboarding/MovieSearchCombobox', () => ({
 }));
 
 vi.mock('@/components/onboarding/AddedMoviesGrid', () => ({
-  AddedMoviesGrid: ({ items }: any) => (
+  AddedMoviesGrid: ({ items }: { items: any[] }) => (
     <div data-testid="added-movies-grid" data-item-count={items.length}>
       Added Movies Grid
     </div>

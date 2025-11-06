@@ -27,11 +27,12 @@ export function UnauthorizedErrorPage() {
 
   const handleAction = (actionId: string) => {
     switch (actionId) {
-      case 'login':
+      case 'login': {
         // Navigate to login with returnTo parameter
         const currentPath = window.location.pathname;
         navigate(`/auth/login?returnTo=${encodeURIComponent(currentPath)}`);
         break;
+      }
       default:
         break;
     }

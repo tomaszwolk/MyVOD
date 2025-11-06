@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
-import { useIsStaff } from "@/hooks/useIsStaff";
 
 // Components
 import { WatchedToolbar } from "@/components/watched/WatchedToolbar";
@@ -24,6 +24,15 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
+
+type MovieMutationErrorResponse = {
+  detail?: string;
+  tconst?: string[];
+};
+
+type SuggestionsErrorResponse = {
+  expires_at?: string;
+};
 
 /**
  * Main watched movies page component.
@@ -38,11 +47,11 @@ export function WatchedPage() {
   // Check if suggestions modal should be open (from URL param)
   const isSuggestionsModalOpen = searchParams.get('suggestions') === 'true';
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    navigate("/auth/login", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/auth/login", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // User preferences (view mode, sort)
   const {
@@ -55,16 +64,17 @@ export function WatchedPage() {
   } = useWatchedPreferences();
 
   // User profile for platform availability
-  const userProfileQuery = useUserProfile();
-  const platformsQuery = usePlatforms();
-  const isStaff = useIsStaff();
+  const userProfileQuery = useUserProfile(isAuthenticated);
+  const platformsQuery = usePlatforms(isAuthenticated);
+  const isStaff = userProfileQuery.data?.is_staff === true;
 
   // Watched movies data
   const watchedQuery = useUserMoviesWatched({
     sortKey: sort,
-    userPlatforms: userProfileQuery.data?.platforms || [],
+    userPlatforms: userProfileQuery.data?.platforms ?? [],
+    enabled: isAuthenticated,
   });
-  const watchlistQuery = useListUserMovies('watchlist');
+  const watchlistQuery = useListUserMovies('watchlist', isAuthenticated);
 
   // Actions
   const restoreMutation = useRestoreToWatchlist();
@@ -77,19 +87,7 @@ export function WatchedPage() {
     enabled: false, // Don't fetch automatically, only when modal opens
   });
 
-  // Handlers
-  const handleViewModeChange = (mode: typeof viewMode) => {
-    setViewMode(mode);
-  };
-
-  const handleSortChange = (sortKey: typeof sort) => {
-    setSort(sortKey);
-  };
-
-  const handleRestore = (id: number) => {
-    restoreMutation.mutate(id);
-  };
-
+  // Local state - must be declared before any conditional returns
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -102,21 +100,7 @@ export function WatchedPage() {
     onConfirm: () => {},
   });
 
-  const handleDelete = (id: number) => {
-    const movie = filteredItems.find(item => item.id === id);
-    if (!movie) return;
-
-    setConfirmDialog({
-      open: true,
-      title: "Usuń film z historii obejrzanych",
-      message: `Czy na pewno chcesz usunąć "${movie.title}" z Twojej historii obejrzanych? Ta operacja jest nieodwracalna.`,
-      onConfirm: () => {
-        deleteFromWatchedMutation.mutate(id);
-        setConfirmDialog(prev => ({ ...prev, open: false }));
-      },
-    });
-  };
-
+  // Handlers
   const watchedEntriesByTconst = useMemo(() => {
     const map = new Map<string, number>();
     (watchedQuery.items ?? []).forEach(entry => {
@@ -143,35 +127,75 @@ export function WatchedPage() {
     [watchedEntriesByTconst]
   );
 
+  const hasUserPlatforms = (userProfileQuery.data?.platforms?.length ?? 0) > 0;
+
+  const filteredItems = useMemo(() => {
+    const items = watchedQuery.items ?? [];
+    if (!hideUnavailable || !hasUserPlatforms) {
+      return items;
+    }
+    return items.filter(item => item.isAvailableOnAnyPlatform);
+  }, [hideUnavailable, hasUserPlatforms, watchedQuery.items]);
+
+  const totalCount = watchedQuery.items?.length ?? 0;
+  const visibleCount = filteredItems.length;
+  const isFilteredEmpty = visibleCount === 0;
+
+  const handleViewModeChange = useCallback((mode: typeof viewMode) => {
+    setViewMode(mode);
+  }, [setViewMode]);
+
+  const handleSortChange = useCallback((sortKey: typeof sort) => {
+    setSort(sortKey);
+  }, [setSort]);
+
+  const handleRestore = useCallback((id: number) => {
+    restoreMutation.mutate(id);
+  }, [restoreMutation]);
+
+  const handleDelete = useCallback((id: number) => {
+    const movie = filteredItems.find(item => item.id === id);
+    if (!movie) {
+      return;
+    }
+
+    setConfirmDialog({
+      open: true,
+      title: "Usuń film z historii obejrzanych",
+      message: `Czy na pewno chcesz usunąć "${movie.title}" z Twojej historii obejrzanych? Ta operacja jest nieodwracalna.`,
+      onConfirm: () => {
+        deleteFromWatchedMutation.mutate(id);
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+      },
+    });
+  }, [deleteFromWatchedMutation, filteredItems]);
+
   // Create watchlist tconst set for suggestions modal
   const watchlistTconstSet = useMemo(() => {
     return new Set(existingWatchlistTconsts);
   }, [existingWatchlistTconsts]);
 
   // Check if suggestions are rate limited for button disabled state
-  const isSuggestDisabled = (suggestionsQuery.error as any)?.response?.status === 429;
+  const isSuggestDisabled = isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+    suggestionsQuery.error.response?.status === 429;
   
   // Get expires_at for rate limit countdown
   const nextAvailableAt = useMemo(() => {
-    if (suggestionsQuery.error) {
-      const error = suggestionsQuery.error as any;
-      if (error?.response?.status === 429) {
-        // If we have expires_at in error response, use it; otherwise calculate midnight
-        const expiresAt = error?.response?.data?.expires_at;
-        if (expiresAt) {
-          return expiresAt;
-        }
-        // Fallback to midnight
-        const now = new Date();
-        const midnight = new Date(now);
-        midnight.setHours(24, 0, 0, 0);
-        return midnight.toISOString();
+    if (isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+      suggestionsQuery.error.response?.status === 429) {
+      const expiresAt = suggestionsQuery.error.response?.data?.expires_at;
+      if (expiresAt) {
+        return expiresAt;
       }
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.toISOString();
     }
-    return suggestionsQuery.data?.expires_at || null;
+    return suggestionsQuery.data?.expires_at ?? null;
   }, [suggestionsQuery.error, suggestionsQuery.data]);
 
-  const handleAddToWatchlist = async (tconst: string) => {
+  const handleAddToWatchlist = useCallback(async (tconst: string) => {
     if (watchlistEntriesByTconst.has(tconst)) {
       toast.info("Ten film jest już na Twojej watchliście");
       return;
@@ -191,21 +215,16 @@ export function WatchedPage() {
 
       const result = await addMovieMutation.mutateAsync({ tconst });
       toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        (error as any).response?.status === 409
-      ) {
+    } catch (error) {
+      if (isAxiosError<MovieMutationErrorResponse>(error) && error.response?.status === 409) {
         toast.info("Ten film jest już na Twojej watchliście");
       } else {
         toast.error("Nie udało się dodać filmu do watchlisty");
       }
     }
-  };
+  }, [addMovieMutation, patchUserMovieMutation, watchlistEntriesByTconst, watchedEntriesByTconst]);
 
-  const handleAddToWatched = async (tconst: string) => {
+  const handleAddToWatched = useCallback(async (tconst: string) => {
     if (watchedEntriesByTconst.has(tconst)) {
       toast.info("Ten film był już oznaczony jako obejrzany");
       return;
@@ -214,19 +233,14 @@ export function WatchedPage() {
     try {
       const result = await addMovieMutation.mutateAsync({ tconst, mark_as_watched: true });
       toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        (error as any).response?.status === 409
-      ) {
+    } catch (error) {
+      if (isAxiosError<MovieMutationErrorResponse>(error) && error.response?.status === 409) {
         toast.info("Ten film był już oznaczony jako obejrzany");
       } else {
         toast.error("Nie udało się dodać filmu do obejrzanych");
       }
     }
-  };
+  }, [addMovieMutation, watchedEntriesByTconst]);
 
   // Loading states
   const isLoading =
@@ -245,37 +259,23 @@ export function WatchedPage() {
     </div>
   );
 
-  const handleSuggest = () => {
+  const handleSuggest = useCallback(() => {
     // Open modal by adding URL param
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('suggestions', 'true');
     setSearchParams(newSearchParams, { replace: false });
-  };
+  }, [searchParams, setSearchParams]);
 
-  const handleCloseSuggestionsModal = () => {
+  const handleCloseSuggestionsModal = useCallback(() => {
     // Close modal by removing URL param
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.delete('suggestions');
     setSearchParams(newSearchParams, { replace: true });
-  };
+  }, [searchParams, setSearchParams]);
 
-  const handleToggleHideUnavailable = () => {
+  const handleToggleHideUnavailable = useCallback(() => {
     setHideUnavailable(!hideUnavailable);
-  };
-
-  const hasUserPlatforms = (userProfileQuery.data?.platforms?.length ?? 0) > 0;
-
-  const filteredItems = useMemo(() => {
-    const items = watchedQuery.items ?? [];
-    if (!hideUnavailable || !hasUserPlatforms) {
-      return items;
-    }
-    return items.filter(item => item.isAvailableOnAnyPlatform);
-  }, [hideUnavailable, hasUserPlatforms, watchedQuery.items]);
-
-  const totalCount = watchedQuery.items?.length ?? 0;
-  const visibleCount = filteredItems.length;
-  const isFilteredEmpty = visibleCount === 0;
+  }, [hideUnavailable, setHideUnavailable]);
 
   const tabs = [
     {
@@ -308,6 +308,10 @@ export function WatchedPage() {
         ]
       : []),
   ];
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>

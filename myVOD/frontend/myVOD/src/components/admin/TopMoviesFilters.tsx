@@ -19,8 +19,6 @@ type TopMoviesFiltersProps = {
  */
 export function TopMoviesFilters({ value, onChange }: TopMoviesFiltersProps) {
   const typeLabel = value.type === "watchlist" ? "Watchlista" : "Obejrzane";
-  const rangeLabel =
-    value.range === "7d" ? "7 dni" : value.range === "30d" ? "30 dni" : "Cały czas";
 
   const handleTypeChange = (type: TopMoviesQuery["type"]) => {
     onChange({ ...value, type });

@@ -7,6 +7,10 @@ import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
 import type { OnboardingSelectedItem, OnboardingWatchedViewModel, SelectedSource } from "@/types/view/onboarding-watched.types";
 import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 
+interface ApiError extends Error {
+  status?: number;
+}
+
 /**
  * Controller hook for the Onboarding Watched Page.
  * Manages the complex flow of marking movies as watched during onboarding.
@@ -136,8 +140,9 @@ export function useOnboardingWatchedController() {
 
         toast.success(`"${movie.primaryTitle}" oznaczono jako obejrzany`);
 
-      } catch (error: any) {
-        if (error?.status === 409) {
+      } catch (error) {
+        const apiError = error as ApiError;
+        if (apiError?.status === 409) {
           const watched: UserMovieDto[] = await listUserMovies('watched');
           const existingWatched = watched.find(m => m.movie.tconst === movie.tconst);
 
@@ -162,17 +167,18 @@ export function useOnboardingWatchedController() {
         }
       }
 
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as ApiError;
       // Remove item from selected on error
       setSelected(prev => prev.filter(item => item.tconst !== movie.tconst));
 
       // Show error toast
-      if (error?.status === 400) {
+      if (apiError?.status === 400) {
         toast.error("Nie udało się oznaczyć filmu");
-      } else if (error?.status >= 500) {
+      } else if (apiError?.status && apiError.status >= 500) {
         toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
       } else {
-        toast.error(error?.message || "Wystąpił błąd podczas oznaczania filmu");
+        toast.error(apiError?.message || "Wystąpił błąd podczas oznaczania filmu");
       }
 
       console.error("Error in pick flow:", error);
@@ -215,7 +221,8 @@ export function useOnboardingWatchedController() {
       // Remove from selected
       setSelected(prev => prev.filter(i => i.tconst !== item.tconst));
 
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as ApiError;
       // Restore success state on error
       setSelected(prev =>
         prev.map(i =>
@@ -224,7 +231,7 @@ export function useOnboardingWatchedController() {
       );
 
       // Show error toast
-      if (error?.status >= 500) {
+      if (apiError?.status && apiError.status >= 500) {
         toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
       } else {
         toast.error("Nie udało się cofnąć operacji");

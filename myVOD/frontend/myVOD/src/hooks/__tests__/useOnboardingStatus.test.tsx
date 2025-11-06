@@ -417,7 +417,7 @@ describe('useOnboardingStatus', () => {
     });
 
     it('should handle unknown fromStep gracefully', () => {
-      const result = getNextOnboardingPath(platformsOnlyProgress, { fromStep: 'unknown' as any });
+      const result = getNextOnboardingPath(platformsOnlyProgress, { fromStep: 'unknown' as 'platforms' });
       expect(result).toBe('/onboarding/platforms'); // Falls back to start
     });
 

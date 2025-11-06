@@ -95,17 +95,19 @@ function sortByYearAsc(items: WatchedMovieItemVM[]): WatchedMovieItemVM[] {
 type UseUserMoviesWatchedProps = {
   sortKey: SortOption;
   userPlatforms: PlatformDto[];
+  enabled?: boolean;
 };
 
 /**
  * Custom hook for fetching and processing user's watched movies.
  * Handles sorting (backend vs client-side) and data transformation.
  */
-export function useUserMoviesWatched({ sortKey, userPlatforms }: UseUserMoviesWatchedProps) {
+export function useUserMoviesWatched({ sortKey, userPlatforms, enabled = true }: UseUserMoviesWatchedProps) {
   const query = useQuery<UserMovieDto[], Error>({
     queryKey: ["user-movies", "watched", sortKey === 'imdb_desc' ? { ordering: '-tconst__avg_rating' } : {}],
     queryFn: () => listUserMovies('watched', sortKey === 'imdb_desc' ? '-tconst__avg_rating' : undefined),
     staleTime: 30_000, // Consider data fresh for 30 seconds
+    enabled,
   });
 
   const processedData = useMemo(() => {

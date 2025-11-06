@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAISuggestions } from "@/lib/api/movies";
-import { logGeminiError } from "@/utils/error-logger";
 import type { AISuggestionsDto } from "@/types/api.types";
 
 /**
@@ -15,6 +14,12 @@ type UseAISuggestionsOptions = {
   debug?: boolean;
   enabled?: boolean;
 };
+
+interface ApiError extends Error {
+  response?: {
+    status?: number;
+  };
+}
 
 export function useAISuggestions(options: UseAISuggestionsOptions = {}) {
   const { debug = false, enabled = true } = options;
@@ -36,18 +41,8 @@ export function useAISuggestions(options: UseAISuggestionsOptions = {}) {
       // Default: 10 minutes if no expires_at
       return 10 * 60 * 1000;
     },
-    gcTime: (query) => {
-      // Same logic for garbage collection time
-      const data = query.state.data;
-      if (data?.expires_at) {
-        const expiresAt = new Date(data.expires_at).getTime();
-        const now = Date.now();
-        const timeUntilExpiry = expiresAt - now;
-        return Math.max(0, timeUntilExpiry);
-      }
-      return 10 * 60 * 1000;
-    },
-    retry: (failureCount, error: any) => {
+    gcTime: 60 * 60 * 1000, // 1 hour
+    retry: (failureCount, error: ApiError) => {
       // Don't retry on 404 (no suggestions available) or 429 (rate limited)
       if (error?.response?.status === 404 || error?.response?.status === 429) {
         return false;

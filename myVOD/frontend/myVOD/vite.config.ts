@@ -1,11 +1,11 @@
 /// <reference types="vitest" />
-import { defineConfig, UserConfig } from 'vite'
-import { InlineConfig } from 'vitest'
+import { defineConfig } from 'vite'
+import type { UserConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 
 interface VitestConfigExport extends UserConfig {
-  test: InlineConfig
+  test: Record<string, unknown>
 }
 
 // https://vite.dev/config/

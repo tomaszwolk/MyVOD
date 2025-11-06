@@ -3,6 +3,12 @@ import { toast } from "sonner";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { useAddMovie } from "@/hooks/useAddMovie";
 
+interface ApiError extends Error {
+  response?: {
+    status?: number;
+  };
+}
+
 /**
  * Hook for handling AI suggestions with modal state and movie adding.
  * Manages the complete flow of showing suggestions, handling errors, and adding movies.
@@ -34,9 +40,10 @@ export function useAISuggestionsHandler() {
       await addMovieMutation.mutateAsync({ tconst });
       setAddedTconsts(prev => new Set([...prev, tconst]));
       toast.success("Film dodany do watchlisty");
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as ApiError;
       // Handle specific error cases
-      if (error?.response?.status === 409) {
+      if (apiError?.response?.status === 409) {
         toast.info("Ten film jest już na Twojej watchliście");
         setAddedTconsts(prev => new Set([...prev, tconst]));
       } else {
@@ -47,7 +54,7 @@ export function useAISuggestionsHandler() {
 
   const handleSuggestClick = () => {
     // Check if suggestions are rate limited
-    const error = suggestionsQuery.error as any;
+    const error = suggestionsQuery.error as ApiError;
     if (error?.response?.status === 429) {
       toast.error("Limit sugestii AI został osiągnięty. Spróbuj ponownie później.");
       return;
@@ -56,7 +63,7 @@ export function useAISuggestionsHandler() {
     openModal();
   };
 
-  const isSuggestDisabled = (suggestionsQuery.error as any)?.response?.status === 429;
+  const isSuggestDisabled = (suggestionsQuery.error as ApiError)?.response?.status === 429;
 
   return {
     // Modal state

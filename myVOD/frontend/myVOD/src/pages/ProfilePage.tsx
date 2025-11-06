@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -11,7 +11,6 @@ import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
-import { useIsStaff } from "@/hooks/useIsStaff";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SearchCombobox } from "@/components/watchlist/SearchCombobox";
@@ -25,7 +24,16 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
-import type { PlatformDto } from "@/types/api.types";
+
+type MovieMutationErrorResponse = {
+  detail?: string;
+  tconst?: string[];
+};
+
+type SuggestionsErrorResponse = {
+  detail?: string;
+  expires_at?: string;
+};
 
 /**
  * ProfilePage component.
@@ -39,18 +47,18 @@ export function ProfilePage() {
   // Check if suggestions modal should be open (from URL param)
   const isSuggestionsModalOpen = searchParams.get('suggestions') === 'true';
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    navigate("/auth/login", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/auth/login", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // Data fetching
-  const userProfileQuery = useUserProfile();
-  const platformsQuery = usePlatforms();
-  const watchlistQuery = useListUserMovies('watchlist');
-  const watchedQuery = useListUserMovies('watched');
-  const isStaff = useIsStaff();
+  const userProfileQuery = useUserProfile(isAuthenticated);
+  const platformsQuery = usePlatforms(isAuthenticated);
+  const watchlistQuery = useListUserMovies('watchlist', isAuthenticated);
+  const watchedQuery = useListUserMovies('watched', isAuthenticated);
+  const isStaff = userProfileQuery.data?.is_staff === true;
 
   // Mutations
   const updatePlatformsMutation = useUpdateUserPlatforms();
@@ -83,22 +91,22 @@ export function ProfilePage() {
     if (selectedPlatformIds.length !== initialSelectedPlatformIds.length) {
       return true;
     }
-    const selectedSet = new Set(selectedPlatformIds.sort());
-    const initialSet = new Set(initialSelectedPlatformIds.sort());
-    return JSON.stringify([...selectedSet]) !== JSON.stringify([...initialSet]);
+    const sortedSelected = [...selectedPlatformIds].sort((a, b) => a - b);
+    const sortedInitial = [...initialSelectedPlatformIds].sort((a, b) => a - b);
+    return sortedSelected.some((id, index) => id !== sortedInitial[index]);
   }, [selectedPlatformIds, initialSelectedPlatformIds]);
 
   // Handlers
-  const handlePlatformToggle = (platformId: number) => {
+  const handlePlatformToggle = useCallback((platformId: number) => {
     setSelectedPlatformIds((prev) => {
       if (prev.includes(platformId)) {
         return prev.filter((id) => id !== platformId);
       }
       return [...prev, platformId];
     });
-  };
+  }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!isDirty || updatePlatformsMutation.isPending) {
       return;
     }
@@ -112,48 +120,51 @@ export function ProfilePage() {
         setSelectedPlatformIds(savedIds);
       },
     });
-  };
+  }, [isDirty, selectedPlatformIds, updatePlatformsMutation]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setSelectedPlatformIds([...initialSelectedPlatformIds]);
-  };
+  }, [initialSelectedPlatformIds]);
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = useCallback(() => {
     setIsDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(() => {
     deleteAccountMutation.mutate();
-  };
+  }, [deleteAccountMutation]);
 
-  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
-    await changePasswordMutation.mutateAsync({
-      current_password: currentPassword,
-      new_password: newPassword,
-    });
-  };
+  const handleChangePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      await changePasswordMutation.mutateAsync({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+    },
+    [changePasswordMutation],
+  );
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate("/auth/login", { replace: true });
-  };
+  }, [logout, navigate]);
 
-  const handleSuggest = () => {
+  const handleSuggest = useCallback(() => {
     // Open modal by adding URL param
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('suggestions', 'true');
     setSearchParams(newSearchParams, { replace: false });
-  };
+  }, [searchParams, setSearchParams]);
 
-  const handleCloseSuggestionsModal = () => {
+  const handleCloseSuggestionsModal = useCallback(() => {
     // Close modal by removing URL param
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.delete('suggestions');
     setSearchParams(newSearchParams, { replace: true });
-  };
+  }, [searchParams, setSearchParams]);
 
   // Handlers for adding movies (from search)
-  const handleAddToWatchlist = async (tconst: string) => {
+  const handleAddToWatchlist = useCallback(async (tconst: string) => {
     const watchedEntries = watchedQuery.data ?? [];
     const watchedEntriesByTconst = new Map<string, number>();
     watchedEntries.forEach(entry => {
@@ -179,12 +190,12 @@ export function ProfilePage() {
       const result = await addMovieMutation.mutateAsync({ tconst });
       toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
     } catch (error) {
-      if (isAxiosError(error)) {
+      if (isAxiosError<MovieMutationErrorResponse>(error)) {
         const status = error.response?.status;
         if (status === 409) {
           toast.info("Ten film jest już na Twojej watchliście");
         } else {
-          const detail = (error.response?.data as any)?.detail ?? (error.response?.data as any)?.tconst?.[0];
+          const detail = error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
           toast.error(detail ?? "Nie udało się dodać filmu do watchlisty");
         }
       } else {
@@ -192,19 +203,19 @@ export function ProfilePage() {
       }
       throw error;
     }
-  };
+  }, [addMovieMutation, patchUserMovieMutation, watchedQuery.data]);
 
-  const handleAddToWatched = async (tconst: string) => {
+  const handleAddToWatched = useCallback(async (tconst: string) => {
     try {
       const result = await addMovieMutation.mutateAsync({ tconst, mark_as_watched: true });
       toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
     } catch (error) {
-      if (isAxiosError(error)) {
+      if (isAxiosError<MovieMutationErrorResponse>(error)) {
         const status = error.response?.status;
         if (status === 409) {
           toast.info("Ten film był już oznaczony jako obejrzany");
         } else {
-          const detail = (error.response?.data as any)?.detail ?? (error.response?.data as any)?.tconst?.[0];
+          const detail = error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
           toast.error(detail ?? "Nie udało się dodać filmu do obejrzanych");
         }
       } else {
@@ -212,11 +223,17 @@ export function ProfilePage() {
       }
       throw error;
     }
-  };
+  }, [addMovieMutation]);
 
   // Get existing tconsts for duplicate checking
-  const watchlistEntries = watchlistQuery.data ?? [];
-  const watchedEntries = watchedQuery.data ?? [];
+  const watchlistEntries = useMemo(
+    () => watchlistQuery.data ?? [],
+    [watchlistQuery.data]
+  );
+  const watchedEntries = useMemo(
+    () => watchedQuery.data ?? [],
+    [watchedQuery.data]
+  );
   const existingTconsts = useMemo(
     () => watchlistEntries.map(entry => entry.movie.tconst),
     [watchlistEntries]
@@ -238,26 +255,23 @@ export function ProfilePage() {
   const hasError = userProfileQuery.isError || platformsQuery.isError;
 
   // Check if suggestions are rate limited for button disabled state
-  const isSuggestDisabled = (suggestionsQuery.error as any)?.response?.status === 429;
+  const isSuggestDisabled = isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+    suggestionsQuery.error.response?.status === 429;
   
   // Get expires_at for rate limit countdown
   const nextAvailableAt = useMemo(() => {
-    if (suggestionsQuery.error) {
-      const error = suggestionsQuery.error as any;
-      if (error?.response?.status === 429) {
-        // If we have expires_at in error response, use it; otherwise calculate midnight
-        const expiresAt = error?.response?.data?.expires_at;
-        if (expiresAt) {
-          return expiresAt;
-        }
-        // Fallback to midnight
-        const now = new Date();
-        const midnight = new Date(now);
-        midnight.setHours(24, 0, 0, 0);
-        return midnight.toISOString();
+    if (isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+      suggestionsQuery.error.response?.status === 429) {
+      const expiresAt = suggestionsQuery.error.response?.data?.expires_at;
+      if (expiresAt) {
+        return expiresAt;
       }
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.toISOString();
     }
-    return suggestionsQuery.data?.expires_at || null;
+    return suggestionsQuery.data?.expires_at ?? null;
   }, [suggestionsQuery.error, suggestionsQuery.data]);
 
   // Prepare tabs for navigation (similar to watchlist/watched)
@@ -303,6 +317,10 @@ export function ProfilePage() {
       </Button>
     </div>
   );
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>

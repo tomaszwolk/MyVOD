@@ -12,7 +12,7 @@ type SuggestionCardProps = {
   item: AISuggestionCardVM;
   isAlreadyOnWatchlist: boolean;
   isAdding: boolean;
-  onAdd: () => void;
+  onAdd: () => Promise<void>;
   platforms: PlatformDto[];
 };
 

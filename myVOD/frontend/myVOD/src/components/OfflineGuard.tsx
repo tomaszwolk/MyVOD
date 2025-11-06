@@ -49,16 +49,20 @@ export function OfflineGuard({
     };
   }, []);
 
+  // Handle redirect mode with useEffect
+  useEffect(() => {
+    if (isOffline && mode === 'redirect') {
+      navigate('/error/offline', { replace: true });
+    }
+  }, [isOffline, mode, navigate]);
+
   // If online, render children normally
   if (!isOffline) {
     return <>{children}</>;
   }
 
-  // If offline and mode is 'redirect', navigate to offline error page
+  // If offline and mode is 'redirect', don't render anything (navigation handled above)
   if (mode === 'redirect') {
-    useEffect(() => {
-      navigate('/error/offline', { replace: true });
-    }, [navigate]);
     return null;
   }
 

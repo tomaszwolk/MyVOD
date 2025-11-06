@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { MetricsCardsGrid } from "@/components/admin/MetricsCardsGrid";
 import { ChartsRow } from "@/components/admin/ChartsRow";
@@ -20,14 +19,13 @@ import { LogOut } from "lucide-react";
 export function AdminDashboardPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const metricsQuery = useAdminMetrics();
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate("/auth/login", { replace: true });
     return null;
   }
-
-  const metricsQuery = useAdminMetrics();
 
   // Handle 403 errors (not staff)
   if (metricsQuery.error && isAxiosError(metricsQuery.error)) {

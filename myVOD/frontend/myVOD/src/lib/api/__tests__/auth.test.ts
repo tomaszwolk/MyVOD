@@ -597,7 +597,7 @@ describe('registerUser - Edge Cases', () => {
 
   it('should handle null email', async () => {
     const command = {
-      email: null as any,
+      email: null as unknown as string,
       password: 'testpass123'
     };
     mock.onPost('/register/').reply(400, {
@@ -693,7 +693,7 @@ describe('loginUser - Edge Cases', () => {
 
   it('should handle null email', async () => {
     const command = {
-      email: null as any,
+      email: null as unknown as string,
       password: 'testpass123'
     };
     mock.onPost('/token/').reply(400, {
@@ -813,8 +813,8 @@ describe('changePassword - Edge Cases', () => {
 
   it('should handle null values', async () => {
     const command = {
-      current_password: null as any,
-      new_password: null as any
+      current_password: null as unknown as string,
+      new_password: null as unknown as string
     };
     mock.onPost('/me/change-password/').reply(400, {
       current_password: ['This field may not be null.'],

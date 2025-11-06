@@ -47,9 +47,14 @@ function initializeTheme() {
 // Initialize theme immediately
 initializeTheme();
 
+interface QueryMeta {
+  integration?: 'gemini' | 'watchmode';
+  operation?: string;
+}
+
 // Global error handler for integration logging
-const handleQueryError = (error: Error, query: any) => {
-  const meta = query.meta as any;
+const handleQueryError = (error: Error, query: { meta?: QueryMeta, queryKey?: unknown }) => {
+  const meta = query.meta;
 
   // Log integration errors
   if (meta?.integration) {
@@ -67,13 +72,35 @@ const handleQueryError = (error: Error, query: any) => {
   }
 };
 
+// Global error handler for mutations
+const handleMutationError = (error: Error, variables: unknown, context: unknown, mutation: { meta?: QueryMeta }) => {
+  const meta = mutation.meta;
+
+  // Log integration errors
+  if (meta?.integration) {
+    import('@/utils/error-logger').then(({ logGeminiError, logWatchmodeError }) => {
+      if (meta.integration === 'gemini') {
+        logGeminiError(meta.operation || 'unknown', error, {
+          variables,
+          context,
+        });
+      } else if (meta.integration === 'watchmode') {
+        logWatchmodeError(meta.operation || 'unknown', error, {
+          variables,
+          context,
+        });
+      }
+    });
+  }
+};
+
 // Create a client for TanStack Query
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: handleQueryError,
   }),
   mutationCache: new MutationCache({
-    onError: handleQueryError,
+    onError: handleMutationError,
   }),
   defaultOptions: {
     queries: {

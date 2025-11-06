@@ -12,6 +12,12 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getPlatforms, patchUserPlatforms } from "@/lib/api/platforms";
 import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 
+interface ApiError extends Error {
+  response?: {
+    status?: number;
+  };
+}
+
 /**
  * Onboarding page for selecting VOD platforms.
  * Step 1 of 3 in the onboarding flow.
@@ -62,7 +68,7 @@ export function OnboardingPlatformsPage() {
       );
       navigate(nextPath, { replace: true });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       console.log('OnboardingPlatformsPage: Mutation error:', error);
       console.log('OnboardingPlatformsPage: Error response:', error?.response);
       console.log('OnboardingPlatformsPage: Error status:', error?.response?.status);
@@ -76,7 +82,7 @@ export function OnboardingPlatformsPage() {
   });
 
   // Helper function to get error message based on error type
-  const getErrorMessage = (error: any) => {
+  const getErrorMessage = (error: ApiError | null) => {
     if (!error?.response) {
       return "Network error. Please check your connection and try again.";
     }
@@ -91,7 +97,7 @@ export function OnboardingPlatformsPage() {
       return "Your session has expired. Please log in again.";
     }
 
-    if (status >= 500) {
+    if (status && status >= 500) {
       return "Server error. Please try again later.";
     }
 
@@ -270,7 +276,7 @@ export function OnboardingPlatformsPage() {
         <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1}>
           <AlertTitle>Save Error</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(mutation.error)}
+            {getErrorMessage(mutation.error as ApiError)}
           </AlertDescription>
         </Alert>
       )}

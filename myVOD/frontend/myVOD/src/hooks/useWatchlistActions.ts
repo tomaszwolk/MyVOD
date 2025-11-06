@@ -121,7 +121,7 @@ export function useDeleteFromWatchlist() {
       });
 
       toast.success(`"${deletedMovie.movie.primary_title}" przywrócono do watchlisty`);
-    } catch (error) {
+    } catch {
       toast.error("Nie udało się cofnąć usunięcia");
     }
   };

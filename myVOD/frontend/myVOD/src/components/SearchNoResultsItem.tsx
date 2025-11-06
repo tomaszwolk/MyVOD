@@ -15,7 +15,7 @@ interface SearchNoResultsItemProps {
  * Obsługiwana walidacja: renderowane tylko dla query.length >= 2 && results.length === 0.
  * Propsy: query: string.
  */
-export function SearchNoResultsItem({ query }: SearchNoResultsItemProps) {
+export function SearchNoResultsItem({ query: _query }: SearchNoResultsItemProps) {
   return (
     <div
       className="flex flex-col items-center gap-2 p-6 text-center"

@@ -12,6 +12,10 @@ vi.mock('@/lib/api/movies', () => ({
 
 const mockSearchMovies = vi.mocked(searchMovies);
 
+interface ApiError extends Error {
+  status?: number;
+}
+
 describe('useMovieSearch', () => {
   const createWrapper = () => {
     const queryClient = new QueryClient({
@@ -98,8 +102,8 @@ describe('useMovieSearch', () => {
 
   describe('API Error Handling', () => {
     it('should handle TMDB API errors (401 Unauthorized)', async () => {
-      const unauthorizedError = new Error('Unauthorized');
-      (unauthorizedError as any).status = 401;
+      const unauthorizedError: ApiError = new Error('Unauthorized');
+      unauthorizedError.status = 401;
 
       mockSearchMovies.mockRejectedValue(unauthorizedError);
 
@@ -149,8 +153,8 @@ describe('useMovieSearch', () => {
     });
 
     it('should handle API rate limiting responses', async () => {
-      const rateLimitError = new Error('Too many requests');
-      (rateLimitError as any).status = 429;
+      const rateLimitError: ApiError = new Error('Too many requests');
+      rateLimitError.status = 429;
 
       mockSearchMovies.mockRejectedValue(rateLimitError);
 
@@ -218,8 +222,8 @@ describe('useMovieSearch', () => {
     });
 
     it('should provide loading state during fetch', async () => {
-      let resolvePromise: (value: any) => void;
-      const promise = new Promise((resolve) => {
+      let resolvePromise: (value: MovieSearchResultDto[]) => void;
+      const promise = new Promise<MovieSearchResultDto[]>((resolve) => {
         resolvePromise = resolve;
       });
 

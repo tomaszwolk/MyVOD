@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -32,7 +32,7 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
   const debouncedQuery = useDebouncedValue(query, 250);
 
   const movieSearch = useMovieSearch(debouncedQuery);
-  const results = movieSearch.data ?? [];
+  const results = useMemo(() => movieSearch.data ?? [], [movieSearch.data]);
   const { isLoading, error } = movieSearch;
 
   // Reset active index when results change
@@ -68,7 +68,7 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
       if (shouldReset) {
         closeAndReset();
       }
-    } catch (error) {
+    } catch {
       // Error feedback is handled by the caller (toast notifications).
     } finally {
       setPendingTconst(null);

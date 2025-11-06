@@ -36,8 +36,18 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
+type MockAxiosInstance = AxiosInstance & {
+  (config: InternalAxiosRequestConfig): Promise<any>;
+  interceptors: {
+    request: { use: vi.Mock };
+    response: { use: vi.Mock };
+  };
+  get: vi.Mock;
+  post: vi.Mock;
+};
+
 describe('setupAxiosInterceptors', () => {
-  let mockAxios: AxiosInstance;
+  let mockAxios: MockAxiosInstance;
   let onLogout: vi.MockedFunction<() => void>;
   let onUnauthorized: vi.MockedFunction<() => void>;
 
@@ -57,7 +67,7 @@ describe('setupAxiosInterceptors', () => {
     };
     mockAxiosInstance.get = vi.fn();
     mockAxiosInstance.post = vi.fn();
-    mockAxios = mockAxiosInstance as any;
+    mockAxios = mockAxiosInstance as MockAxiosInstance;
 
     // Mock callbacks
     onLogout = vi.fn();
@@ -68,7 +78,7 @@ describe('setupAxiosInterceptors', () => {
   });
 
   describe('Request Interceptor', () => {
-    let requestInterceptor: any;
+    let requestInterceptor: (config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig;
 
     beforeEach(() => {
       requestInterceptor = mockAxios.interceptors.request.use.mock.calls[mockAxios.interceptors.request.use.mock.calls.length - 1][0];
@@ -156,7 +166,7 @@ describe('setupAxiosInterceptors', () => {
   });
 
   describe('Response Interceptor', () => {
-    let responseInterceptor: any;
+    let responseInterceptor: (error: any) => Promise<any>;
 
     beforeEach(() => {
       responseInterceptor = mockAxios.interceptors.response.use.mock.calls[mockAxios.interceptors.response.use.mock.calls.length - 1][1];

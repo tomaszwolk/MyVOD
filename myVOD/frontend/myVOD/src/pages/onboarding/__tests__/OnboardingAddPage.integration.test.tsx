@@ -5,13 +5,13 @@ import { toast } from 'sonner';
 
 // Mock Popover components to avoid Floating UI issues in tests
 vi.mock('@/components/ui/popover', () => ({
-  Popover: ({ children, open }: any) => {
+  Popover: ({ children, open }: { children: React.ReactNode; open: boolean }) => {
     return <div data-testid="popover" data-open={open}>{children}</div>;
   },
-  PopoverTrigger: ({ children, asChild }: any) => {
+  PopoverTrigger: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => {
     return <div data-testid="popover-trigger">{children}</div>;
   },
-  PopoverContent: ({ children, className, align, onOpenAutoFocus }: any) => {
+  PopoverContent: ({ children, className, align, onOpenAutoFocus }: { children: React.ReactNode; className?: string; align?: string; onOpenAutoFocus?: (event: Event) => void }) => {
     return (
       <div
         data-testid="popover-content"

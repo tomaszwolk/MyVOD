@@ -141,7 +141,7 @@ describe('TMDBPoster', () => {
       />
     );
 
-    let element = screen.getByAltText('Movie poster');
+    const element = screen.getByAltText('Movie poster');
     expect(element).toHaveClass(customClass);
 
     // Test with placeholder (trigger error)

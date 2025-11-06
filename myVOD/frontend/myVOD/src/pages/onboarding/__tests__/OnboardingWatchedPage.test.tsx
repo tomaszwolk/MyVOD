@@ -6,7 +6,7 @@ import type { OnboardingSelectedItem } from '@/types/view/onboarding-watched.typ
 
 // Mock all the components used in the page
 vi.mock('@/components/onboarding/OnboardingLayout', () => ({
-  OnboardingLayout: ({ children, title }: any) => (
+  OnboardingLayout: ({ children, title }: { children: React.ReactNode; title: string }) => (
     <div data-testid="onboarding-layout" data-title={title}>
       {children}
     </div>
@@ -14,13 +14,13 @@ vi.mock('@/components/onboarding/OnboardingLayout', () => ({
 }));
 
 vi.mock('@/components/onboarding/ProgressBar', () => ({
-  ProgressBar: ({ current, total }: any) => (
+  ProgressBar: ({ current, total }: { current: number; total: number }) => (
     <div data-testid="progress-bar" data-current={current} data-total={total} />
   ),
 }));
 
 vi.mock('@/components/onboarding/OnboardingHeader', () => ({
-  OnboardingHeader: ({ title, hint }: any) => (
+  OnboardingHeader: ({ title, hint }: { title: string; hint: string }) => (
     <div data-testid="onboarding-header">
       <h1>{title}</h1>
       <p>{hint}</p>
@@ -29,7 +29,7 @@ vi.mock('@/components/onboarding/OnboardingHeader', () => ({
 }));
 
 vi.mock('@/components/onboarding/WatchedSearchCombobox', () => ({
-  WatchedSearchCombobox: ({ value, onChange, onPick, disabled, selectedTconsts }: any) => {
+  WatchedSearchCombobox: ({ value, onChange, onPick, disabled, selectedTconsts }: { value: string; onChange: (value: string) => void; onPick: (option: { tconst: string; primaryTitle: string }) => void; disabled: boolean; selectedTconsts: Set<string> }) => {
     const buttonDisabled = disabled || selectedTconsts.has('tt0111161');
     return (
       <div data-testid="watched-search-combobox" data-value={value} data-disabled={disabled}>
@@ -53,7 +53,7 @@ vi.mock('@/components/onboarding/WatchedSearchCombobox', () => ({
 }));
 
 vi.mock('@/components/onboarding/SelectedMoviesList', () => ({
-  SelectedMoviesList: ({ items, maxItems, onUndo }: any) => (
+  SelectedMoviesList: ({ items, maxItems, onUndo }: { items: OnboardingSelectedItem[]; maxItems: number; onUndo: (item: OnboardingSelectedItem) => void }) => (
     <div data-testid="selected-movies-list" data-item-count={items.length} data-max-items={maxItems}>
       {items.map((item: OnboardingSelectedItem) => (
         <div key={item.tconst} data-testid={`selected-movie-${item.tconst}`}>
@@ -71,7 +71,7 @@ vi.mock('@/components/onboarding/SelectedMoviesList', () => ({
 }));
 
 vi.mock('@/components/onboarding/OnboardingFooterNav', () => ({
-  OnboardingFooterNav: ({ onSkip, onNext }: any) => (
+  OnboardingFooterNav: ({ onSkip, onNext }: { onSkip: () => void; onNext: () => void }) => (
     <div data-testid="onboarding-footer-nav">
       <button data-testid="skip-button" onClick={onSkip}>
         Skip

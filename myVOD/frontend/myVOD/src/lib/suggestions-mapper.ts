@@ -1,6 +1,12 @@
 import type { SuggestionItemDto, AISuggestionsDto } from "@/types/api.types";
 import type { AISuggestionCardVM, AISuggestionsViewModel } from "@/types/view/suggestions.types";
 
+interface ApiError extends Error {
+  response?: {
+    status?: number;
+  };
+}
+
 /**
  * Maps API DTO to ViewModel for a single suggestion card.
  * Handles poster URL construction (TMDB base URL + poster_path).
@@ -44,7 +50,8 @@ export function mapAISuggestionsToVM(
   dto: AISuggestionsDto | null,
   error: Error | null
 ): AISuggestionsViewModel {
-  if (error && (error as any)?.response?.status === 429) {
+  const apiError = error as ApiError;
+  if (apiError && apiError?.response?.status === 429) {
     // Rate limited - return empty with rate limit flag
     return {
       expiresAt: null,
@@ -54,7 +61,7 @@ export function mapAISuggestionsToVM(
     };
   }
 
-  if (error && (error as any)?.response?.status === 404) {
+  if (apiError && apiError?.response?.status === 404) {
     // No data available
     return {
       expiresAt: null,

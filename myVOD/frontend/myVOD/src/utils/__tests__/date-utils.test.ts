@@ -26,8 +26,8 @@ describe('date-utils', () => {
     });
 
     it('should handle null/undefined dates', () => {
-      expect(formatLastCheckedDate(null as any)).toBe('nieznana data');
-      expect(formatLastCheckedDate(undefined as any)).toBe('nieznana data');
+      expect(formatLastCheckedDate(null as unknown as string)).toBe('nieznana data');
+      expect(formatLastCheckedDate(undefined as unknown as string)).toBe('nieznana data');
     });
 
     it('should use correct Polish date format', () => {

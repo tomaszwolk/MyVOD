@@ -1,9 +1,16 @@
 import { useEffect, useRef } from "react";
 import type { RetentionPoint } from "@/types/view/admin.types";
+import type { ChartConstructor, ChartInstance, ChartConfiguration } from "./chart-types";
 
 type RetentionLineChartProps = {
   data: RetentionPoint[];
 };
+
+declare global {
+  interface Window {
+    Chart?: ChartConstructor;
+  }
+}
 
 /**
  * RetentionLineChart component.
@@ -11,7 +18,7 @@ type RetentionLineChartProps = {
  */
 export function RetentionLineChart({ data }: RetentionLineChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartInstanceRef = useRef<any>(null);
+  const chartInstanceRef = useRef<ChartInstance | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current || !data || data.length === 0) {
@@ -22,9 +29,9 @@ export function RetentionLineChart({ data }: RetentionLineChartProps) {
     const initChart = async () => {
       try {
         // Try to use Chart.js from CDN if available in window
-        const Chart = (window as any).Chart;
-        
-        if (!Chart) {
+        let chartConstructor = window.Chart;
+
+        if (!chartConstructor) {
           // Load Chart.js from CDN if not available
           await new Promise<void>((resolve, reject) => {
             if (document.querySelector('script[src*="chart.js"]')) {
@@ -37,9 +44,10 @@ export function RetentionLineChart({ data }: RetentionLineChartProps) {
             script.onerror = () => reject(new Error("Failed to load Chart.js"));
             document.head.appendChild(script);
           });
+          chartConstructor = window.Chart;
         }
 
-        const ChartLib = (window as any).Chart;
+        const ChartLib = chartConstructor;
         if (!ChartLib) {
           console.error("Chart.js not available");
           return;
@@ -62,7 +70,7 @@ export function RetentionLineChart({ data }: RetentionLineChartProps) {
         const retention7d = data.map((point) => point.retention_7d);
         const retention30d = data.map((point) => point.retention_30d);
 
-        chartInstanceRef.current = new ChartLib(ctx, {
+        const chartConfig: ChartConfiguration<"line"> = {
           type: "line",
           data: {
             labels,
@@ -101,7 +109,7 @@ export function RetentionLineChart({ data }: RetentionLineChartProps) {
                 beginAtZero: true,
                 max: 100,
                 ticks: {
-                  callback: function (value: any) {
+                  callback: function (value: number) {
                     return value + "%";
                   },
                 },
@@ -113,7 +121,9 @@ export function RetentionLineChart({ data }: RetentionLineChartProps) {
               intersect: false,
             },
           },
-        });
+        };
+
+        chartInstanceRef.current = new ChartLib(ctx, chartConfig);
       } catch (error) {
         console.error("Error initializing chart:", error);
       }

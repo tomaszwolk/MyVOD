@@ -15,6 +15,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { deleteUserMovie } from "@/lib/api/movies";
 import type { AddedMovieVM, SearchOptionVM } from "@/types/api.types";
 
+interface ApiError extends Error {
+  status?: number;
+}
+
 /**
  * Onboarding page for adding movies to watchlist.
  * Step 2 of 3 in the onboarding flow.
@@ -100,7 +104,8 @@ export function OnboardingAddPage() {
       // Success toast
       toast.success(`"${searchOption.primaryTitle}" został dodany do Twojej watchlisty`);
 
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as ApiError;
       // Remove from state on error
       setAdded(prev => prev.filter(movie => movie.tconst !== searchOption.tconst));
       setAddedSet(prev => {
@@ -110,14 +115,14 @@ export function OnboardingAddPage() {
       });
 
       // Handle different error types
-      if (error?.status === 409) {
+      if (apiError?.status === 409) {
         // Movie already on watchlist - disable in session and show info toast
         setAddedSet(prev => new Set(prev).add(searchOption.tconst));
         toast.info("Ten film jest już na Twojej watchliście");
-      } else if (error?.status === 400) {
+      } else if (apiError?.status === 400) {
         // Invalid tconst or movie not found
         toast.error("Nie udało się dodać filmu");
-      } else if (error?.status >= 500) {
+      } else if (apiError?.status && apiError.status >= 500) {
         // Server error
         toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
       } else {
@@ -154,13 +159,14 @@ export function OnboardingAddPage() {
       await queryClient.invalidateQueries({ queryKey: ["user-movies"] });
 
       toast.success(`"${movie.primaryTitle}" został usunięty z watchlisty`);
-    } catch (error: any) {
-      if (error?.status === 401 || error?.status === 403) {
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError?.status === 401 || apiError?.status === 403) {
         navigate('/auth/login');
         return;
       }
 
-      if (error?.status >= 500) {
+      if (apiError?.status && apiError.status >= 500) {
         toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
       } else {
         toast.error("Nie udało się usunąć filmu");
