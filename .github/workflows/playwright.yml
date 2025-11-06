@@ -8,6 +8,19 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      USE_E2E_TEST_DATABASE: true
+      SUPABASE_DB_NAME: ${{ secrets.SUPABASE_E2E_DB_NAME }}
+      SUPABASE_DB_USER: ${{ secrets.SUPABASE_E2E_DB_USER }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_E2E_DB_PASSWORD }}
+      SUPABASE_DB_HOST: ${{ secrets.SUPABASE_E2E_DB_HOST }}
+      SUPABASE_DB_PORT: ${{ secrets.SUPABASE_E2E_DB_PORT }}
+      SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
+    
+    defaults:
+      run:
+        working-directory: ./myVOD/frontend/myVOD
+    
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -23,5 +36,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        path: playwright-report/
+        path: ./myVOD/frontend/myVOD/playwright-report/
         retention-days: 30

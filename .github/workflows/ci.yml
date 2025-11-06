@@ -9,7 +9,7 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
     env:
-      USE_E2E_TEST_DATABASE: true
+      # USE_E2E_TEST_DATABASE is only for E2E tests with Playwright, not for pytest unit tests
       SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
       SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
