@@ -9,6 +9,12 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
     env:
+      USE_E2E_TEST_DATABASE: true
+      SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+      SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+      SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
       SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
     
     defaults:
@@ -33,7 +39,7 @@ jobs:
         key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
 
     - name: Install dependencies
-      run: uv sync --ci
+      run: uv sync
 
     - name: Lint with ruff
       run: uv run ruff check .
