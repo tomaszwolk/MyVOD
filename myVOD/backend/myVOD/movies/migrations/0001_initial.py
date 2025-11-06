@@ -15,19 +15,22 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
-        # These operations will now succeed because they are not in a transaction.
-        UnaccentExtension(),
-        TrigramExtension(),
-        # This function depends on the 'unaccent' extension.
+        # All preparatory SQL commands must be in a single, non-transactional operation.
         migrations.RunSQL(
             sql="""
+            CREATE EXTENSION IF NOT EXISTS unaccent;
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
             CREATE OR REPLACE FUNCTION immutable_unaccent(text)
             RETURNS text LANGUAGE sql IMMUTABLE AS
             $func$
             SELECT unaccent($1)
             $func$;
             """,
-            reverse_sql="DROP FUNCTION IF EXISTS immutable_unaccent(text);",
+            reverse_sql="""
+            DROP FUNCTION IF EXISTS immutable_unaccent(text);
+            DROP EXTENSION IF EXISTS pg_trgm;
+            DROP EXTENSION IF EXISTS unaccent;
+            """,
         ),
         migrations.CreateModel(
             name="AiSuggestionBatch",
