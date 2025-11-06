@@ -123,6 +123,13 @@ if os.getenv('USE_E2E_TEST_DATABASE') == 'true':
             'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
             'HOST': os.getenv('SUPABASE_DB_HOST'),
             'PORT': os.getenv('SUPABASE_DB_PORT'),
+            'TEST': {
+                # Use the same database for tests instead of creating a separate test database
+                # This is necessary when using cloud databases like Supabase where:
+                # 1. User may not have permissions to create new databases
+                # 2. New test databases wouldn't have required extensions (unaccent, pg_trgm)
+                'NAME': os.getenv('SUPABASE_DB_NAME', 'postgres'),
+            }
         }
     }
 else:

@@ -14,11 +14,40 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
-        # All preparatory SQL commands must be in a single, non-transactional operation.
+        # Step 1: Try to create extensions (may fail due to permissions, but that's OK if they already exist)
         migrations.RunSQL(
             sql="""
-            CREATE EXTENSION IF NOT EXISTS unaccent;
-            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            DO $$
+            BEGIN
+                -- Try to create unaccent extension if it doesn't exist
+                -- This may fail if user lacks permissions, but we continue anyway
+                IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'unaccent') THEN
+                    BEGIN
+                        CREATE EXTENSION unaccent;
+                    EXCEPTION WHEN insufficient_privilege THEN
+                        RAISE NOTICE 'Could not create unaccent extension - insufficient privileges. Please enable it manually.';
+                    WHEN OTHERS THEN
+                        RAISE NOTICE 'Could not create unaccent extension: %', SQLERRM;
+                    END;
+                END IF;
+                
+                -- Try to create pg_trgm extension if it doesn't exist
+                IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm') THEN
+                    BEGIN
+                        CREATE EXTENSION pg_trgm;
+                    EXCEPTION WHEN insufficient_privilege THEN
+                        RAISE NOTICE 'Could not create pg_trgm extension - insufficient privileges. Please enable it manually.';
+                    WHEN OTHERS THEN
+                        RAISE NOTICE 'Could not create pg_trgm extension: %', SQLERRM;
+                    END;
+                END IF;
+            END $$;
+            """,
+            reverse_sql="-- Extensions are shared and should not be dropped automatically",
+        ),
+        # Step 2: Create the immutable_unaccent function
+        migrations.RunSQL(
+            sql="""
             DO $$
             BEGIN
                 -- Only create the function if unaccent extension is available
@@ -37,14 +66,11 @@ class Migration(migrations.Migration):
                     $func$
                     SELECT $1
                     $func$;
+                    RAISE WARNING 'unaccent extension not available - using simplified immutable_unaccent function';
                 END IF;
             END $$;
             """,
-            reverse_sql="""
-            DROP FUNCTION IF EXISTS immutable_unaccent(text);
-            DROP EXTENSION IF EXISTS pg_trgm;
-            DROP EXTENSION IF EXISTS unaccent;
-            """,
+            reverse_sql="DROP FUNCTION IF EXISTS immutable_unaccent(text);",
         ),
         migrations.CreateModel(
             name="AiSuggestionBatch",
