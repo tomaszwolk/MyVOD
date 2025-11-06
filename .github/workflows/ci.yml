@@ -8,6 +8,8 @@ on:
 jobs:
   backend-ci:
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
     
     defaults:
       run:
