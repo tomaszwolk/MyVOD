@@ -19,11 +19,26 @@ class Migration(migrations.Migration):
             sql="""
             CREATE EXTENSION IF NOT EXISTS unaccent;
             CREATE EXTENSION IF NOT EXISTS pg_trgm;
-            CREATE OR REPLACE FUNCTION immutable_unaccent(text)
-            RETURNS text LANGUAGE sql IMMUTABLE AS
-            $func$
-            SELECT unaccent($1)
-            $func$;
+            DO $$
+            BEGIN
+                -- Only create the function if unaccent extension is available
+                IF EXISTS (
+                    SELECT 1 FROM pg_extension WHERE extname = 'unaccent'
+                ) THEN
+                    CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+                    RETURNS text LANGUAGE sql IMMUTABLE AS
+                    $func$
+                    SELECT unaccent($1)
+                    $func$;
+                ELSE
+                    -- Create a no-op function if unaccent is not available
+                    CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+                    RETURNS text LANGUAGE sql IMMUTABLE AS
+                    $func$
+                    SELECT $1
+                    $func$;
+                END IF;
+            END $$;
             """,
             reverse_sql="""
             DROP FUNCTION IF EXISTS immutable_unaccent(text);
