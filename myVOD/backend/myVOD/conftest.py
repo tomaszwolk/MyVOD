@@ -12,7 +12,7 @@ import pytest
 
 
 @pytest.fixture(scope='session')
-def django_db_setup():
+def django_db_setup(django_db_blocker):
     """
     Override the default django_db_setup to prevent creating/destroying test database.
 
@@ -22,22 +22,11 @@ def django_db_setup():
     Note: This means tests will run against the actual database specified in settings.
     Make sure your tests properly clean up after themselves!
     """
-    # Get the database configuration
-    from django.test.utils import setup_test_environment, teardown_test_environment
-
-    # Setup test environment (sets DEBUG=False, among other things)
-    setup_test_environment()
-
-    # Don't create/destroy database - just ensure migrations are run
     from django.core.management import call_command
 
-    # Run migrations if needed (silently)
-    call_command('migrate', '--run-syncdb', verbosity=0, interactive=False)
-
-    yield
-
-    # Cleanup test environment
-    teardown_test_environment()
+    with django_db_blocker.unblock():
+        # Run migrations on the existing database (not a new test database)
+        call_command('migrate', '--run-syncdb', verbosity=0, interactive=False)
 
 
 @pytest.fixture(autouse=True)

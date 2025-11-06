@@ -23,13 +23,30 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install uv
+      run: pip install uv
+      working-directory: ${{ github.workspace }}
+    
+    - name: Install Python dependencies
+      run: uv sync
+      working-directory: ${{ github.workspace }}/myVOD/backend/myVOD
+    
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+    
     - name: Install dependencies
       run: npm ci
+    
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    
     - name: Run Playwright tests
       run: npx playwright test
     - uses: actions/upload-artifact@v4
