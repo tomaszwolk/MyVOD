@@ -1,3 +1,5 @@
+import type React from 'react';
+
 // Admin Dashboard Types
 
 /**
@@ -108,6 +110,6 @@ export type MetricCardVM = {
   value: string | number;
   hint?: string;
   tooltip?: string;
-  icon?: string;
+  icon?: React.ReactNode;
 };
 

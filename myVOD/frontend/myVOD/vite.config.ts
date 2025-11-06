@@ -1,7 +1,12 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig, UserConfig } from 'vite'
+import { InlineConfig } from 'vitest'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
+
+interface VitestConfigExport extends UserConfig {
+  test: InlineConfig
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -29,4 +34,4 @@ export default defineConfig({
       '**/*.spec.ts', // ignore spec files
     ],
   },
-})
+} as VitestConfigExport)

@@ -4,7 +4,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider, MutationCache } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { http } from '@/lib/http'
 import { setupAxiosInterceptors } from '@/lib/axios-interceptors'
@@ -69,14 +69,16 @@ const handleQueryError = (error: Error, query: any) => {
 
 // Create a client for TanStack Query
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: handleQueryError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleQueryError,
+  }),
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      onError: handleQueryError,
-    },
-    mutations: {
-      onError: handleQueryError,
     },
   },
 })
