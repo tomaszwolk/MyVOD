@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             CREATE OR REPLACE FUNCTION immutable_unaccent(text)
             RETURNS text LANGUAGE sql IMMUTABLE AS
             $func$
-            SELECT unaccent('unaccent', $1)
+            SELECT unaccent($1)
             $func$;
             """,
             reverse_sql="DROP FUNCTION IF EXISTS immutable_unaccent(text);",
