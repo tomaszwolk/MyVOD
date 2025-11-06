@@ -5,7 +5,6 @@ Views for myVOD project root.
 import logging
 from django.shortcuts import redirect
 from django.db import DatabaseError, IntegrityError
-from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response

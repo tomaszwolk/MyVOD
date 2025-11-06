@@ -14,7 +14,7 @@ db_name = 'postgres'
 db_user = 'postgres'
 
 print("--- Skrypt testujący połączenie z bazą danych ---")
-print(f"Próba połączenia z:")
+print("Próba połączenia z:")
 print(f"Host:     {db_host}")
 print(f"Port:     {db_port}")
 print(f"Użytkownik: {db_user}")

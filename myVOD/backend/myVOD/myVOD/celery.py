@@ -1,6 +1,7 @@
 import os
 from celery import Celery
 from celery.schedules import crontab
+from django.core.management import call_command
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myVOD.settings')
 
@@ -19,7 +20,6 @@ app.conf.beat_schedule = {
 }
 
 # We need a task to call the management command
-from django.core.management import call_command
 
 @app.task(name='movies.tasks.run_update_availability_changes')
 def run_update_availability_changes():
