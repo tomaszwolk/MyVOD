@@ -7,7 +7,7 @@ __pycache__/
 .VSCodeCounter
 */__pycache__
 .env.tests
-
+.scenario-4-auth-state.json
 # Playwright
 node_modules/
 /test-results/
@@ -17,3 +17,10 @@ node_modules/
 /playwright/.auth/
 
 scenario-4-auth-state.json
+
+Accept
+Authorization
+Content-Type
+GET
+Host
+User-Agent
