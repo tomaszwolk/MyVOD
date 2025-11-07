@@ -12,6 +12,15 @@ export class WatchlistPage {
    * This makes the sync resilient to translation or formatting changes.
    */
   private async waitForNewToast(previousToastCount: number): Promise<void> {
+    // Najpierw spróbujmy upewnić się, że poprzednie toasty wygasły
+    await this.page
+      .waitForFunction(() => {
+        const currentToasts = document.querySelectorAll('[data-sonner-toast]').length;
+        return currentToasts <= previousToastCount;
+      }, undefined, { timeout: 3000 })
+      .catch(() => {});
+
+    // Czekamy na pojawienie się nowego toasta (liczba > previousToastCount)
     await this.page.waitForFunction(
       (initialCount) => {
         const toastElements = document.querySelectorAll('[data-sonner-toast]');
@@ -21,7 +30,7 @@ export class WatchlistPage {
       { timeout: 10000 }
     );
 
-    // Allow the toast content to finish rendering before proceeding.
+    // Dajmy treści toasta chwilę na render
     await this.page.waitForTimeout(500);
   }
 
