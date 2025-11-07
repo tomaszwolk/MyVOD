@@ -16,6 +16,8 @@ jobs:
       SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
       SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
       SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
+      TEST_USER: ${{ secrets.TEST_USER }}
+      TEST_USER_2: ${{ secrets.TEST_USER_2 }}
     
     defaults:
       run:
