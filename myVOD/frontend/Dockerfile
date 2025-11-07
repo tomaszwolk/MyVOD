@@ -1,16 +1,22 @@
 # Etap 1: Budowanie aplikacji React
-FROM node:20-alpine as build-stage
+FROM node:20-alpine AS build-stage
 
 WORKDIR /app
 
-# Kopiowanie package.json i package-lock.json
-COPY package.json package-lock.json ./
+# Deklaracja argumentu budowania
+ARG VITE_API_URL
+
+# Kopiowanie package.json i package-lock.json z podfolderu myVOD
+COPY myVOD/package.json myVOD/package-lock.json ./
 
 # Instalacja zależności
 RUN npm install
 
-# Kopiowanie reszty plików aplikacji
-COPY . .
+# Kopiowanie reszty plików aplikacji z podfolderu myVOD
+COPY myVOD/. .
+
+# Stworzenie pliku .env na podstawie argumentu - teraz we właściwym miejscu
+RUN echo "VITE_API_URL=${VITE_API_URL}" > .env
 
 # Budowanie aplikacji produkcyjnej
 RUN npm run build

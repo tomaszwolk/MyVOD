@@ -1,4 +1,8 @@
-version: '3.8'
+# This docker-compose.yml file uses the modern Compose file format,
+# which does not require a top-level 'version' attribute.
+#
+# IMPORTANT: Before running any docker-compose commands,
+# ensure that Docker Desktop is running on your machine.
 
 services:
   backend:
@@ -16,6 +20,8 @@ services:
   frontend:
     build:
       context: ./myVOD/frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL}
     container_name: myvod-frontend
     ports:
       - "8080:80"
