@@ -153,3 +153,21 @@
   - Industry standard
   - Gunicorn - production-ready WSGI
   - Nginx - SSL, static files, load balancing
+
+---
+
+## Deployments & Releases
+
+### Hosting: **Render.com (PaaS)**
+- **Platform**: [Render](https://render.com/)
+- **Strategy**: A containerized multi-service architecture deployed from a monorepo.
+- **Configuration**: Infrastructure as Code using a `render.yaml` file at the root of the repository.
+- **Key Components**:
+  - `web`: Web Service (Docker) for Django + Gunicorn.
+  - `worker`: Background Worker (Docker) for the Celery worker.
+  - `redis`: Managed Redis instance for Celery and caching.
+  - `db`: Managed PostgreSQL instance for the database.
+  - `frontend`: Static Site for the React build, served via Render's CDN.
+- **CI/CD**:
+  - Automated builds and deployments on push to the `main` branch.
+  - Automatic "Preview Environments" created for each pull request.

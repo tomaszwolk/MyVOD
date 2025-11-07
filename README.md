@@ -14,6 +14,7 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
   - [Project description](#project-description)
   - [Table of Contents](#table-of-contents)
   - [Tech stack](#tech-stack)
+  - [Hosting and Deployment](#hosting-and-deployment)
   - [Getting started locally](#getting-started-locally)
   - [Available scripts](#available-scripts)
   - [Project scope](#project-scope)
@@ -50,9 +51,24 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
     - E2E: Playwright (planned)
   - Containerization: Docker + Docker Compose (planned)
   - CI/CD: GitHub Actions (planned)
-  - Hosting: DigitalOcean + Nginx (planned)
+  - Hosting: Render.com (PaaS)
 
 See tech stack details: [./.ai/tech-stack.md](./.ai/tech-stack.md)
+
+---
+
+### Hosting and Deployment
+
+The application is designed for a containerized multi-service architecture and will be hosted on [Render](https://render.com/), a unified cloud platform (PaaS).
+
+The key components of the production environment on Render include:
+- **Web Service**: Runs the Dockerized Django + Gunicorn application.
+- **Background Worker**: Runs the Celery worker for asynchronous tasks.
+- **Managed PostgreSQL**: A dedicated, managed database instance.
+- **Managed Redis**: A managed instance for Celery's message broker and caching.
+- **Static Site**: Serves the compiled React frontend application, providing fast, global delivery via Render's CDN.
+
+This setup benefits from features like automated deployments from Git, infrastructure-as-code via a `render.yaml` file, and automatic Preview Environments for pull requests.
 
 ---
 
