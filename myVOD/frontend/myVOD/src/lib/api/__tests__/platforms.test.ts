@@ -73,7 +73,7 @@ describe('getPlatforms', () => {
 
     await getPlatforms();
 
-    expect(mock.history.get[0].baseURL).toBe('http://localhost:8000/api'); // http instance should be used with baseURL
+    expect(mock.history.get[0].baseURL).toBe('/api'); // http instance should be used with /api baseURL
   });
 });
 

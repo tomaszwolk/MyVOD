@@ -20,7 +20,7 @@ import type {
 vi.mock("@/lib/http", () => ({
   http: {
     defaults: {
-      baseURL: "http://localhost:8000/api",
+      baseURL: "/api",
     },
     get: vi.fn(),
   },
@@ -109,7 +109,7 @@ describe("Admin API Functions", () => {
       await getAdminMetrics();
 
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/metrics/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
       });
     });
 
@@ -133,7 +133,7 @@ describe("Admin API Functions", () => {
 
       await expect(getAdminMetrics()).rejects.toThrow();
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/metrics/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
       });
     });
 
@@ -153,7 +153,7 @@ describe("Admin API Functions", () => {
       // Verify that the mocked http instance is used (interceptors would be applied)
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/metrics/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
       });
     });
   });
@@ -304,7 +304,7 @@ describe("Admin API Functions", () => {
       await getTopMovies(mockQuery);
 
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/top-movies/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
         params: {
           type: "watchlist",
           range: "30d",
@@ -343,7 +343,7 @@ describe("Admin API Functions", () => {
 
       await expect(getTopMovies(mockQuery)).rejects.toThrow();
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/top-movies/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
         params: {
           type: "watchlist",
           range: "30d",
@@ -525,7 +525,7 @@ describe("Admin API Functions", () => {
       await getErrorLogs(mockQuery);
 
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/error-logs/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
         params: {
           api_type: ["tmdb", "watchmode"],
           date_from: "2024-01-01",
@@ -570,7 +570,7 @@ describe("Admin API Functions", () => {
       await getErrorLogs();
 
       expect(http.get).toHaveBeenCalledWith("/admin/analytics/api/error-logs/", {
-        baseURL: "http://localhost:8000",
+        baseURL: "",
         params: {},
       });
     });
@@ -783,7 +783,7 @@ describe("Admin API Functions", () => {
       await exportTopMoviesCSV(mockQuery);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "http://localhost:8000/admin/analytics/api/top-movies/export.csv?type=watchlist&range=30d",
+        "/admin/analytics/api/top-movies/export.csv?type=watchlist&range=30d",
         {
           headers: {
             Authorization: `Bearer ${mockToken}`,
@@ -897,7 +897,7 @@ describe("Admin API Functions", () => {
 
       await exportErrorLogsCSV(mockQuery);
 
-      const expectedUrl = "http://localhost:8000/admin/analytics/api/error-logs/export.csv?api_type=tmdb&api_type=watchmode&date_from=2024-01-01&date_to=2024-01-31&sort=timestamp_desc";
+      const expectedUrl = "/admin/analytics/api/error-logs/export.csv?api_type=tmdb&api_type=watchmode&date_from=2024-01-01&date_to=2024-01-31&sort=timestamp_desc";
       expect(global.fetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
           Authorization: "Bearer mock-token",
@@ -912,7 +912,7 @@ describe("Admin API Functions", () => {
       await exportErrorLogsCSV(mockQuery);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("http://localhost:8000/admin/analytics/api/error-logs/export.csv"),
+        expect.stringContaining("/admin/analytics/api/error-logs/export.csv"),
         {
           headers: {
             Authorization: `Bearer ${mockToken}`,

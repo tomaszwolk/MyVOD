@@ -82,7 +82,11 @@ Bezpieczeństwo:
 - PBKDF2 (domyślne ustawienia Django) dla haszowania
 - JSON Web Tokens (JWT) dla autentykacji API
 - Ochrona przed atakami brute-force
-- Brak funkcji "zapomniane hasło" w MVP (v1.1)
+- Funkcja "zapomniane hasła":
+  - Przycisk "Zapomniałeś hasła?" na stronie logowania
+  - Strona do wprowadzenia adresu email i wysłania linku do resetu
+  - Link do resetu hasła wysyłany na email (ważny 1 godzinę)
+  - Strona do ustawienia nowego hasła (wymagania: min. 8 znaków, mix liter i cyfr)
 
 Zgodność z RODO:
 - Możliwość hard delete konta użytkownika
@@ -359,6 +363,7 @@ Funkcjonalności:
 - Sugestie AI (Gemini-flash-lite)
 - Onboarding nowych użytkowników
 - Basic analytics i dashboard admin
+- Resetowanie hasła (poprzez email)
 - Usuwanie danych (RODO compliance)
 
 Ograniczenia MVP:
@@ -378,7 +383,7 @@ Funkcjonalności odłożone na przyszłość:
 - Seriale (wersja v1.1)
 - Lokalizacja tytułów filmów (v1.1)
 - Weryfikacja email (v1.1)
-- Funkcja "zapomniane hasło" (v1.1)
+- Funkcja "zapomniane hasło" (v1.1) - zaimplementowana
 - Ocena filmów 1-10 i notatki (v1.1)
 - Edycja daty obejrzenia (v1.1)
 - Więcej niż 5 platform VOD (v1.1+)
@@ -498,9 +503,19 @@ Kryteria akceptacji:
 - Użytkownik jest przekierowany do strony logowania
 - Próba dostępu do chronionej strony po wylogowaniu przekierowuje do logowania
 
-### 5.2 Onboarding
+US-004: Resetowanie hasła
+Jako użytkownik, który zapomniał hasła, chcę je zresetować, aby odzyskać dostęp do mojego konta.
 
-US-004: Onboarding - Wybór platform VOD
+Kryteria akceptacji:
+- Na stronie logowania znajduje się link "Zapomniałeś hasła?"
+- Po kliknięciu w link, użytkownik jest przenoszony na stronę, gdzie może wpisać swój adres email.
+- Po wpisaniu i zatwierdzeniu adresu email, system wysyła na ten adres link do resetowania hasła.
+- Link jest ważny przez 15 minut.
+- Po kliknięciu w link, użytkownik jest przenoszony na stronę, gdzie może ustawić nowe hasło.
+- Nowe hasło musi spełniać wymagania bezpieczeństwa (min. 8 znaków, mix liter i cyfr).
+- Po pomyślnym zresetowaniu hasła, użytkownik jest informowany o sukcesie i może zalogować się nowym hasłem.
+
+US-005: Onboarding - Wybór platform VOD
 Jako nowy użytkownik podczas pierwszego logowania chcę wybrać moje platformy VOD, aby otrzymywać spersonalizowane informacje o dostępności.
 
 Kryteria akceptacji:
@@ -513,7 +528,7 @@ Kryteria akceptacji:
 - Po kliknięciu "Dalej" lub "Skip" użytkownik przechodzi do Kroku 2
 - Wybory są zapisywane w profilu użytkownika
 
-US-005: Onboarding - Dodanie pierwszych filmów
+US-006: Onboarding - Dodanie pierwszych filmów
 Jako nowy użytkownik chcę dodać pierwsze filmy do watchlisty, aby poznać funkcjonalność aplikacji.
 
 Kryteria akceptacji:
@@ -527,7 +542,7 @@ Kryteria akceptacji:
 - Po kliknięciu "Dalej" lub "Skip" użytkownik przechodzi do Kroku 3
 - Dodane filmy są zapisywane na watchliście użytkownika
 
-US-006: Onboarding - Oznaczenie obejrzanych filmów
+US-007: Onboarding - Oznaczenie obejrzanych filmów
 Jako nowy użytkownik chcę oznaczyć filmy które już widziałem, aby system mógł generować lepsze sugestie AI.
 
 Kryteria akceptacji:
@@ -544,7 +559,7 @@ Kryteria akceptacji:
 - Oznaczone filmy są zapisywane w zakładce "Obejrzane" z datą dzisiejszą
 - Onboarding nie jest wyświetlany przy kolejnych logowaniach
 
-US-007: Pomijanie onboardingu
+US-008: Pomijanie onboardingu
 Jako nowy użytkownik w pośpiechu chcę pominąć onboarding, aby od razu zacząć korzystać z aplikacji.
 
 Kryteria akceptacji:
@@ -557,7 +572,7 @@ Kryteria akceptacji:
 
 ### 5.3 Profil użytkownika
 
-US-008: Edycja platform VOD w profilu
+US-009: Edycja platform VOD w profilu
 Jako użytkownik chcę zmienić moje platformy VOD w profilu, aby dostosować aplikację do moich aktualnych subskrypcji.
 
 Kryteria akceptacji:
@@ -571,7 +586,7 @@ Kryteria akceptacji:
 
 ### 5.4 Wyszukiwanie filmów
 
-US-009: Wyszukiwanie filmu z autocomplete
+US-010: Wyszukiwanie filmu z autocomplete
 Jako użytkownik chcę wyszukać film po tytule, aby dodać go do mojej watchlisty.
 
 Kryteria akceptacji:
@@ -585,7 +600,7 @@ Kryteria akceptacji:
 - Kliknięcie na wynik dodaje film do watchlisty
 - Komunikat potwierdzający dodanie pojawia się krótko (toast/snackbar)
 
-US-010: Wyszukiwanie filmu nieistniejącego w bazie
+US-011: Wyszukiwanie filmu nieistniejącego w bazie
 Jako użytkownik chcę wyszukać film który nie istnieje w bazie, aby otrzymać odpowiednią informację.
 
 Kryteria akceptacji:
