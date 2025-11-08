@@ -1201,6 +1201,9 @@ Sekcja 5: Growth
 
 7.1.7 Plakaty
 ---
+Ostrzeżenia - to tylko warningi generatora dokumentacji OpenAPI, nie wpływają na działanie aplikacji. Jeśli chcesz je usunąć w przyszłości, możesz:
+- Dodać @extend_schema_field dla pól typu callable
+- Utworzyć niestandardowe rozszerzenie dla UUIDJWTAuthentication
 
 Koniec dokumentu PRD
 

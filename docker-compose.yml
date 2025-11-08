@@ -8,6 +8,7 @@ services:
   backend:
     build:
       context: ./myVOD/backend
+    image: tomaszwolk/10xmovies-backend:latest
     container_name: myvod-backend
     command: gunicorn myVOD.wsgi:application --bind 0.0.0.0:8000
     ports:
@@ -22,6 +23,7 @@ services:
       context: ./myVOD/frontend
       args:
         - VITE_API_URL=${VITE_API_URL}
+    image: tomaszwolk/10xmovies-frontend:latest
     container_name: myvod-frontend
     ports:
       - "8080:80"
@@ -37,6 +39,7 @@ services:
   celery_worker:
     build:
       context: ./myVOD/backend
+    image: tomaszwolk/10xmovies-celery_worker:latest
     container_name: myvod-celery-worker
     command: celery -A myVOD worker -l info
     env_file:
@@ -48,6 +51,7 @@ services:
   celery_beat:
     build:
       context: ./myVOD/backend
+    image: tomaszwolk/10xmovies-celery_beat:latest
     container_name: myvod-celery-beat
     command: celery -A myVOD beat -l info
     env_file:
