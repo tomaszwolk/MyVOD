@@ -955,7 +955,23 @@ describe("Admin API Functions", () => {
   });
 
   describe("getAdminBaseURL", () => {
-    it("should remove /api from baseURL", () => {
+    it("should return empty string in development mode (baseURL = /api)", () => {
+      http.defaults.baseURL = "/api";
+
+      const result = getAdminBaseURL();
+
+      expect(result).toBe("");
+    });
+
+    it("should return empty string when baseURL is undefined", () => {
+      http.defaults.baseURL = undefined;
+
+      const result = getAdminBaseURL();
+
+      expect(result).toBe("");
+    });
+
+    it("should remove /api from full URL baseURL", () => {
       http.defaults.baseURL = "http://localhost:8000/api";
 
       const result = getAdminBaseURL();
@@ -963,7 +979,7 @@ describe("Admin API Functions", () => {
       expect(result).toBe("http://localhost:8000");
     });
 
-    it("should handle baseURL without /api", () => {
+    it("should handle baseURL without /api suffix", () => {
       http.defaults.baseURL = "http://localhost:8000";
 
       const result = getAdminBaseURL();

@@ -390,6 +390,7 @@ export function ProfilePage() {
 
               {/* Change Password Section */}
               <ChangePasswordCard
+                userEmail={userProfileQuery.data?.email || ""}
                 onChangePassword={handleChangePassword}
                 isChanging={changePasswordMutation.isPending}
               />

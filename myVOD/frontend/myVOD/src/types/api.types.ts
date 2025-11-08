@@ -1,5 +1,13 @@
 // API Types for MyVOD application
 
+// Generyczny typ dla odpowiedzi z paginacją
+export type PaginatedResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
 // Platform types
 export type PlatformDto = {
   id: number;

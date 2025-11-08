@@ -8,6 +8,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
  * Props for ChangePasswordCard component.
  */
 type ChangePasswordCardProps = {
+  userEmail: string;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   isChanging: boolean;
 };
@@ -15,8 +16,10 @@ type ChangePasswordCardProps = {
 /**
  * Card component for changing user password.
  * Contains form with current password, new password, and confirm password fields.
+ * Includes hidden username field for password manager accessibility.
  */
 export function ChangePasswordCard({
+  userEmail,
   onChangePassword,
   isChanging,
 }: ChangePasswordCardProps) {
@@ -93,6 +96,23 @@ export function ChangePasswordCard({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Hidden username field for password managers */}
+          <input
+            type="email"
+            name="username"
+            autoComplete="username"
+            value={userEmail}
+            readOnly
+            aria-hidden="true"
+            tabIndex={-1}
+            style={{ 
+              position: 'absolute',
+              left: '-9999px',
+              width: '1px',
+              height: '1px'
+            }}
+          />
+
           {/* Current Password */}
           <div className="space-y-2">
             <Label htmlFor="current-password">Obecne hasło</Label>
@@ -109,6 +129,7 @@ export function ChangePasswordCard({
                   }
                 }}
                 disabled={isChanging}
+                autoComplete="current-password"
                 className={errors.currentPassword ? "border-destructive" : ""}
                 aria-invalid={!!errors.currentPassword}
                 aria-describedby={errors.currentPassword ? "current-password-error" : undefined}
@@ -149,6 +170,7 @@ export function ChangePasswordCard({
                   }
                 }}
                 disabled={isChanging}
+                autoComplete="new-password"
                 className={errors.newPassword ? "border-destructive" : ""}
                 aria-invalid={!!errors.newPassword}
                 aria-describedby={errors.newPassword ? "new-password-error" : undefined}
@@ -192,6 +214,7 @@ export function ChangePasswordCard({
                   }
                 }}
                 disabled={isChanging}
+                autoComplete="new-password"
                 className={errors.confirmPassword ? "border-destructive" : ""}
                 aria-invalid={!!errors.confirmPassword}
                 aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}

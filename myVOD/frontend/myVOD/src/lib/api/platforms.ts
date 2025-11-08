@@ -2,11 +2,12 @@ import { http } from "@/lib/http";
 import type {
   PlatformDto,
   UserProfileDto,
-  UpdateUserProfileCommand
+  UpdateUserProfileCommand,
 } from "@/types/api.types";
 
 /**
  * Fetch all available VOD platforms.
+ * Note: This endpoint returns a direct array (not paginated)
  * @returns Array of platform DTOs
  * @throws API error with status and data
  */

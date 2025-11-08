@@ -10,6 +10,9 @@ interface VitestConfigExport extends UserConfig {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // define: {
+  //   '__VITE_API_URL__': JSON.stringify('')
+  // },
   plugins: [react()],
   resolve: {
     alias: {
@@ -19,6 +22,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/admin': {
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,

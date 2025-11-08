@@ -10,12 +10,18 @@ import type {
 /**
  * API client for admin dashboard endpoints.
  * All endpoints require staff permissions and are under /admin/analytics/api/
- * Note: Admin endpoints are under /admin/ (not /api/), so we override baseURL
+ * Note: Admin endpoints go directly through root path (not under /api/), 
+ * so we override baseURL to empty string for development proxy
  */
 
 // Get base URL without /api prefix for admin endpoints
 export const getAdminBaseURL = () => {
-  const baseURL = http.defaults.baseURL || "http://localhost:8000/api";
+  const baseURL = http.defaults.baseURL;
+  // In development, baseURL is "/api", so we return empty string to use root path
+  // In production, baseURL might be full URL, so we remove /api suffix
+  if (!baseURL || baseURL === "/api") {
+    return "";
+  }
   return baseURL.replace("/api", "");
 };
 

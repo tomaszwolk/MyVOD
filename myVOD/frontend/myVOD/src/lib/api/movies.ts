@@ -64,6 +64,7 @@ export async function deleteUserMovie(id: number): Promise<void> {
 /**
  * List user movies filtered by status and ordering.
  * Corresponds to GET /api/user-movies/?status=<status>&ordering=<ordering>
+ * Note: This endpoint returns a direct array (pagination disabled in backend)
  * @param status - Filter by status ('watchlist' or 'watched')
  * @param ordering - Optional ordering parameter
  * @returns Promise<UserMovieDto[]>

@@ -28,6 +28,7 @@ describe('ChangePasswordCard', () => {
   const renderComponent = (props?: Partial<React.ComponentProps<typeof ChangePasswordCard>>) => {
     return render(
       <ChangePasswordCard
+        userEmail="test@example.com"
         onChangePassword={mockOnChangePassword}
         isChanging={false}
         {...props}
