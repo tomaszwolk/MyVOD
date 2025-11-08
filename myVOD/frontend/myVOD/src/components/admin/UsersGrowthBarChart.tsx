@@ -28,28 +28,42 @@ export function UsersGrowthBarChart({ data }: UsersGrowthBarChartProps) {
     // Dynamically import Chart.js
     const initChart = async () => {
       try {
-        // Try to use Chart.js from CDN if available in window
-        let chartConstructor = window.Chart;
-        
-        if (!chartConstructor) {
-          // Load Chart.js from CDN if not available
-          await new Promise<void>((resolve, reject) => {
-            if (document.querySelector('script[src*="chart.js"]')) {
-              resolve();
-              return;
-            }
-            const script = document.createElement("script");
-            script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js";
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error("Failed to load Chart.js"));
-            document.head.appendChild(script);
-          });
-          chartConstructor = window.Chart;
+        // Check if Chart.js is already loaded
+        if (!window.Chart) {
+          // Check if script is already in DOM
+          const existingScript = document.querySelector('script[src*="chart.js"]');
+          
+          if (!existingScript) {
+            // Load Chart.js from CDN
+            await new Promise<void>((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js";
+              script.async = true;
+              script.onload = () => resolve();
+              script.onerror = () => reject(new Error("Failed to load Chart.js"));
+              document.head.appendChild(script);
+            });
+          } else {
+            // Script exists but Chart might not be loaded yet
+            await new Promise<void>((resolve) => {
+              const checkChart = setInterval(() => {
+                if (window.Chart) {
+                  clearInterval(checkChart);
+                  resolve();
+                }
+              }, 50);
+              // Timeout after 5 seconds
+              setTimeout(() => {
+                clearInterval(checkChart);
+                resolve();
+              }, 5000);
+            });
+          }
         }
 
-        const ChartLib = chartConstructor;
+        const ChartLib = window.Chart;
         if (!ChartLib) {
-          console.error("Chart.js not available");
+          console.error("Chart.js not available after loading attempt");
           return;
         }
 
