@@ -5,6 +5,7 @@ const ACCESS_TOKEN_KEY = "myVOD_access_token";
 const REFRESH_TOKEN_KEY = "myVOD_refresh_token";
 
 let isRefreshing = false;
+let isRedirecting = false; // Flag to prevent multiple redirects when refresh token expires
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
   reject: (error?: unknown) => void;
@@ -74,6 +75,11 @@ export function setupAxiosInterceptors(
         return Promise.reject(error);
       }
 
+      // If already redirecting, reject immediately to prevent redirect loops
+      if (isRedirecting) {
+        return Promise.reject(error);
+      }
+
       // If already refreshing, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -98,10 +104,14 @@ export function setupAxiosInterceptors(
       if (!refreshToken) {
         isRefreshing = false;
         // No refresh token available - show unauthorized page or logout
-        if (onUnauthorized) {
-          onUnauthorized();
-        } else {
-          onLogout();
+        // Only redirect once, even if multiple requests fail simultaneously
+        if (!isRedirecting) {
+          isRedirecting = true;
+          if (onUnauthorized) {
+            onUnauthorized();
+          } else {
+            onLogout();
+          }
         }
         return Promise.reject(error);
       }
@@ -128,10 +138,15 @@ export function setupAxiosInterceptors(
         // Refresh token is invalid or expired - show unauthorized page
         processQueue(refreshError as AxiosError, null);
         isRefreshing = false;
-        if (onUnauthorized) {
-          onUnauthorized();
-        } else {
-          onLogout();
+        
+        // Only redirect once, even if multiple requests fail simultaneously
+        if (!isRedirecting) {
+          isRedirecting = true;
+          if (onUnauthorized) {
+            onUnauthorized();
+          } else {
+            onLogout();
+          }
         }
         return Promise.reject(refreshError);
       }

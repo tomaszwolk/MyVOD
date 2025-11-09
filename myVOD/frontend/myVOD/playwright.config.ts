@@ -57,9 +57,10 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd ../../ && uv run python backend/myVOD/manage.py runserver',
+      command: 'uv run python manage.py runserver',
       url: 'http://localhost:8000',
       reuseExistingServer: false,   // !process.env.CI,
+      cwd: path.resolve(__dirname, '../../backend/myVOD'),
       env: {
         USE_E2E_TEST_DATABASE: 'true',
         SUPABASE_DB_HOST: process.env.SUPABASE_DB_HOST,
@@ -67,6 +68,8 @@ export default defineConfig({
         SUPABASE_DB_USER: process.env.SUPABASE_DB_USER,
         SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
         SUPABASE_DB_NAME: process.env.SUPABASE_DB_NAME,
+        SECRET_KEY: process.env.SECRET_KEY,
+        DEBUG: process.env.DEBUG || 'True',
       },
     },
     {
