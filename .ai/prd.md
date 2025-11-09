@@ -108,6 +108,7 @@ Funkcjonalności:
 - Możliwość wyboru wielu platform jednocześnie
 - Zapis preferencji dla filtrowania wyników
 - Wykorzystanie w sugestiach AI
+- Możliwość zmiany hasła z poziomu profilu użytkownika.
 
 Wymagania interfejsu:
 - Intuicyjny wybór platform (checkboxy lub toggle)

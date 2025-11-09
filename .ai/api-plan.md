@@ -88,6 +88,27 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     ```
     -   **Note**: The `is_staff` field is read-only and cannot be modified via this endpoint. It reflects the user's staff status from the database.
 
+#### `POST /api/me/change-password/`
+
+-   **Description**: Changes the password for the currently authenticated user.
+-   **Authentication**: Required.
+-   **Request Body**:
+    ```json
+    {
+      "current_password": "oldStrongPassword123",
+      "new_password": "newStrongerPassword456"
+    }
+    ```
+-   **Success Response** (200 OK):
+    ```json
+    {
+        "message": "Hasło zostało zmienione"
+    }
+    ```
+-   **Error Responses**:
+    -   `400 Bad Request`: Invalid old password, or the new password does not meet security requirements.
+    -   `401 Unauthorized`: Not authenticated.
+
 #### `DELETE /api/me/`
 
 -   **Description**: Permanently deletes the authenticated user's account and all associated data (GDPR compliant).
@@ -96,6 +117,72 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 -   **Error Responses**:
     -   `401 Unauthorized`: Not authenticated.
 -   **Note**: This operation is irreversible and deletes all user data including watchlist, watched history, and preferences.
+
+### 3.1.1. Password Reset
+
+#### `POST /api/password-reset/`
+
+-   **Description**: Initiates the password reset process by sending an email to the user.
+-   **Authentication**: None.
+-   **Request Body**:
+    ```json
+    {
+      "email": "user@example.com"
+    }
+    ```
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "detail": "If an account with this email exists, a password reset link has been sent."
+    }
+    ```
+    - **Note**: This endpoint always returns a success message to prevent user enumeration attacks.
+
+#### `POST /api/password-reset/validate_token/`
+
+-   **Description**: Validates the password reset token from the email link.
+-   **Authentication**: None.
+-   **Request Body**:
+    ```json
+    {
+      "uid": "...",
+      "token": "..."
+    }
+    ```
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "valid": true
+    }
+    ```
+-   **Error Response** (400 Bad Request):
+    ```json
+    {
+      "valid": false,
+      "error": "Invalid or expired token."
+    }
+    ```
+
+#### `POST /api/password-reset/confirm/`
+
+-   **Description**: Sets a new password after successful token validation.
+-   **Authentication**: None.
+-   **Request Body**:
+    ```json
+    {
+      "uid": "...",
+      "token": "...",
+      "new_password": "newStrongerPassword456"
+    }
+    ```
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "detail": "Password has been reset successfully."
+    }
+    ```
+-   **Error Responses**:
+    -   `400 Bad Request`: Invalid token, or the new password is weak.
 
 ### 3.2. Movies & Platforms
 

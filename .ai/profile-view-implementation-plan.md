@@ -18,6 +18,7 @@ ProfilePage
   │   │   └─ PlatformCheckboxItem × N (spodziewane 5)
   │   └─ SaveChangesBar (Zapisz zmiany / Anuluj)
   ├─ Separator
+  ├─ ChangePasswordCard
   └─ DangerZoneCard
       └─ DeleteAccountSection
           └─ AlertDialog (potwierdzenie usunięcia)
@@ -74,6 +75,14 @@ ProfilePage
 - Typy: proste booleany + callbacki.
 - Propsy: `{ dirty: boolean; saving: boolean; onSave(): void; onReset(): void }`.
 
+### ChangePasswordCard
+- Opis: Karta do zmiany hasła.
+- Elementy: pola na obecne hasło, nowe hasło i potwierdzenie nowego hasła.
+- Interakcje: wysyłanie formularza.
+- Walidacja: siła hasła, zgodność.
+- Typy: `ChangePasswordCommand`.
+- Propsy: `{ onSubmit: (data: ChangePasswordCommand) => void; isSubmitting: boolean; error?: string }`.
+
 ### DangerZoneCard
 - Opis: Karta „Strefa zagrożenia” z akcją usunięcia konta.
 - Elementy: tytuł, opis, przycisk `Usuń konto` w wariancie destrukcyjnym.
@@ -127,6 +136,7 @@ const QueryKeys = {
 - Mutacje:
   - `useMutation(UpdateUserPlatforms)` → PATCH `/api/me/` z `UpdateUserProfileCommand`
   - `useMutation(DeleteAccount)` → DELETE (patrz Integracja API)
+  - `useChangePasswordMutation()` → POST `/api/me/change-password/`
 - Stan lokalny:
   - `selectedPlatformIds` (kontroluje zaznaczenia w grupie)
   - `initialSelectedPlatformIds` (z profilu)
@@ -193,6 +203,7 @@ const QueryKeys = {
      - `usePlatformsQuery()` → GET `/api/platforms/`
      - `useUpdateUserPlatformsMutation()` → PATCH `/api/me/`
      - `useDeleteAccountMutation()` → tymczasowo w oparciu o `DELETE /api/me/` (po potwierdzeniu backendu zaktualizować w razie potrzeby)
+     - `useChangePasswordMutation()` → POST `/api/me/change-password/`
 3. UI – szkielety
    - Zbuduj `ProfilePage` z loaderem (skeleton) i stanami błędów.
    - Dodaj `PageHeader` z emailem z `UserProfileDto`.
@@ -204,15 +215,21 @@ const QueryKeys = {
    - Na `onSave`: wyślij `UpdateUserProfileCommand` z posortowaną listą ID.
    - Po sukcesie: toast „Zapisano zmiany”, ustaw nowy stan bazowy, `invalidateQueries` profilu, userMovies i aiSuggestions.
    - Zaktualizuj globalną flagę „hasSelectedPlatforms”.
-6. Strefa zagrożenia
+6. Zmiana hasła
+   - Zbuduj `ChangePasswordCard` z polami na obecne hasło, nowe hasło i potwierdzenie nowego hasła.
+   - Zaimplementuj walidację po stronie klienta dla siły hasła i zgodności.
+   - Na `onSubmit`: wywołaj mutację `useChangePasswordMutation` z `ChangePasswordCommand`.
+   - Po sukcesie: wyczyść formularz i wyświetl toast „Hasło zostało zmienione”.
+   - W przypadku błędu: wyświetl odpowiedni toast z informacją o błędzie (np. „Nieprawidłowe obecne hasło”).
+7. Strefa zagrożenia
    - Zbuduj `DangerZoneCard` i `DeleteAccountSection` z `AlertDialog` (shadcn/ui) i treścią ostrzeżenia z PRD.
    - Na potwierdzeniu: wywołaj mutację usunięcia, w trakcie zablokuj przyciski, po sukcesie czyść sesję i redirect.
-7. Dostępność/UX
+8. Dostępność/UX
    - Zapewnij aria-atributy dla checkboxów i dialogu, focus management, stany `disabled`, skeletony i komunikaty błędów.
-8. Testy
+9. Testy
    - Testy komponentów: logika `dirty`, enable/disable przycisków, wywołanie PATCH z poprawnym payloadem, zachowanie dialogu.
    - Testy integracyjne z mockiem API: sukces i błędy dla GET/PATCH/DELETE.
-9. Dokumentacja
-   - Krótki README sekcji profilu (przepływy, klucze zapytań, zależności od watchlisty) i adnotacja, że endpoint usunięcia konta jest wymagany po stronie backendu.
+10. Dokumentacja
+    - Krótki README sekcji profilu (przepływy, klucze zapytań, zależności od watchlisty) i adnotacja, że endpoint usunięcia konta jest wymagany po stronie backendu.
 
 

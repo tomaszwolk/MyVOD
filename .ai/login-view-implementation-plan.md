@@ -19,14 +19,30 @@ Struktura komponentów zostanie zorganizowana w sposób hierarchiczny, aby oddzi
       - SubmitButton (Komponent UI z shadcn/ui)
       - ErrorAlert (Komponent UI z shadcn/ui)
     - Link do Rejestracji (React Router Link)
+    - Link do Resetowania Hasła (React Router Link)
+
+- AuthLayout
+  - ForgotPasswordPage
+    - ForgotPasswordForm
+      - EmailInput
+      - SubmitButton
+      - SuccessMessage / ErrorAlert
+
+- AuthLayout
+  - ResetPasswordPage
+    - ResetPasswordForm
+      - PasswordInput (Nowe hasło)
+      - PasswordInput (Potwierdź hasło)
+      - SubmitButton
+      - ErrorAlert
 ```
 
 ## 4. Szczegóły komponentów
 
 ### `LoginPage`
 - **Opis komponentu**: Główny komponent strony, odpowiedzialny za renderowanie układu widoku logowania, w tym tytułu, formularza logowania i linku do strony rejestracji.
-- **Główne elementy**: Tytuł `<h1>`, komponent `LoginForm`, akapit z `Link` do `/auth/register`.
-- **Obsługiwane interakcje**: Nawigacja do strony rejestracji.
+- **Główne elementy**: Tytuł `<h1>`, komponent `LoginForm`, akapit z `Link` do `/auth/register` oraz `Link` do `/auth/forgot-password`.
+- **Obsługiwane interakcje**: Nawigacja do strony rejestracji i resetowania hasła.
 - **Obsługiwana walidacja**: Brak.
 - **Typy**: Brak.
 - **Propsy**: Brak.
@@ -92,6 +108,19 @@ export type AuthTokensDto = {
 export type AuthErrorDto = {
   detail: string;
 };
+
+export type ForgotPasswordCommand = {
+  email: string;
+};
+
+export type ValidateResetTokenCommand = {
+  uid: string;
+  token: string;
+};
+
+export type ResetPasswordConfirmCommand = ValidateResetTokenCommand & {
+  new_password: string;
+};
 ```
 
 ## 6. Zarządzanie stanem
@@ -132,6 +161,11 @@ Integracja z API zostanie zrealizowana za pomocą niestandardowego hooka `useLog
 }
 ```
 
+- **Endpointy resetowania hasła**:
+  - `POST /api/password-reset/`: Inicjuje proces, wysyłając e-mail.
+  - `POST /api/password-reset/validate_token/`: Sprawdza poprawność tokenu.
+  - `POST /api/password-reset/confirm/`: Ustawia nowe hasło.
+
 ## 8. Interakcje użytkownika
 - **Wpisywanie danych**: Użytkownik wprowadza e-mail i hasło. `react-hook-form` na bieżąco aktualizuje stan i uruchamia walidację (np. przy `onBlur`).
 - **Przesłanie formularza**: Użytkownik klika przycisk "Zaloguj" lub naciska Enter.
@@ -139,6 +173,14 @@ Integracja z API zostanie zrealizowana za pomocą niestandardowego hooka `useLog
   - Jeśli walidacja przejdzie, przycisk jest blokowany, pojawia się loader, a żądanie API jest wysyłane.
 - **Pomyślne logowanie**: Aplikacja zapisuje tokeny i przekierowuje użytkownika do `/watchlist`.
 - **Nieudane logowanie**: Loader znika, przycisk staje się ponownie aktywny, a pod formularzem pojawia się alert z komunikatem błędu.
+
+- **Resetowanie hasła**:
+  - Użytkownik klika link "Zapomniałeś hasła?".
+  - Zostaje przekierowany do `/auth/forgot-password`.
+  - Wpisuje swój adres e-mail i wysyła formularz. Otrzymuje komunikat o wysłaniu linku.
+  - Otwiera link z e-maila, który prowadzi do `/auth/reset-password?uid=...&token=...`.
+  - Aplikacja weryfikuje token. Jeśli jest poprawny, wyświetla formularz do ustawienia nowego hasła.
+  - Użytkownik wpisuje i potwierdza nowe hasło. Po pomyślnym ustawieniu zostaje przekierowany na stronę logowania z komunikatem o sukcesie.
 
 ## 9. Warunki i walidacja
 Walidacja formularza zostanie zaimplementowana przy użyciu biblioteki `zod`.
@@ -161,6 +203,10 @@ Walidacja formularza zostanie zaimplementowana przy użyciu biblioteki `zod`.
   - Komponent: `PasswordInput`.
   - Wpływ na UI: Wyświetlenie komunikatu błędu pod polem.
 
+- **Walidacja dla resetowania hasła**:
+  - Schemat `forgotPasswordSchema` będzie walidował pole e-mail.
+  - Schemat `resetPasswordSchema` będzie walidował nowe hasło i jego potwierdzenie, sprawdzając siłę i zgodność.
+
 ## 10. Obsługa błędów
 - **Błędy walidacji klienta**: Obsługiwane przez `react-hook-form` i `zod`. Komunikaty są wyświetlane przy konkretnych polach.
 - **Błąd poświadczeń (401 Unauthorized)**: API zwraca błąd. `useMutation` przechodzi w stan `isError`. W UI wyświetlany jest ogólny komunikat w komponencie `ErrorAlert`: "Nieprawidłowy email lub hasło".
@@ -178,3 +224,9 @@ Walidacja formularza zostanie zaimplementowana przy użyciu biblioteki `zod`.
 8.  **Obsługa logowania i przekierowania**: W `onSuccess` mutacji wywołać funkcję `login` z `AuthContext` i użyć `useNavigate` z `react-router-dom` do przekierowania użytkownika.
 9.  **Dodanie routingu**: Dodać nową ścieżkę `/auth/login` w głównym pliku routingu aplikacji, która będzie renderować `LoginPage`.
 10. **Stylowanie i UX**: Dopracować wygląd widoku zgodnie z resztą aplikacji, upewnić się, że obsługa fokusu i przesyłania formularza klawiszem Enter działają poprawnie.
+11. **Implementacja resetowania hasła**:
+    - Dodać link "Zapomniałeś hasła?" na stronie logowania.
+    - Stworzyć nowe trasy `/auth/forgot-password` i `/auth/reset-password`.
+    - Zaimplementować komponenty `ForgotPasswordPage` i `ResetPasswordPage` wraz z formularzami.
+    - Stworzyć hooki `useForgotPasswordMutation`, `useValidateResetTokenQuery` i `useResetPasswordMutation` do obsługi API.
+    - Zintegrować logikę w komponentach, włączając obsługę stanów ładowania i błędów.
