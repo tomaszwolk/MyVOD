@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { validateResetToken } from "@/lib/api/auth";
-import type { ValidateResetTokenCommand, ValidateResetTokenResponse } from "@/lib/api/auth";
+import type { ValidateResetTokenCommand } from "@/types/api.types";
+import type { ValidateResetTokenResponse } from "@/lib/api/auth";
 
 /**
  * Custom hook for validating password reset token using TanStack Query.

@@ -33,7 +33,6 @@ from .views import (
     PasswordResetConfirmView,
 )
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 urlpatterns = [
     # Admin Analytics API (under /admin/analytics/api/)

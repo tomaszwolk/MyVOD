@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { forgotPassword } from "@/lib/api/auth";
-import type { ForgotPasswordCommand, ForgotPasswordResponse } from "@/lib/api/auth";
+import type { ForgotPasswordCommand } from "@/types/api.types";
+import type { ForgotPasswordResponse } from "@/lib/api/auth";
 
 /**
  * Custom hook for initiating password reset process using TanStack Query.

@@ -4,7 +4,10 @@ import type {
   RegisteredUserDto,
   LoginUserCommand,
   AuthTokensDto,
-  UserProfileDto
+  UserProfileDto,
+  ForgotPasswordCommand,
+  ValidateResetTokenCommand,
+  ResetPasswordConfirmCommand
 } from "@/types/api.types";
 
 /**

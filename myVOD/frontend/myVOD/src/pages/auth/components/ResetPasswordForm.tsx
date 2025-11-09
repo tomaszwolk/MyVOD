@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useResetPasswordMutation } from "@/hooks/useResetPasswordMutation";
-import { resetPasswordSchema, checkPasswordRules } from "@/schemas/password-reset.schema";
+import { resetPasswordSchema } from "@/schemas/password-reset.schema";
 import { ErrorAlert } from "./ErrorAlert";
 import { PasswordRules } from "./PasswordRules";
 
@@ -51,7 +51,6 @@ export function ResetPasswordForm({ uid, token }: ResetPasswordFormProps) {
   });
 
   const watchedPassword = form.watch("newPassword");
-  const passwordRules = checkPasswordRules(watchedPassword);
 
   const onSubmit = (values: ResetPasswordFormValues) => {
     setServerError(null);
@@ -159,7 +158,7 @@ export function ResetPasswordForm({ uid, token }: ResetPasswordFormProps) {
 
               {/* Password Rules */}
               {watchedPassword && (
-                <PasswordRules rules={passwordRules} />
+                <PasswordRules password={watchedPassword} />
               )}
             </FormItem>
           )}
