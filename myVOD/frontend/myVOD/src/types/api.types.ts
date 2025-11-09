@@ -47,6 +47,20 @@ export type AuthErrorDto = {
   detail: string;
 };
 
+// Password reset types
+export type ForgotPasswordCommand = {
+  email: string;
+};
+
+export type ValidateResetTokenCommand = {
+  uid: string;
+  token: string;
+};
+
+export type ResetPasswordConfirmCommand = ValidateResetTokenCommand & {
+  new_password: string;
+};
+
 export type UserProfileDto = {
   email: string;
   platforms: PlatformDto[];

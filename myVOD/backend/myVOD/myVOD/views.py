@@ -5,6 +5,13 @@ Views for myVOD project root.
 import logging
 from django.shortcuts import redirect
 from django.db import DatabaseError, IntegrityError
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,7 +28,10 @@ from .serializers import (
     ChangePasswordSerializer,
     RegisterUserSerializer,
     RegisteredUserSerializer,
-    AISuggestionsSerializer
+    AISuggestionsSerializer,
+    PasswordResetSerializer,
+    PasswordResetValidateSerializer,
+    PasswordResetConfirmSerializer
 )
 from services.user_profile_service import (
     get_user_profile,
@@ -696,5 +706,289 @@ class AISuggestionsView(APIView):
             )
             return Response(
                 {"error": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PasswordResetView(APIView):
+    """
+    API view for password reset request.
+
+    POST /api/password-reset/
+
+    This is a public endpoint (no authentication required).
+    Accepts email address and sends password reset link to the user.
+
+    Returns:
+        200: Success message (always returned for security - doesn't reveal if email exists)
+        400: Invalid email format
+        500: Internal server error
+    """
+    permission_classes = [AllowAny]
+    authentication_classes: tuple = ()
+
+    @extend_schema(
+        summary="Request password reset",
+        description=(
+            "Initiates password reset process by sending an email with reset link. "
+            "For security reasons, always returns success message even if email doesn't exist. "
+            "This prevents email enumeration attacks. "
+            "Requires valid email format."
+        ),
+        request=PasswordResetSerializer,
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            500: OpenApiTypes.OBJECT,
+        },
+        tags=['Authentication'],
+    )
+    def post(self, request):
+        """
+        Handle POST request for password reset.
+
+        Always returns success for security reasons.
+        """
+        serializer = PasswordResetSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.warning(
+                f"Invalid password reset request: {serializer.errors}"
+            )
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        email = serializer.validated_data['email']
+
+        try:
+            # Try to find user by email
+            User = get_user_model()
+            try:
+                user = User.objects.get(email=email, is_active=True)
+                # Generate reset token and send email
+                uid = user.pk
+                token = default_token_generator.make_token(user)
+
+                # Send email with reset link
+                subject = "Resetowanie hasła - MyVOD"
+                reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?uid={uid}&token={token}"
+
+                context = {
+                    'user': user,
+                    'reset_url': reset_url,
+                    'site_name': 'MyVOD',
+                }
+
+                message = render_to_string('password_reset_email.html', context)
+
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    html_message=message,
+                )
+
+                logger.info(f"Password reset email sent to: {email}")
+
+            except User.DoesNotExist:
+                # Don't reveal if email exists or not
+                logger.info(f"Password reset attempted for non-existent email: {email}")
+                pass
+
+            # Always return success for security
+            return Response(
+                {"message": "Jeśli podany adres email jest powiązany z kontem, otrzymasz wiadomość z linkiem do resetowania hasła."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Error sending password reset email to {email}: {str(e)}",
+                exc_info=True
+            )
+            # Still return success to avoid revealing internal errors
+            return Response(
+                {"message": "Jeśli podany adres email jest powiązany z kontem, otrzymasz wiadomość z linkiem do resetowania hasła."},
+                status=status.HTTP_200_OK
+            )
+
+
+class PasswordResetValidateView(APIView):
+    """
+    API view for password reset token validation.
+
+    POST /api/password-reset/validate_token/
+
+    This is a public endpoint (no authentication required).
+    Validates that the reset token is valid and not expired.
+
+    Returns:
+        200: Token is valid
+        400: Invalid token or user
+        500: Internal server error
+    """
+    permission_classes = [AllowAny]
+    authentication_classes: tuple = ()
+
+    @extend_schema(
+        summary="Validate password reset token",
+        description=(
+            "Validates that the password reset token is valid and not expired. "
+            "Used by frontend to check if user can proceed with password reset."
+        ),
+        request=PasswordResetValidateSerializer,
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            500: OpenApiTypes.OBJECT,
+        },
+        tags=['Authentication'],
+    )
+    def post(self, request):
+        """
+        Handle POST request for token validation.
+        """
+        serializer = PasswordResetValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.warning(
+                f"Invalid token validation request: {serializer.errors}"
+            )
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        uid = serializer.validated_data['uid']
+        token = serializer.validated_data['token']
+
+        try:
+            # Decode user ID from base64
+            try:
+                user_id = force_str(urlsafe_base64_decode(uid))
+                User = get_user_model()
+                user = User.objects.get(pk=user_id, is_active=True)
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                logger.warning(f"Invalid user ID in password reset token: {uid}")
+                return Response(
+                    {"error": "Nieprawidłowy link resetowania hasła."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Check if token is valid
+            if default_token_generator.check_token(user, token):
+                logger.info(f"Valid password reset token for user: {user.email}")
+                return Response(
+                    {"message": "Token jest prawidłowy."},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                logger.warning(f"Invalid password reset token for user: {user.email}")
+                return Response(
+                    {"error": "Link resetowania hasła jest nieprawidłowy lub wygasł."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error validating password reset token: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Wystąpił błąd podczas sprawdzania tokenu."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    API view for password reset confirmation.
+
+    POST /api/password-reset/confirm/
+
+    This is a public endpoint (no authentication required).
+    Sets new password using validated reset token.
+
+    Returns:
+        200: Password changed successfully
+        400: Invalid token, user, or password
+        500: Internal server error
+    """
+    permission_classes = [AllowAny]
+    authentication_classes: tuple = ()
+
+    @extend_schema(
+        summary="Confirm password reset",
+        description=(
+            "Sets new password using the validated reset token. "
+            "Token must be valid and not expired. "
+            "New password must meet security requirements."
+        ),
+        request=PasswordResetConfirmSerializer,
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            500: OpenApiTypes.OBJECT,
+        },
+        tags=['Authentication'],
+    )
+    def post(self, request):
+        """
+        Handle POST request for password reset confirmation.
+        """
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.warning(
+                f"Invalid password reset confirmation request: {serializer.errors}"
+            )
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        uid = serializer.validated_data['uid']
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+
+        try:
+            # Decode user ID from base64
+            try:
+                user_id = force_str(urlsafe_base64_decode(uid))
+                User = get_user_model()
+                user = User.objects.get(pk=user_id, is_active=True)
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                logger.warning(f"Invalid user ID in password reset confirmation: {uid}")
+                return Response(
+                    {"error": "Nieprawidłowy link resetowania hasła."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Check if token is valid
+            if not default_token_generator.check_token(user, token):
+                logger.warning(f"Invalid password reset token for user: {user.email}")
+                return Response(
+                    {"error": "Link resetowania hasła jest nieprawidłowy lub wygasł."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Set new password
+            user.set_password(new_password)
+            user.save()
+
+            logger.info(f"Password successfully reset for user: {user.email}")
+
+            return Response(
+                {"message": "Hasło zostało pomyślnie zmienione."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Error confirming password reset: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Wystąpił błąd podczas ustawiania nowego hasła."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

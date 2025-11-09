@@ -354,3 +354,82 @@ class AISuggestionsSerializer(serializers.Serializer):
     """
     expires_at = serializers.DateTimeField()
     suggestions = SuggestionItemSerializer(many=True)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    """
+    Serializer for password reset request.
+
+    This maps to ForgotPasswordCommand on the frontend.
+    Accepts email address to send password reset link.
+
+    Request body for POST /api/password-reset/
+    """
+    email = serializers.EmailField(
+        required=True,
+        help_text="Email address for password reset"
+    )
+
+    def validate_email(self, value):
+        """
+        Validate that user with this email exists.
+        We don't want to reveal if email exists or not for security reasons,
+        so we don't raise validation error here - just return the email.
+        """
+        return value.lower()
+
+
+class PasswordResetValidateSerializer(serializers.Serializer):
+    """
+    Serializer for password reset token validation.
+
+    This maps to ValidateResetTokenCommand on the frontend.
+    Validates that the reset token is valid and not expired.
+
+    Request body for POST /api/password-reset/validate_token/
+    """
+    uid = serializers.CharField(
+        required=True,
+        help_text="User ID encoded in base64"
+    )
+    token = serializers.CharField(
+        required=True,
+        help_text="Password reset token"
+    )
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for password reset confirmation.
+
+    This maps to ResetPasswordConfirmCommand on the frontend.
+    Sets new password using the validated reset token.
+
+    Request body for POST /api/password-reset/confirm/
+    """
+    uid = serializers.CharField(
+        required=True,
+        help_text="User ID encoded in base64"
+    )
+    token = serializers.CharField(
+        required=True,
+        help_text="Password reset token"
+    )
+    new_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'},
+        help_text="New password (minimum 8 characters, must contain letters and numbers)"
+    )
+
+    def validate_new_password(self, value):
+        """
+        Validate new password meets security requirements.
+        """
+        try:
+            # Use Django's password validators (user doesn't exist yet in this context)
+            validate_password(value, user=None)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+
+        return value

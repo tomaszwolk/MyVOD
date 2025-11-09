@@ -27,6 +27,13 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 from . import views
+from .views import (
+    PasswordResetView,
+    PasswordResetValidateView,
+    PasswordResetConfirmView,
+)
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 urlpatterns = [
     # Admin Analytics API (under /admin/analytics/api/)
@@ -64,6 +71,11 @@ urlpatterns = [
 
     # User Registration (Public)
     path("api/register/", views.RegisterView.as_view(), name="register"),
+
+    # Password Reset (Public)
+    path("api/password-reset/", csrf_exempt(PasswordResetView.as_view()), name="password-reset"),
+    path("api/password-reset/validate_token/", csrf_exempt(PasswordResetValidateView.as_view()), name="password-reset-validate"),
+    path("api/password-reset/confirm/", csrf_exempt(PasswordResetConfirmView.as_view()), name="password-reset-confirm"),
 
     # AI Movie Suggestions (Authenticated)
     path("api/suggestions/", views.AISuggestionsView.as_view(), name="suggestions"),

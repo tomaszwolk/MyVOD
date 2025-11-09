@@ -163,16 +163,26 @@ export function LoginForm() {
           )}
         </Button>
 
-        {/* Register Link */}
-        <p className="text-center text-sm text-muted-foreground">
-          Nie masz konta?{" "}
-          <Link
-            to="/auth/register"
-            className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-          >
-            Zarejestruj się
-          </Link>
-        </p>
+        {/* Links */}
+        <div className="space-y-2">
+          <p className="text-center text-sm text-muted-foreground">
+            Nie masz konta?{" "}
+            <Link
+              to="/auth/register"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            >
+              Zarejestruj się
+            </Link>
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
+            <Link
+              to="/auth/forgot-password"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            >
+              Zapomniałeś hasła?
+            </Link>
+          </p>
+        </div>
       </form>
     </Form>
   );

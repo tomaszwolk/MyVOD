@@ -95,3 +95,55 @@ export async function changePassword(
   const { data } = await http.post<ChangePasswordResponse>("/me/change-password/", payload);
   return data;
 }
+
+// Password reset types
+export type ForgotPasswordResponse = {
+  message: string;
+};
+
+export type ValidateResetTokenResponse = {
+  message: string;
+};
+
+export type ResetPasswordConfirmResponse = {
+  message: string;
+};
+
+/**
+ * Initiate password reset process by sending reset email.
+ * @param payload - Email address for password reset
+ * @returns Success message
+ * @throws API error with status and data
+ */
+export async function forgotPassword(
+  payload: ForgotPasswordCommand
+): Promise<ForgotPasswordResponse> {
+  const { data } = await http.post<ForgotPasswordResponse>("/password-reset/", payload);
+  return data;
+}
+
+/**
+ * Validate password reset token.
+ * @param payload - UID and token from reset email
+ * @returns Success message if token is valid
+ * @throws API error with status and data (400 if invalid)
+ */
+export async function validateResetToken(
+  payload: ValidateResetTokenCommand
+): Promise<ValidateResetTokenResponse> {
+  const { data } = await http.post<ValidateResetTokenResponse>("/password-reset/validate_token/", payload);
+  return data;
+}
+
+/**
+ * Confirm password reset with new password.
+ * @param payload - UID, token, and new password
+ * @returns Success message
+ * @throws API error with status and data
+ */
+export async function resetPasswordConfirm(
+  payload: ResetPasswordConfirmCommand
+): Promise<ResetPasswordConfirmResponse> {
+  const { data } = await http.post<ResetPasswordConfirmResponse>("/password-reset/confirm/", payload);
+  return data;
+}

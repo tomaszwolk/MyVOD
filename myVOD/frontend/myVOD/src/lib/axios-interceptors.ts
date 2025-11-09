@@ -46,16 +46,25 @@ export function setupAxiosInterceptors(
     (config: InternalAxiosRequestConfig) => {
       const token = localStorage.getItem(ACCESS_TOKEN_KEY);
       
-      // Don't add token to login, register, refresh, or public endpoints
+      // Don't add token to login, register, refresh, password reset, or public endpoints
       const isAuthEndpoint =
         config.url?.includes("/token/") ||
         config.url?.includes("/register/") ||
-        config.url?.includes("/platforms/");
+        config.url?.includes("/platforms/") ||
+        config.url?.includes("/password-reset/");
 
       if (token && !isAuthEndpoint) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
+
+      // Don't send CSRF token for password reset endpoints
+      if (config.url?.includes("/password-reset/")) {
+        // Remove any CSRF token from headers or cookies if present
+        delete config.headers['X-CSRFToken'];
+        delete config.headers['X-XSRF-TOKEN'];
+        config.withCredentials = false;
+      }
+
       return config;
     },
     (error) => {
