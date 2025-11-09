@@ -16,6 +16,7 @@ jobs:
       SUPABASE_DB_HOST: ${{ secrets.SUPABASE_E2E_DB_HOST }}
       SUPABASE_DB_PORT: ${{ secrets.SUPABASE_E2E_DB_PORT }}
       SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
+      DEBUG: 'True'
     
     defaults:
       run:
