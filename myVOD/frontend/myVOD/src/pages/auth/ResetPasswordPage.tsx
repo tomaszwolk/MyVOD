@@ -18,6 +18,9 @@ export function ResetPasswordPage() {
   const uid = searchParams.get("uid");
   const token = searchParams.get("token");
 
+  // Debug logging
+  console.log("ResetPasswordPage - URL params:", { uid, token });
+
   const [tokenValidated, setTokenValidated] = useState(false);
 
   // Validate token on mount

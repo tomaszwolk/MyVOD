@@ -3,12 +3,13 @@ Views for myVOD project root.
 """
 
 import logging
+from urllib.parse import urlencode
 from django.shortcuts import redirect
 from django.db import DatabaseError, IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_str, force_bytes
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -767,12 +768,15 @@ class PasswordResetView(APIView):
             try:
                 user = User.objects.get(email=email, is_active=True)
                 # Generate reset token and send email
-                uid = user.pk
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
 
                 # Send email with reset link
                 subject = "Resetowanie hasła - MyVOD"
-                reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?uid={uid}&token={token}"
+                query_string = urlencode({"uid": uid, "token": token})
+                reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?{query_string}"
+
+                logger.info(f"Generated reset URL: {reset_url}")
 
                 context = {
                     'user': user,
@@ -863,14 +867,19 @@ class PasswordResetValidateView(APIView):
         uid = serializer.validated_data['uid']
         token = serializer.validated_data['token']
 
+        logger.info(f"Validating reset token - uid: {uid}, token: {token}")
+
         try:
             # Decode user ID from base64
             try:
+                logger.info(f"Attempting to decode uid: {uid}")
                 user_id = force_str(urlsafe_base64_decode(uid))
+                logger.info(f"Decoded user_id: {user_id}")
                 User = get_user_model()
                 user = User.objects.get(pk=user_id, is_active=True)
-            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-                logger.warning(f"Invalid user ID in password reset token: {uid}")
+                logger.info(f"Found user: {user.email}")
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+                logger.warning(f"Invalid user ID in password reset token: {uid}, error: {str(e)}")
                 return Response(
                     {"error": "Nieprawidłowy link resetowania hasła."},
                     status=status.HTTP_400_BAD_REQUEST
@@ -951,14 +960,19 @@ class PasswordResetConfirmView(APIView):
         token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
 
+        logger.info(f"Confirming password reset - uid: {uid}, token length: {len(token) if token else 0}")
+
         try:
             # Decode user ID from base64
             try:
+                logger.info(f"Attempting to decode uid for confirmation: {uid}")
                 user_id = force_str(urlsafe_base64_decode(uid))
+                logger.info(f"Decoded user_id for confirmation: {user_id}")
                 User = get_user_model()
                 user = User.objects.get(pk=user_id, is_active=True)
-            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-                logger.warning(f"Invalid user ID in password reset confirmation: {uid}")
+                logger.info(f"Found user for confirmation: {user.email}")
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+                logger.warning(f"Invalid user ID in password reset confirmation: {uid}, error: {str(e)}")
                 return Response(
                     {"error": "Nieprawidłowy link resetowania hasła."},
                     status=status.HTTP_400_BAD_REQUEST
