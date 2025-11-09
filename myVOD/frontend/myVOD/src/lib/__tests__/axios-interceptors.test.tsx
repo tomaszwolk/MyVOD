@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import { setupAxiosInterceptors } from '../axios-interceptors';
+import { setupAxiosInterceptors, resetAxiosInterceptors } from '../axios-interceptors';
 import { refreshAccessToken } from '../api/auth';
 
 // Mock axios
@@ -32,13 +32,16 @@ describe('axios-interceptors', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Reset interceptor state
+    resetAxiosInterceptors();
+
     // Reset localStorage mock
     localStorageMock.getItem.mockImplementation(() => null);
     localStorageMock.setItem.mockImplementation(() => {});
     localStorageMock.removeItem.mockImplementation(() => {});
 
     // Create mock axios instance with interceptors
-    const mockAxiosCallable = vi.fn();
+    const mockAxiosCallable = vi.fn().mockResolvedValue({ data: 'retried' });
     mockAxios = Object.assign(mockAxiosCallable, {
       interceptors: {
         request: {

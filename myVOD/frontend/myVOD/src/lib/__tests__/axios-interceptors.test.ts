@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import { setupAxiosInterceptors } from '../axios-interceptors';
+import { setupAxiosInterceptors, resetAxiosInterceptors } from '../axios-interceptors';
 import { refreshAccessToken } from '../api/auth';
 
 vi.mock('axios', () => ({
@@ -53,6 +53,9 @@ describe('setupAxiosInterceptors', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset interceptor state
+    resetAxiosInterceptors();
 
     // Reset localStorage mock
     localStorageMock.getItem.mockImplementation(() => null);
@@ -197,6 +200,9 @@ describe('setupAxiosInterceptors', () => {
     });
 
     it('should call onLogout when onUnauthorized is not provided and refresh token is missing', async () => {
+      // Reset state before setting up new interceptors
+      resetAxiosInterceptors();
+      
       // Setup interceptors without onUnauthorized
       setupAxiosInterceptors(mockAxios, onLogout);
 

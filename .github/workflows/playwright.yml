@@ -17,6 +17,7 @@ jobs:
       SUPABASE_DB_PORT: ${{ secrets.SUPABASE_E2E_DB_PORT }}
       SECRET_KEY: ${{ secrets.ACTIONS_SECRET_KEY }}
       DEBUG: 'True'
+      CACHE_URL: '' # Force LocMemCache instead of Redis for E2E tests
     
     defaults:
       run:

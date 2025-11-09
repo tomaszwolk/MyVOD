@@ -24,6 +24,15 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 };
 
 /**
+ * Reset interceptor state (useful for testing)
+ */
+export function resetAxiosInterceptors() {
+  isRefreshing = false;
+  isRedirecting = false;
+  failedQueue = [];
+}
+
+/**
  * Setup Axios interceptors for automatic token refresh.
  * This function should be called once during app initialization.
  */

@@ -70,6 +70,7 @@ export default defineConfig({
         SUPABASE_DB_NAME: process.env.SUPABASE_DB_NAME,
         SECRET_KEY: process.env.SECRET_KEY,
         DEBUG: process.env.DEBUG || 'True',
+        CACHE_URL: '', // Force LocMemCache instead of Redis for E2E tests
       },
     },
     {

@@ -19,7 +19,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 DEFAULT_CACHE_URL = os.getenv("CACHE_URL")
 
-if DEFAULT_CACHE_URL:
+# Use Redis only if CACHE_URL is set and not empty
+if DEFAULT_CACHE_URL and DEFAULT_CACHE_URL.strip():
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
