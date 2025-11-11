@@ -229,46 +229,48 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                           className="w-full h-full object-cover rounded"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate text-foreground">
-                          {result.primaryTitle}
+                      <div className="flex flex-1 flex-col justify-between self-stretch min-w-0">
+                        <div>
+                          <div className="font-medium text-sm truncate text-foreground">
+                            {result.primaryTitle}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {result.startYear && `${result.startYear}`} • 
+                            ⭐ {result.avgRating ? `${result.avgRating}/10` : "Brak oceny"}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {result.startYear && `${result.startYear} • `}
-                          {result.avgRating ? `${result.avgRating}/10` : "Brak oceny"}
+                        <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="whitespace-nowrap"
+                            disabled={isOnWatchlist || isPending}
+                            aria-label={isOnWatchlist ? "Film jest już na watchliście" : `Dodaj ${result.primaryTitle} do watchlist`}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void handleAddToWatchlist(result);
+                            }}
+                            onMouseDown={(event) => event.preventDefault()}
+                          >
+                            + do watchlist
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="whitespace-nowrap"
+                            disabled={isPending || isWatched}
+                            aria-label={isWatched ? "Film jest już na liście obejrzanych" : `Dodaj ${result.primaryTitle} do obejrzanych`}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void handleAddToWatched(result);
+                            }}
+                            onMouseDown={(event) => event.preventDefault()}
+                          >
+                            + do obejrzane
+                          </Button>
                         </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="whitespace-nowrap"
-                          disabled={isOnWatchlist || isPending}
-                          aria-label={isOnWatchlist ? "Film jest już na watchliście" : `Dodaj ${result.primaryTitle} do watchlist`}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            void handleAddToWatchlist(result);
-                          }}
-                          onMouseDown={(event) => event.preventDefault()}
-                        >
-                          + do watchlist
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="whitespace-nowrap"
-                          disabled={isPending || isWatched}
-                          aria-label={isWatched ? "Film jest już na liście obejrzanych" : `Dodaj ${result.primaryTitle} do obejrzanych`}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            void handleAddToWatched(result);
-                          }}
-                          onMouseDown={(event) => event.preventDefault()}
-                        >
-                          + do obejrzane
-                        </Button>
                       </div>
                     </div>
                   </div>

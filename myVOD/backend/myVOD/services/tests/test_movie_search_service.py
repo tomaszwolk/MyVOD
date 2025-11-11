@@ -2,6 +2,7 @@
 
 from django.core.cache import cache
 from django.test import TestCase
+from unittest.mock import patch
 
 from movies.models import Movie  # type: ignore
 from movies.serializers import MovieSearchResultSerializer
@@ -220,14 +221,26 @@ class MovieSearchServiceTests(TestCase):
         self.assertGreater(len(results), 0)
         self.assertIn("num_votes", results[0])
 
-    def test_search_uses_cache_on_subsequent_calls(self):
+    @patch('movies.serializers.update_movie_poster.delay')
+    def test_search_uses_cache_on_subsequent_calls(self, mock_update_poster_delay):
         """Second identical search should hit cache and avoid DB queries."""
-
+        # First call: populates the cache and should trigger poster updates
         with self.assertNumQueries(1):
             search_movies("TestMovie Stellar Journey")
 
+        # The delay method should have been called for the results in the first search
+        self.assertTrue(mock_update_poster_delay.called)
+
+        # Reset the mock to clear the call history before the second search
+        mock_update_poster_delay.reset_mock()
+
+        # Second call: should hit the cache, perform no DB queries,
+        # and should NOT trigger poster updates again.
         with self.assertNumQueries(0):
             search_movies("TestMovie Stellar Journey")
+
+        # Verify that the poster update task was NOT called during the second, cached search
+        mock_update_poster_delay.assert_not_called()
 
     def test_similarity_threshold_selection(self):
         """Similarity threshold should scale with normalized query length."""

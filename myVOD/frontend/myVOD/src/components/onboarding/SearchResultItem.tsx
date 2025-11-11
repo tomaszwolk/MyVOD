@@ -64,7 +64,7 @@ export function SearchResultItem({ item, disabled, onAdd }: SearchResultItemProp
           {item.avgRating && (
             <>
               <span>•</span>
-              <span>⭐ {item.avgRating}</span>
+              <span>⭐ {item.avgRating}/10</span>
             </>
           )}
         </div>

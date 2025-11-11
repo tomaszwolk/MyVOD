@@ -35,6 +35,7 @@ Sercem mechanizmu jest asynchroniczne zadanie Celery o nazwie `update_movie_post
 *   Pobiera obiekt filmu z bazy danych.
 *   Korzysta z `tmdb_client`, aby uzyskać URL plakatu.
 *   Zapisuje pozyskany URL w polu `poster_path` w tabeli `movie`.
+*   Jeśli podczas procesu został pobrany brakujący `tmdb_id`, jest on również zapisywany w bazie danych w tym samym kroku.
 *   Aktualizuje pole `poster_last_checked` obecną datą i godziną, aby system wiedział, kiedy ostatnio sprawdzano ten film.
 
 ### c) Integracja z Serializerami
