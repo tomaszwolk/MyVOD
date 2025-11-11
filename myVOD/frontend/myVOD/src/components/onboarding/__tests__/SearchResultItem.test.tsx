@@ -139,7 +139,7 @@ describe('SearchResultItem', () => {
 
     render(<SearchResultItem item={mockSearchOption} disabled={false} onAdd={mockOnAdd} />);
 
-    expect(screen.getByText('⭐ 9.3')).toBeInTheDocument();
+    expect(screen.getByText(/⭐\s*9.3/)).toBeInTheDocument();
   });
 
   it('should have correct accessibility attributes', () => {

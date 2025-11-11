@@ -63,7 +63,7 @@ export function OnboardingWatchedPage() {
 
       <div className="space-y-8">
         {/* Movie search combobox */}
-        <div className="max-w-md mx-auto">
+        <div className="max-w-lg mx-auto">
           <WatchedSearchCombobox
             value={viewModel.query}
             onChange={setQuery}

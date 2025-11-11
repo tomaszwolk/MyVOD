@@ -1,20 +1,14 @@
 import { Badge } from "@/components/ui/badge";
-import { SelectedMovieItem } from "./SelectedMovieItem";
+import { MovieListItem } from "./MovieListItem";
 import type { OnboardingSelectedItem } from "@/types/view/onboarding-watched.types";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
-/**
- * Props for SelectedMoviesList component.
- */
 type SelectedMoviesListProps = {
   items: OnboardingSelectedItem[];
   maxItems: number;
   onUndo: (item: OnboardingSelectedItem) => void;
 };
 
-/**
- * List of selected movies marked as watched in the onboarding session.
- * Shows status indicators and allows undoing selections.
- */
 export function SelectedMoviesList({ items, maxItems, onUndo }: SelectedMoviesListProps) {
   if (items.length === 0) {
     return (
@@ -36,17 +30,32 @@ export function SelectedMoviesList({ items, maxItems, onUndo }: SelectedMoviesLi
         </Badge>
       </div>
 
-      {/* List of selected movies */}
       <div className="space-y-2">
         {items.map((item) => (
-          <SelectedMovieItem
-            key={item.tconst}
-            item={item}
-            onUndo={onUndo}
-          />
+          <div key={item.tconst} className="relative">
+            <MovieListItem
+              tconst={item.tconst}
+              primaryTitle={item.primary_title}
+              startYear={item.start_year}
+              posterUrl={item.poster_path}
+              avgRating={item.avg_rating}
+              onRemove={() => onUndo(item)}
+              isRemoving={item.status === 'loading'}
+            />
+            <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+              {item.status === 'loading' && (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              )}
+              {/* {item.status === 'success' && (
+                <CheckCircle2 className="h-6 w-6 text-green-600" /> */}
+              {/* )} */}
+              {item.status === 'error' && (
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
-}
-
+} 

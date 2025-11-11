@@ -24,6 +24,7 @@ export type OnboardingSelectedItem = {
   primary_title: string;
   start_year: number | null;
   poster_path: string | null;
+  avg_rating: string | null;
   userMovieId: number | null; // Known after POST/lookup
   source: SelectedSource;
   status: SelectedStatus;

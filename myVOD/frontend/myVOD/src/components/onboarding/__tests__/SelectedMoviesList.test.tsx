@@ -1,7 +1,15 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@/test/utils';
+import { render, screen, fireEvent } from '@/test/utils';
 import { SelectedMoviesList } from '../SelectedMoviesList';
 import type { OnboardingSelectedItem } from '@/types/view/onboarding-watched.types';
+
+vi.mock('./MovieListItem', () => ({
+  MovieListItem: vi.fn(({ primaryTitle, onRemove }) => (
+    <div>
+      <button onClick={onRemove} aria-label={`Remove ${primaryTitle} from list`}></button>
+    </div>
+  )),
+}));
 
 describe('SelectedMoviesList', () => {
   const mockItem: OnboardingSelectedItem = {
@@ -40,8 +48,8 @@ describe('SelectedMoviesList', () => {
   it('should render movie items', () => {
     render(<SelectedMoviesList {...defaultProps} items={[mockItem, mockItem2]} />);
 
-    expect(screen.getByText('The Shawshank Redemption')).toBeInTheDocument();
-    expect(screen.getByText('The Godfather')).toBeInTheDocument();
+    expect(screen.getByTestId('movie-list-item-tt0111161')).toBeInTheDocument();
+    expect(screen.getByTestId('movie-list-item-tt0068646')).toBeInTheDocument();
   });
 
   it('should show counter badge', () => {
@@ -55,9 +63,8 @@ describe('SelectedMoviesList', () => {
     const onUndo = vi.fn();
     render(<SelectedMoviesList {...defaultProps} items={[mockItem]} onUndo={onUndo} />);
 
-    // Find the X button and click it
-    const undoButton = screen.getByRole('button', { name: /Cofnij oznaczenie filmu The Shawshank Redemption/ });
-    undoButton.click();
+    const undoButton = screen.getByRole('button', { name: /Remove The Shawshank Redemption from list/i });
+    fireEvent.click(undoButton);
 
     expect(onUndo).toHaveBeenCalledWith(mockItem);
   });

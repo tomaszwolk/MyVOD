@@ -56,14 +56,8 @@ vi.mock('@/components/onboarding/SelectedMoviesList', () => ({
   SelectedMoviesList: ({ items, maxItems, onUndo }: { items: OnboardingSelectedItem[]; maxItems: number; onUndo: (item: OnboardingSelectedItem) => void }) => (
     <div data-testid="selected-movies-list" data-item-count={items.length} data-max-items={maxItems}>
       {items.map((item: OnboardingSelectedItem) => (
-        <div key={item.tconst} data-testid={`selected-movie-${item.tconst}`}>
-          {item.primary_title}
-          <button
-            data-testid={`undo-${item.tconst}`}
-            onClick={() => onUndo(item)}
-          >
-            Undo
-          </button>
+        <div key={item.tconst}>
+          <button data-testid={`undo-${item.tconst}`} onClick={() => onUndo(item)} />
         </div>
       ))}
     </div>

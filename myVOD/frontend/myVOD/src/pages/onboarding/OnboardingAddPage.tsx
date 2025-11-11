@@ -6,7 +6,7 @@ import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { MovieSearchCombobox } from "@/components/onboarding/MovieSearchCombobox";
-import { AddedMoviesGrid } from "@/components/onboarding/AddedMoviesGrid";
+import { AddedMoviesList } from "@/components/onboarding/AddedMoviesList";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAddUserMovie } from "@/hooks/useAddUserMovie";
@@ -56,6 +56,7 @@ export function OnboardingAddPage() {
         tconst: movie.movie.tconst,
         primaryTitle: movie.movie.primary_title,
         startYear: movie.movie.start_year,
+        avgRating: movie.movie.avg_rating,
         posterUrl: movie.movie.poster_path,
       }));
 
@@ -80,6 +81,7 @@ export function OnboardingAddPage() {
         tconst: searchOption.tconst,
         primaryTitle: searchOption.primaryTitle,
         startYear: searchOption.startYear,
+        avgRating: searchOption.avgRating,
         posterUrl: searchOption.posterUrl,
       };
 
@@ -214,7 +216,7 @@ export function OnboardingAddPage() {
 
       <div className="space-y-8">
         {/* Movie search combobox */}
-        <div className="max-w-md mx-auto">
+        <div className="max-w-lg mx-auto">
           <MovieSearchCombobox
             disabledTconsts={addedSet}
             onSelectOption={handleAddMovie}
@@ -223,7 +225,7 @@ export function OnboardingAddPage() {
 
         {/* Added movies grid */}
         <div className="max-w-lg mx-auto">
-          <AddedMoviesGrid
+          <AddedMoviesList
             items={added}
             onRemove={handleRemoveMovie}
             removingTconsts={removingTconsts}

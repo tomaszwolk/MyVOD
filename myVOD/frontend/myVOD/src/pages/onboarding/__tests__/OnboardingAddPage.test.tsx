@@ -36,10 +36,10 @@ vi.mock('@/components/onboarding/MovieSearchCombobox', () => ({
   ),
 }));
 
-vi.mock('@/components/onboarding/AddedMoviesGrid', () => ({
-  AddedMoviesGrid: ({ items }: { items: any[] }) => (
-    <div data-testid="added-movies-grid" data-item-count={items.length}>
-      Added Movies Grid
+vi.mock('@/components/onboarding/AddedMoviesList', () => ({
+  AddedMoviesList: ({ items }: { items: any[] }) => (
+    <div data-testid="added-movies-list" data-item-count={items.length}>
+      Added Movies List
     </div>
   ),
 }));
@@ -81,7 +81,7 @@ describe('OnboardingAddPage', () => {
     expect(screen.getByTestId('progress-bar')).toBeInTheDocument();
     expect(screen.getByTestId('onboarding-header')).toBeInTheDocument();
     expect(screen.getByTestId('movie-search-combobox')).toBeInTheDocument();
-    expect(screen.getByTestId('added-movies-grid')).toBeInTheDocument();
+    expect(screen.getByTestId('added-movies-list')).toBeInTheDocument();
     expect(screen.getByTestId('onboarding-footer-nav')).toBeInTheDocument();
   });
 

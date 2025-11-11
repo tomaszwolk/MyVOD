@@ -62,6 +62,7 @@ export function useOnboardingWatchedController() {
         primary_title: movie.movie.primary_title,
         start_year: movie.movie.start_year,
         poster_path: movie.movie.poster_path,
+        avg_rating: movie.movie.avg_rating,
         userMovieId: movie.id,
         source: "preexisting_watched",
         status: "success",
@@ -105,6 +106,7 @@ export function useOnboardingWatchedController() {
       primary_title: movie.primaryTitle,
       start_year: movie.startYear,
       poster_path: movie.posterUrl,
+      avg_rating: movie.avgRating,
       userMovieId: null,
       source: 'newly_created', // Will be updated based on API response
       status: 'loading',
