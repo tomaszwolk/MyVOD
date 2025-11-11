@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "django_celery_results",
     "users",
     "movies",
     "user_movies",
@@ -290,12 +291,29 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@myvod.com')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACTIVE = os.getenv('CELERY_ACTIVE', 'False').lower() == 'true'
+
+# Common settings that will be used in all configurations
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+
+if not CELERY_ACTIVE or DEBUG:
+    # If Celery is explicitly disabled OR we are in DEBUG mode,
+    # execute tasks synchronously in-process.
+    # This avoids the need for a running Redis server during local development and testing.
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_BROKER_URL = 'memory://'
+    # Using the database as a result backend is a good choice for this mode
+    # as it requires no extra services.
+    CELERY_RESULT_BACKEND = 'django-db'
+else:
+    # Production-like configuration: Celery is active and we are NOT in DEBUG mode.
+    # Use Redis as the message broker and result backend.
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+    CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+
 
 # VOD Platform Configuration
 # Mapping from Watchmode source name to internal platform slug

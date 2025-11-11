@@ -5,6 +5,9 @@ This module contains serializers for movie-related API endpoints.
 """
 from rest_framework import serializers
 from .models import Movie, MovieAvailability, Platform
+from datetime import timedelta
+from django.utils import timezone
+from tasks.movie_tasks import update_movie_poster
 
 
 class MovieSearchQueryParamsSerializer(serializers.Serializer):
@@ -71,3 +74,25 @@ class MovieSearchResultSerializer(serializers.ModelSerializer):
         if obj.avg_rating is not None:
             return str(obj.avg_rating)
         return None
+
+    def to_representation(self, instance):
+        """
+        Serialize the movie instance and trigger poster update if needed.
+        """
+        representation = super().to_representation(instance)
+        
+        # Trigger poster update task if poster is missing or outdated
+        needs_update = False
+        if not instance.poster_path:
+            needs_update = True
+        elif instance.poster_last_checked:
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            if instance.poster_last_checked < thirty_days_ago:
+                needs_update = True
+        else: # poster_path exists but never checked
+            needs_update = True
+
+        if needs_update:
+            update_movie_poster.delay(instance.tconst)
+            
+        return representation

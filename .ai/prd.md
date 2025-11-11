@@ -1211,7 +1211,7 @@ Sekcja 5: Growth
 - dla nowych użytkowników, by sprawdzić jak działa aplikacja dodana zostanie opcja "Zaloguj jako ..."
 - typy użytkowników: fan anime, fan kina akcji, romantyk, entyzjasta horrorów, fan komedii
 
-7.1.5 Reset hasła na stronie głównej. Forgot Password?
+7.1.5 Reset hasła na stronie głównej. Forgot Password? ---- DONE
 
 7.1.6 Dodać ikony platform (Netflix etc)
 

@@ -1,13 +1,16 @@
 import requests
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 
-API_KEY = 'twoj_klucz_api'
 IMDB_ID = 'tt0111161'  # przykładowe tconst z IMDb
 
 # Pobranie TMDB_ID na podstawie IMDB_ID
-tmdb_lookup_url = f'https://api.themoviedb.org/3/find/{IMDB_ID}?api_key={API_KEY}&external_source=imdb_id'
+tmdb_lookup_url = f'https://api.themoviedb.org/3/find/{IMDB_ID}?api_key={TMDB_API_KEY}&external_source=imdb_id'
+# print(tmdb_lookup_url)
 tmdb_result = requests.get(tmdb_lookup_url).json()
 tmdb_id = tmdb_result['movie_results'][0]['id']
 

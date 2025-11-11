@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from movies.models import Movie, MovieAvailability, UserMovie  # type: ignore
+from datetime import timedelta
+from django.utils import timezone
+from tasks.movie_tasks import update_movie_poster
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -16,6 +19,26 @@ class MovieSerializer(serializers.ModelSerializer):
             "avg_rating",
             "poster_path",
         ]
+
+    def to_representation(self, instance):
+        """
+        Serialize the movie instance and trigger poster update if needed.
+        """
+        representation = super().to_representation(instance)
+        
+        # Trigger poster update task if poster is missing or outdated
+        needs_update = False
+        if not instance.poster_path:
+            needs_update = True
+        elif instance.poster_last_checked:
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            if instance.poster_last_checked < thirty_days_ago:
+                needs_update = True
+        
+        if needs_update:
+            update_movie_poster.delay(instance.tconst)
+            
+        return representation
 
 
 class MovieAvailabilitySerializer(serializers.ModelSerializer):
