@@ -54,16 +54,20 @@ export function OnboardingWatchedPage() {
   return (
     <OnboardingLayout title="Oznacz filmy które już widziałeś" headerActions={headerActions}>
       <div data-testid="onboarding-step-3">
-        <ProgressBar current={3} total={3} />
+      <ProgressBar
+        current={3} total={3}
+        className="mt-2"
+      />
 
       <OnboardingHeader
         title={title}
         hint={hint}
+        className="mt-4"
       />
 
       <div className="space-y-8">
         {/* Movie search combobox */}
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto mt-6">
           <WatchedSearchCombobox
             value={viewModel.query}
             onChange={setQuery}

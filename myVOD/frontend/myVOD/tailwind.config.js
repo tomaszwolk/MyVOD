@@ -19,8 +19,12 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
+        },
+        toast: {
+          DEFAULT: "hsl(var(--toast-background))",
+          foreground: "hsl(var(--toast-foreground))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",

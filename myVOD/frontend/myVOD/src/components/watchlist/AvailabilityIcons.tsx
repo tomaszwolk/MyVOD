@@ -48,15 +48,15 @@ export const AvailabilityIcons = memo<AvailabilityIconsProps>(function Availabil
             <Tooltip key={avail.platform_id}>
               <TooltipTrigger asChild>
                 <div
-                  className={`w-6 h-6 rounded flex items-center justify-center text-xs font-medium ${
+                  className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium ${
                     isAvailable
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-white-100 text-green-800 dark:bg-green-100 dark:text-green-800'
+                      : 'bg-gray-100 text-gray-500 dark:bg-gray-100 dark:text-gray-500'
                   }`}
                   title={tooltipText}
                   data-testid={`streaming-provider-icon-${platform.platform_slug}`}
                 >
-                  {IconComponent && <IconComponent className="w-4 h-4" />}
+                  {IconComponent && <IconComponent className="w-6 h-6" />}
                 </div>
               </TooltipTrigger>
               <TooltipContent>

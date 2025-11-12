@@ -29,7 +29,7 @@ export function OnboardingFooterNav({
         className="sm:order-1"
         aria-label="Skip adding movies and continue to next step"
       >
-        Skip
+        Pomiń
       </Button>
 
       <Button
@@ -37,6 +37,7 @@ export function OnboardingFooterNav({
         className="sm:order-2"
         aria-label="Continue to next onboarding step"
         data-testid={nextButtonTestId}
+        variant="outline"
       >
         {nextButtonText}
       </Button>

@@ -3,18 +3,20 @@
  */
 export function ProgressBar({
   current,
-  total
+  total,
+  className = ""
 }: {
   current: number;
   total: number;
+  className?: string;
 }) {
   const progress = (current / total) * 100;
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <div className="flex justify-between text-sm text-muted-foreground">
-        <span>Step {current} of {total}</span>
-        <span>{Math.round(progress)}% complete</span>
+        <span>Krok {current} z {total}</span>
+        <span>{Math.round(progress)}% ukończony</span>
       </div>
       <div className="w-full bg-secondary rounded-full h-2">
         <div

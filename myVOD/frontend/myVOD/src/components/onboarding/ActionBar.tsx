@@ -6,11 +6,15 @@ import { Button } from "@/components/ui/button";
 export function ActionBar({
   onSkip,
   onNext,
-  isBusy = false
+  isBusy = false,
+  nextButtonText = "Dalej",
+  skipButtonText = "Pomiń",
 }: {
   onSkip: () => void;
   onNext: () => void;
   isBusy?: boolean;
+  nextButtonText?: string;
+  skipButtonText?: string;
 }) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:justify-between" role="group" aria-label="Onboarding actions">
@@ -21,7 +25,7 @@ export function ActionBar({
         className="sm:order-1"
         aria-label="Skip platform selection and continue to next step"
       >
-        Skip
+        {skipButtonText}
       </Button>
 
       <Button
@@ -32,7 +36,7 @@ export function ActionBar({
         aria-label={isBusy ? "Saving platform selection..." : "Save platform selection and continue"}
         data-testid="onboarding-next-button"
       >
-        {isBusy ? "Saving..." : "Next"}
+        {isBusy ? "Saving..." : nextButtonText}
       </Button>
     </div>
   );

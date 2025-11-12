@@ -207,16 +207,20 @@ export function OnboardingAddPage() {
   return (
     <OnboardingLayout title="Dodaj filmy do watchlisty" headerActions={headerActions}>
       <div data-testid="onboarding-step-2">
-        <ProgressBar current={2} total={3} />
+      <ProgressBar
+        current={2} total={3}
+        className="mt-2"
+      />
 
       <OnboardingHeader
         title="Dodaj przynajmniej 3 filmy do watchlisty"
         hint="Wyszukaj filmy i dodaj je do swojej watchlisty, aby rozpocząć"
+        className="mt-4"
       />
 
       <div className="space-y-8">
         {/* Movie search combobox */}
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto mt-6">
           <MovieSearchCombobox
             disabledTconsts={addedSet}
             onSelectOption={handleAddMovie}

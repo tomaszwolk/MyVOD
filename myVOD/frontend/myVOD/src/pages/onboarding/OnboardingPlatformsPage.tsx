@@ -242,25 +242,32 @@ export function OnboardingPlatformsPage() {
   }
 
   return (
-    <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
+    <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
       <div data-testid="onboarding-step-1">
-        <ProgressBar current={1} total={3} />
+      <ProgressBar
+        current={1} total={3}
+        className="mt-2"
+      />
 
       <OnboardingHeader
-        title="Choose your platforms"
-        hint="Select the streaming services you have access to"
+        title="Wybierz swoje platformy VOD"
+        hint="Wybierz platformy VOD, które posiadasz dostęp"
+        className="mt-4"
       />
 
       <PlatformsGrid
         platforms={platformViewModels}
         onToggle={togglePlatform}
         isDisabled={mutation.isPending}
+        className="mb-6"
       />
 
       <ActionBar
         onSkip={handleSkip}
         onNext={handleNext}
         isBusy={mutation.isPending}
+        nextButtonText="Dalej"
+        skipButtonText="Pomiń"
       />
 
       {validationError && (

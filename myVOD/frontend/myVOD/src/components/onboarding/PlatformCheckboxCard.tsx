@@ -48,11 +48,12 @@ export const PlatformCheckboxCard = forwardRef<
     >
       <div className="flex items-center space-x-3">
         {/* Platform icon/logo */}
-        <div className="flex-shrink-0 w-8 h-8 bg-muted rounded flex items-center justify-center">
+        {/* <div className="flex-shrink-0 w-8 h-8 bg-muted rounded flex items-center justify-center"> */}
+        <div className="flex-shrink-0 w-10 h-10 bg-white dark:bg-green-100 rounded flex items-center justify-center">
           {(() => {
             const IconComponent = getPlatformIcon(slug);
             if (IconComponent) {
-              return <IconComponent className="w-6 h-6" />;
+              return <IconComponent className="w-8 h-8" />;
             }
             // Fallback for missing icons
             return (
