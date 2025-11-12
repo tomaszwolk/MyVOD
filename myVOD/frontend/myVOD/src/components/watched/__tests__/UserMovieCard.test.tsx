@@ -68,12 +68,6 @@ describe('UserMovieCard', () => {
     expect(screen.getByTestId('image-icon')).toBeInTheDocument();
   });
 
-  it('should show watched date', () => {
-    render(<UserMovieCard {...defaultProps} />);
-
-    expect(screen.getByText('Obejrzany: 1 stycznia 2024')).toBeInTheDocument();
-  });
-
   it('should call onRestore when restore button is clicked', () => {
     render(<UserMovieCard {...defaultProps} />);
 

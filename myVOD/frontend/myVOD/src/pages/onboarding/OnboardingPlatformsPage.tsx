@@ -4,13 +4,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
-import { PlatformsGrid, type PlatformViewModel } from "@/components/onboarding/PlatformsGrid";
+import {
+  PlatformsGrid,
+  type PlatformViewModel,
+} from "@/components/onboarding/PlatformsGrid";
 import { ActionBar } from "@/components/onboarding/ActionBar";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getPlatforms, patchUserPlatforms } from "@/lib/api/platforms";
-import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import {
+  getNextOnboardingPath,
+  useOnboardingStatus,
+} from "@/hooks/useOnboardingStatus";
 
 interface ApiError extends Error {
   response?: {
@@ -36,18 +42,15 @@ export function OnboardingPlatformsPage() {
   // Local state for validation errors
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const {
-    progress,
-    profile,
-  } = useOnboardingStatus();
+  const { progress, profile } = useOnboardingStatus();
 
   // Fetch platforms
   const {
     data: platforms = [],
     isLoading,
-    error: platformsError
+    error: platformsError,
   } = useQuery({
-    queryKey: ['platforms'],
+    queryKey: ["platforms"],
     queryFn: getPlatforms,
   });
 
@@ -56,7 +59,7 @@ export function OnboardingPlatformsPage() {
     mutationFn: patchUserPlatforms,
     onSuccess: () => {
       // Invalidate and refetch user profile queries
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       // Navigate to next relevant step based on current progress
       const nextPath = getNextOnboardingPath(
         {
@@ -64,19 +67,24 @@ export function OnboardingPlatformsPage() {
           hasWatchlistMovies: progress.hasWatchlistMovies,
           hasWatchedMovies: progress.hasWatchedMovies,
         },
-        { fromStep: 'platforms' }
+        { fromStep: "platforms" }
       );
       navigate(nextPath, { replace: true });
     },
     onError: (error: ApiError) => {
-      console.log('OnboardingPlatformsPage: Mutation error:', error);
-      console.log('OnboardingPlatformsPage: Error response:', error?.response);
-      console.log('OnboardingPlatformsPage: Error status:', error?.response?.status);
+      console.log("OnboardingPlatformsPage: Mutation error:", error);
+      console.log("OnboardingPlatformsPage: Error response:", error?.response);
+      console.log(
+        "OnboardingPlatformsPage: Error status:",
+        error?.response?.status
+      );
 
       // Handle authentication errors by redirecting to login
       if (error?.response?.status === 401 || error?.response?.status === 403) {
-        console.log('OnboardingPlatformsPage: Redirecting to login due to auth error');
-        navigate('/auth/login');
+        console.log(
+          "OnboardingPlatformsPage: Redirecting to login due to auth error"
+        );
+        navigate("/auth/login");
       }
     },
   });
@@ -128,7 +136,7 @@ export function OnboardingPlatformsPage() {
 
   // Toggle platform selection
   const togglePlatform = (id: number) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -156,14 +164,19 @@ export function OnboardingPlatformsPage() {
     }
 
     // Check if we have a valid token
-    const token = localStorage.getItem('myVOD_access_token');
+    const token = localStorage.getItem("myVOD_access_token");
     if (!token) {
-      console.log('OnboardingPlatformsPage: No access token found, redirecting to login');
-      navigate('/auth/login');
+      console.log(
+        "OnboardingPlatformsPage: No access token found, redirecting to login"
+      );
+      navigate("/auth/login");
       return;
     }
 
-    console.log('OnboardingPlatformsPage: Token found, proceeding with mutation:', !!token);
+    console.log(
+      "OnboardingPlatformsPage: Token found, proceeding with mutation:",
+      !!token
+    );
 
     // Clear any previous validation errors
     setValidationError(null);
@@ -172,34 +185,35 @@ export function OnboardingPlatformsPage() {
 
   // Handle skip button click
   const handleSkip = () => {
-    const nextPath = getNextOnboardingPath(progress, { fromStep: 'platforms' });
-    console.log("[OnboardingPlatforms] 🏃 Skip button clicked - navigating to", nextPath);
+    const nextPath = getNextOnboardingPath(progress, { fromStep: "platforms" });
+    console.log(
+      "[OnboardingPlatforms] 🏃 Skip button clicked - navigating to",
+      nextPath
+    );
     // Skip to the next incomplete onboarding step (or main app if finished)
     navigate(nextPath, { replace: true });
     console.log("[OnboardingPlatforms] ✅ navigate() called");
   };
 
   // Map platforms to view models
-  const platformViewModels: PlatformViewModel[] = platforms.map(platform => ({
+  const platformViewModels: PlatformViewModel[] = platforms.map((platform) => ({
     id: platform.id,
     slug: platform.platform_slug,
     name: platform.platform_name,
     selected: selectedIds.has(platform.id),
   }));
 
-  const headerActions = (
-    <ThemeToggle key="theme-toggle" />
-  );
+  const headerActions = <ThemeToggle key="theme-toggle" />;
 
   // Loading state
   if (isLoading) {
     return (
-      <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
+      <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
         <ProgressBar current={1} total={3} />
         <div className="space-y-6">
           <OnboardingHeader
-            title="Choose your platforms"
-            hint="Select the streaming services you have access to"
+            title="Wybierz swoje platformy VOD"
+            hint="Wybierz platformy VOD, do których posiadasz dostęp"
           />
           <div className="animate-pulse space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -216,15 +230,15 @@ export function OnboardingPlatformsPage() {
   // Error state for platforms loading
   if (platformsError) {
     return (
-      <OnboardingLayout title="Welcome to MyVOD" headerActions={headerActions}>
+      <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
         <ProgressBar current={1} total={3} />
         <div className="space-y-6">
           <OnboardingHeader
-            title="Choose your platforms"
-            hint="Select the streaming services you have access to"
+            title="Wybierz swoje platformy VOD"
+            hint="Wybierz platformy VOD, do których posiadasz dostęp"
           />
           <Alert variant="destructive">
-            <AlertTitle>Loading Error</AlertTitle>
+            <AlertTitle>Błąd ładowania</AlertTitle>
             <AlertDescription className="space-y-4">
               <p>Nie udało się wczytać listy platform. Spróbuj ponownie.</p>
               <Button
@@ -244,49 +258,47 @@ export function OnboardingPlatformsPage() {
   return (
     <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
       <div data-testid="onboarding-step-1">
-      <ProgressBar
-        current={1} total={3}
-        className="mt-2"
-      />
+        <ProgressBar current={1} total={3} className="mt-2" />
 
-      <OnboardingHeader
-        title="Wybierz swoje platformy VOD"
-        hint="Wybierz platformy VOD, które posiadasz dostęp"
-        className="mt-4"
-      />
+        <OnboardingHeader
+          title="Wybierz swoje platformy VOD"
+          hint="Wybierz platformy VOD, do których posiadasz dostęp"
+          className="mt-4"
+        />
 
-      <PlatformsGrid
-        platforms={platformViewModels}
-        onToggle={togglePlatform}
-        isDisabled={mutation.isPending}
-        className="mb-6"
-      />
+        <PlatformsGrid
+          platforms={platformViewModels}
+          onToggle={togglePlatform}
+          isDisabled={mutation.isPending}
+          className="mb-6"
+        />
 
-      <ActionBar
-        onSkip={handleSkip}
-        onNext={handleNext}
-        isBusy={mutation.isPending}
-        nextButtonText="Dalej"
-        skipButtonText="Pomiń"
-      />
+        <ActionBar
+          onSkip={handleSkip}
+          onNext={handleNext}
+          isBusy={mutation.isPending}
+          nextButtonText="Dalej"
+          skipButtonText="Pomiń"
+          busyButtonText="Zapisuję..."
+        />
 
-      {validationError && (
-        <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1}>
-          <AlertTitle>Validation Error</AlertTitle>
-          <AlertDescription>
-            {validationError}
-          </AlertDescription>
-        </Alert>
-      )}
+        {validationError && (
+          <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1}>
+            <AlertTitle>Błąd walidacji</AlertTitle>
+            <AlertDescription>{validationError}</AlertDescription>
+          </Alert>
+        )}
 
-      {mutation.error && mutation.error.response?.status !== 401 && mutation.error.response?.status !== 403 && (
-        <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1}>
-          <AlertTitle>Save Error</AlertTitle>
-          <AlertDescription>
-            {getErrorMessage(mutation.error as ApiError)}
-          </AlertDescription>
-        </Alert>
-      )}
+        {mutation.error &&
+          mutation.error.response?.status !== 401 &&
+          mutation.error.response?.status !== 403 && (
+            <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1}>
+              <AlertTitle>Błąd zapisu</AlertTitle>
+              <AlertDescription>
+                {getErrorMessage(mutation.error as ApiError)}
+              </AlertDescription>
+            </Alert>
+          )}
       </div>
     </OnboardingLayout>
   );

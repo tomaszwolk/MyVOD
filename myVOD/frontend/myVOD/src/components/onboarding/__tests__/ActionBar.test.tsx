@@ -40,7 +40,7 @@ describe('ActionBar', () => {
     renderWithProviders(<ActionBar {...defaultProps} isBusy={true} />);
 
     const skipButton = screen.getByRole('button', { name: 'Skip platform selection and continue to next step' });
-    const nextButton = screen.getByRole('button', { name: 'Saving platform selection...' });
+    const nextButton = screen.getByRole('button', { name: 'Saving...' });
 
     expect(skipButton).toBeDisabled();
     expect(nextButton).toBeDisabled();
@@ -49,7 +49,7 @@ describe('ActionBar', () => {
   it('should show "Saving..." text when busy', () => {
     renderWithProviders(<ActionBar {...defaultProps} isBusy={true} />);
 
-    expect(screen.getByRole('button', { name: 'Saving platform selection...' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Saving...' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save platform selection and continue' })).not.toBeInTheDocument();
   });
 
@@ -66,8 +66,8 @@ describe('ActionBar', () => {
   it('should have correct aria-label when busy', () => {
     renderWithProviders(<ActionBar {...defaultProps} isBusy={true} />);
 
-    const nextButton = screen.getByRole('button', { name: 'Saving platform selection...' });
-    expect(nextButton).toHaveAttribute('aria-label', 'Saving platform selection...');
+    const nextButton = screen.getByRole('button', { name: 'Saving...' });
+    expect(nextButton).toHaveAttribute('aria-label', 'Saving...');
   });
 
   it('should be keyboard accessible', () => {

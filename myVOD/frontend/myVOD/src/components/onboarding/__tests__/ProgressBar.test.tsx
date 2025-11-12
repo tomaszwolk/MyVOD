@@ -6,13 +6,13 @@ describe('ProgressBar', () => {
   it('should display correct step numbers', () => {
     renderWithProviders(<ProgressBar current={2} total={3} />);
 
-    expect(screen.getByText('Step 2 of 3')).toBeInTheDocument();
+    expect(screen.getByText('Krok 2 z 3')).toBeInTheDocument();
   });
 
   it('should calculate progress percentage', () => {
     renderWithProviders(<ProgressBar current={1} total={3} />);
 
-    expect(screen.getByText('33% complete')).toBeInTheDocument();
+    expect(screen.getByText('33% ukończony')).toBeInTheDocument();
   });
 
   it('should render progress bar with correct width', () => {
@@ -26,17 +26,17 @@ describe('ProgressBar', () => {
   it('should show progress text', () => {
     renderWithProviders(<ProgressBar current={3} total={5} />);
 
-    expect(screen.getByText('60% complete')).toBeInTheDocument(); // 3/5 = 60%
+    expect(screen.getByText('60% ukończony')).toBeInTheDocument(); // 3/5 = 60%
   });
 
   it('should handle edge cases', () => {
     // Test 0 progress
     renderWithProviders(<ProgressBar current={0} total={5} />);
-    expect(screen.getByText('0% complete')).toBeInTheDocument();
+    expect(screen.getByText('0% ukończony')).toBeInTheDocument();
 
     // Test 100% progress
     renderWithProviders(<ProgressBar current={5} total={5} />);
-    expect(screen.getByText('100% complete')).toBeInTheDocument();
+    expect(screen.getByText('100% ukończony')).toBeInTheDocument();
   });
 
   it('should have correct structure and styling', () => {

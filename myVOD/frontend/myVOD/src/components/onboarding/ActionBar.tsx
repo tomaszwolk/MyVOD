@@ -9,15 +9,21 @@ export function ActionBar({
   isBusy = false,
   nextButtonText = "Dalej",
   skipButtonText = "Pomiń",
+  busyButtonText = "Saving...",
 }: {
   onSkip: () => void;
   onNext: () => void;
   isBusy?: boolean;
   nextButtonText?: string;
   skipButtonText?: string;
+  busyButtonText?: string;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row gap-3 sm:justify-between" role="group" aria-label="Onboarding actions">
+    <div
+      className="flex flex-col sm:flex-row gap-3 sm:justify-between"
+      role="group"
+      aria-label="Onboarding actions"
+    >
       <Button
         variant="outline"
         onClick={onSkip}
@@ -33,10 +39,12 @@ export function ActionBar({
         onClick={onNext}
         disabled={isBusy}
         className="sm:order-2"
-        aria-label={isBusy ? "Saving platform selection..." : "Save platform selection and continue"}
+        aria-label={
+          isBusy ? busyButtonText : "Save platform selection and continue"
+        }
         data-testid="onboarding-next-button"
       >
-        {isBusy ? "Saving..." : nextButtonText}
+        {isBusy ? busyButtonText : nextButtonText}
       </Button>
     </div>
   );

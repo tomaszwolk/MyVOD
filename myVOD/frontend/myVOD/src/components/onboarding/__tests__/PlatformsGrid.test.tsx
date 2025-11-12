@@ -31,7 +31,7 @@ describe('PlatformsGrid', () => {
     renderWithProviders(<PlatformsGrid platforms={mockPlatforms} onToggle={onToggle} />);
 
     const fieldset = screen.getByRole('group');
-    const legend = screen.getByText('Select your streaming platforms (1 selected)');
+    const legend = screen.getByText('Wybierz platformy streamingowe (1 zaznaczonych)');
 
     expect(fieldset).toBeInTheDocument();
     expect(legend).toBeInTheDocument();
@@ -62,25 +62,25 @@ describe('PlatformsGrid', () => {
       <PlatformsGrid platforms={mockPlatforms} onToggle={onToggle} />
     );
 
-    expect(screen.getByText('Select your streaming platforms (1 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz platformy streamingowe (1 zaznaczonych)')).toBeInTheDocument();
 
     // Test with all selected
     const allSelectedPlatforms = mockPlatforms.map(p => ({ ...p, selected: true }));
     rerender(<PlatformsGrid platforms={allSelectedPlatforms} onToggle={onToggle} />);
 
-    expect(screen.getByText('Select your streaming platforms (3 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz platformy streamingowe (3 zaznaczonych)')).toBeInTheDocument();
 
     // Test with none selected
     const noneSelectedPlatforms = mockPlatforms.map(p => ({ ...p, selected: false }));
     rerender(<PlatformsGrid platforms={noneSelectedPlatforms} onToggle={onToggle} />);
 
-    expect(screen.getByText('Select your streaming platforms (0 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz platformy streamingowe (0 zaznaczonych)')).toBeInTheDocument();
   });
 
   it('should handle empty platforms array', () => {
     renderWithProviders(<PlatformsGrid platforms={[]} onToggle={onToggle} />);
 
-    expect(screen.getByText('Select your streaming platforms (0 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz platformy streamingowe (0 zaznaczonych)')).toBeInTheDocument();
     expect(screen.queryByTestId(/platform-card-/)).not.toBeInTheDocument();
   });
 
@@ -96,7 +96,7 @@ describe('PlatformsGrid', () => {
     renderWithProviders(<PlatformsGrid platforms={mockPlatforms} onToggle={onToggle} />);
 
     const fieldset = screen.getByRole('group');
-    const legend = screen.getByText(/Select your streaming platforms/);
+    const legend = screen.getByText(/Wybierz platformy streamingowe/);
 
     expect(fieldset.tagName).toBe('FIELDSET');
     expect(legend.tagName).toBe('LEGEND');

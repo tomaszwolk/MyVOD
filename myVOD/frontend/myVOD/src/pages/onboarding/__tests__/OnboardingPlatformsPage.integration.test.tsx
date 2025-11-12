@@ -77,7 +77,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
 
     // Wait for platforms to load and skeleton to disappear
     await waitFor(() => {
-      expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
     });
 
     // Wait for platforms to actually render (not skeleton)
@@ -99,7 +99,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     expect(disneyCard).toHaveAttribute('aria-checked', 'true');
 
     // Click Next
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Verify API call with correct platform IDs
@@ -117,10 +117,10 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Skip')).toBeInTheDocument();
+      expect(screen.getByText('Pomiń')).toBeInTheDocument();
     });
 
-    const skipButton = screen.getByText('Skip');
+    const skipButton = screen.getByText('Pomiń');
     fireEvent.click(skipButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/watchlist', { replace: true });
@@ -130,7 +130,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
     });
 
     // Wait for platforms to actually render
@@ -143,7 +143,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     fireEvent.click(hboCard);
 
     // Click Next
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Verify API was called with selected platform
@@ -164,7 +164,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
     });
   });
 
@@ -183,18 +183,18 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     });
 
     // Verify correct count in legend
-    expect(screen.getByText('Select your streaming platforms (0 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz platformy streamingowe (0 zaznaczonych)')).toBeInTheDocument();
   });
 
   it('should validate platform selection', async () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Click Next without selecting any platforms
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Should show validation error
@@ -223,7 +223,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Loading Error')).toBeInTheDocument();
+      expect(screen.getByText('Błąd ładowania')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Nie udało się wczytać listy platform. Spróbuj ponownie.')).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
     });
 
     // Wait for platforms to actually render
@@ -268,14 +268,14 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Select platform and click Next
     const netflixCard = screen.getByRole('checkbox', { name: /Netflix/i });
     fireEvent.click(netflixCard);
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Should redirect to login due to missing token
@@ -295,19 +295,19 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Select platform and click Next
     const netflixCard = screen.getByRole('checkbox', { name: /Netflix/i });
     fireEvent.click(netflixCard);
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Should show error
     await waitFor(() => {
-      expect(screen.getByText('Save Error')).toBeInTheDocument();
+      expect(screen.getByText('Błąd zapisu')).toBeInTheDocument();
       expect(screen.getByText('Server error. Please try again later.')).toBeInTheDocument();
     });
 

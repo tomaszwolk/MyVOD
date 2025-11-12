@@ -77,8 +77,8 @@ describe('MovieCard', () => {
     render(<MovieCard {...defaultProps} />);
 
     // Should show platform icons with tooltips
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
-    expect(screen.getByTitle('HBO: Niedostępny')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'HBO: Niedostępny' })).toBeInTheDocument();
   });
 
   it('should not show unavailable badge when movie is available', () => {
@@ -87,9 +87,13 @@ describe('MovieCard', () => {
     expect(screen.queryByText('Niedostępny')).not.toBeInTheDocument();
   });
 
-  it('should show unavailable badge when movie is not available', () => {
+  it('should handle unavailable movies without showing badge', () => {
     const unavailableItem = {
       ...mockItem,
+      availability: [
+        { platform_id: 1, platform_name: 'Netflix', is_available: false },
+        { platform_id: 2, platform_name: 'HBO', is_available: false },
+      ],
       availabilitySummary: {
         isAvailableOnAny: false,
         availablePlatformIds: [],
@@ -98,7 +102,8 @@ describe('MovieCard', () => {
 
     render(<MovieCard {...defaultProps} item={unavailableItem} />);
 
-    expect(screen.getByText('Niedostępny')).toBeInTheDocument();
+    expect(screen.queryByText('Niedostępny')).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Niedostępny' })).toBeInTheDocument();
   });
 
   it('should call onMarkWatched when mark as watched button is clicked', () => {

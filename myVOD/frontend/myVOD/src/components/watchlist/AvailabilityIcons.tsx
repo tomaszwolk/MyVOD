@@ -66,6 +66,8 @@ export const AvailabilityIcons = memo<AvailabilityIconsProps>(
                         : "bg-gray-100 text-gray-500 dark:bg-gray-100 dark:text-gray-500"
                     }`}
                     data-testid={`streaming-provider-icon-${platform.platform_slug}`}
+                    role="img"
+                    aria-label={tooltipText}
                   >
                     {IconComponent && <IconComponent className="w-6 h-6" />}
                   </div>

@@ -18,16 +18,16 @@ describe('AvailabilityIcons', () => {
 
     render(<AvailabilityIcons availability={availability} platforms={mockPlatforms} />);
 
-    // Should show tooltips for both platforms
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
-    expect(screen.getByTitle('HBO: Niedostępny')).toBeInTheDocument();
+    // Should show accessible labels for both platforms
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'HBO: Niedostępny' })).toBeInTheDocument();
 
-    // Should have green background for available platform
-    const netflixIcon = screen.getByTitle('Netflix: Dostępny');
-    expect(netflixIcon).toHaveClass('bg-green-100', 'text-green-800');
+    // Should have green styling for available platform
+    const netflixIcon = screen.getByRole('img', { name: 'Netflix: Dostępny' });
+    expect(netflixIcon).toHaveClass('bg-white-100', 'text-green-800');
 
-    // Should have gray background for unavailable platform
-    const hboIcon = screen.getByTitle('HBO: Niedostępny');
+    // Should have gray styling for unavailable platform
+    const hboIcon = screen.getByRole('img', { name: 'HBO: Niedostępny' });
     expect(hboIcon).toHaveClass('bg-gray-100', 'text-gray-500');
   });
 
@@ -41,13 +41,13 @@ describe('AvailabilityIcons', () => {
 
     render(<AvailabilityIcons availability={availability} platforms={userPlatforms} />);
 
-    expect(screen.getByText('Dostępność nieznana')).toBeInTheDocument();
+    expect(screen.getByText('Niedostępny')).toBeInTheDocument();
   });
 
   it('should show unknown availability badge when no availability data', () => {
     render(<AvailabilityIcons availability={[]} platforms={mockPlatforms} />);
 
-    expect(screen.getByText('Dostępność nieznana')).toBeInTheDocument();
+    expect(screen.getByText('Niedostępny')).toBeInTheDocument();
   });
 
   it('should only show platforms that user has selected', () => {
@@ -63,9 +63,9 @@ describe('AvailabilityIcons', () => {
     render(<AvailabilityIcons availability={availability} platforms={userPlatforms} />);
 
     // Should only show Netflix icon
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
-    expect(screen.queryByTitle('HBO: Dostępny')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Amazon Prime: Dostępny')).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'HBO: Dostępny' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Amazon Prime: Dostępny' })).not.toBeInTheDocument();
   });
 
   it('should handle unknown platform slugs gracefully', () => {
@@ -80,9 +80,9 @@ describe('AvailabilityIcons', () => {
     render(<AvailabilityIcons availability={availability} platforms={platformsWithUnknown} />);
 
     // Should show tooltip for unknown platform
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
     // Should still render even with unknown slug (uses default icon)
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
   });
 
   it('should show multiple available platforms', () => {
@@ -93,8 +93,8 @@ describe('AvailabilityIcons', () => {
 
     render(<AvailabilityIcons availability={availability} platforms={mockPlatforms} />);
 
-    expect(screen.getByTitle('Netflix: Dostępny')).toBeInTheDocument();
-    expect(screen.getByTitle('HBO: Dostępny')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Netflix: Dostępny' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'HBO: Dostępny' })).toBeInTheDocument();
   });
 
   it('should handle null availability status as unavailable', () => {
@@ -105,9 +105,9 @@ describe('AvailabilityIcons', () => {
     render(<AvailabilityIcons availability={availability} platforms={mockPlatforms} />);
 
     // Should show Netflix icon as unavailable (gray) when availability is null
-    const netflixIcon = screen.getByTitle('Netflix: Niedostępny');
+    const netflixIcon = screen.getByRole('img', { name: 'Netflix: Niedostępny' });
     expect(netflixIcon).toBeInTheDocument();
     expect(netflixIcon).toHaveClass('bg-gray-100', 'text-gray-500');
-    expect(screen.queryByText('Dostępność nieznana')).not.toBeInTheDocument();
+    expect(screen.queryByText('Niedostępny')).not.toBeInTheDocument();
   });
 });

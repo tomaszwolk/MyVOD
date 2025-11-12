@@ -120,9 +120,9 @@ describe('OnboardingAddPage Integration Tests', () => {
       expect(screen.getByRole('heading', { level: 2, name: 'Dodaj przynajmniej 3 filmy do watchlisty' })).toBeInTheDocument();
     });
 
-    // Check step indicator
-    expect(screen.getByText('Step 2 of 3')).toBeInTheDocument();
-    expect(screen.getByText('67% complete')).toBeInTheDocument();
+    // Check step indicator (localized copy)
+    expect(screen.getByText(/Krok\s*2\s*z\s*3/i)).toBeInTheDocument();
+    expect(screen.getByText(/67\s*% ukończony/i)).toBeInTheDocument();
 
     // Check hint text
     expect(screen.getByText('Wyszukaj filmy i dodaj je do swojej watchlisty, aby rozpocząć')).toBeInTheDocument();
@@ -201,9 +201,9 @@ describe('OnboardingAddPage Integration Tests', () => {
   it('should show progress bar with correct values', () => {
     render(<OnboardingAddPage />);
 
-    // Check progress bar shows step 2 of 3
-    expect(screen.getByText('Step 2 of 3')).toBeInTheDocument();
-    expect(screen.getByText('67% complete')).toBeInTheDocument();
+    // Check progress bar shows localized step information
+    expect(screen.getByText(/Krok\s*2\s*z\s*3/i)).toBeInTheDocument();
+    expect(screen.getByText(/67\s*% ukończony/i)).toBeInTheDocument();
   });
 
   it('should add movie to watchlist successfully', async () => {

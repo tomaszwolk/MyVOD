@@ -75,8 +75,8 @@ describe('OnboardingPlatformsPage', () => {
 
     renderWithProviders(<OnboardingPlatformsPage />);
 
-    expect(screen.getByText('Welcome to MyVOD')).toBeInTheDocument();
-    expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
+    expect(screen.getByText('Witaj w MyVOD')).toBeInTheDocument();
+    expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
   });
 
   it('should show error state on platforms fetch failure', async () => {
@@ -85,7 +85,7 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Loading Error')).toBeInTheDocument();
+      expect(screen.getByText('Błąd ładowania')).toBeInTheDocument();
     });
   });
 
@@ -93,11 +93,11 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Welcome to MyVOD')).toBeInTheDocument();
-      expect(screen.getByText('Choose your platforms')).toBeInTheDocument();
-      expect(screen.getByText('Select the streaming services you have access to')).toBeInTheDocument();
-      expect(screen.getByText('Skip')).toBeInTheDocument();
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Witaj w MyVOD')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz swoje platformy VOD')).toBeInTheDocument();
+      expect(screen.getByText('Wybierz platformy VOD, do których posiadasz dostęp')).toBeInTheDocument();
+      expect(screen.getByText('Pomiń')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
   });
 
@@ -121,7 +121,7 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Deselect all platforms first (Netflix is pre-selected, so we need to deselect it)
@@ -132,7 +132,7 @@ describe('OnboardingPlatformsPage', () => {
     expect(netflixCard).toHaveAttribute('aria-checked', 'false');
 
     // Click Next with no selection
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
@@ -144,14 +144,14 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Ensure Netflix is selected (should be pre-selected from profile)
     const netflixCard = screen.getByRole('checkbox', { name: /Netflix/i });
     expect(netflixCard).toHaveAttribute('aria-checked', 'true');
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
@@ -163,10 +163,10 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
@@ -188,14 +188,14 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Save Error')).toBeInTheDocument();
+      expect(screen.getByText('Błąd zapisu')).toBeInTheDocument();
       expect(screen.getByText('Invalid platform selection. Please try again.')).toBeInTheDocument();
     }, { timeout: 3000 });
   });
@@ -204,7 +204,7 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
     // Deselect Netflix to have no selection
@@ -212,7 +212,7 @@ describe('OnboardingPlatformsPage', () => {
     fireEvent.click(netflixCard); // Deselect
 
     // Click Next with no selection to trigger error
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
@@ -233,18 +233,18 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     // Button should show loading state
     await waitFor(() => {
-      expect(screen.getByText('Saving...')).toBeInTheDocument();
+      expect(screen.getByText('Zapisuję...')).toBeInTheDocument();
     }, { timeout: 2000 });
 
-    expect(screen.getByText('Saving...')).toBeDisabled();
+    expect(screen.getByText('Zapisuję...')).toBeDisabled();
   });
 
   it('should redirect to login on 401 error', async () => {
@@ -255,10 +255,10 @@ describe('OnboardingPlatformsPage', () => {
     renderWithProviders(<OnboardingPlatformsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByText('Dalej')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText('Dalej');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
