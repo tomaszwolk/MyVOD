@@ -1,4 +1,4 @@
-# Plan implementacji endpointu zmiany hasła
+# Plan implementacji endpointu zmiany hasła - Zaimplementowane
 
 ## Endpoint: `POST /api/me/change-password/`
 

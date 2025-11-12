@@ -4,6 +4,12 @@ import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -29,11 +35,11 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   onRestore,
   isRestoring,
   onDelete,
-  isDeleting
+  isDeleting,
 }) {
-
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 2).join(", ") : null;
+  const tooltipMeta = [item.year, displayGenres].filter(Boolean).join(" • ");
 
   const handleRestore = () => {
     onRestore(item.id);
@@ -45,7 +51,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
 
   return (
     <article
-      className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
+      className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow flex flex-col"
       aria-labelledby={`movie-title-${item.id}`}
       role="article"
       data-testid={`watched-movie-card-${item.tconst}`}
@@ -62,67 +68,81 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        {/* Title */}
-        <h3
-          id={`movie-title-${item.id}`}
-          className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
-        >
-          {item.title}
-        </h3>
+      <div className="p-4 flex flex-col flex-grow">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {/* Top Group */}
+              <div>
+                {/* Title */}
+                <h3
+                  id={`movie-title-${item.id}`}
+                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+                >
+                  {item.title}
+                </h3>
 
-        {/* Year, Genres, Rating */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-          {item.year && (
-            <span>{item.year}</span>
-          )}
-          {displayGenres && (
-            <>
-              <span>•</span>
-              <span className="truncate">{displayGenres}</span>
-            </>
-          )}
-        </div>
+                {/* Year, Genres, Rating */}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                  {item.year && <span>{item.year}</span>}
+                  {displayGenres && (
+                    <>
+                      <span>•</span>
+                      <span className="truncate">{displayGenres}</span>
+                    </>
+                  )}
+                </div>
 
-        {/* Rating */}
-        {item.avgRating && (
-          <div className="text-sm font-medium text-foreground mb-2">
-            {item.avgRating}/10
+                {/* Rating */}
+                {item.avgRating && (
+                  <div className="text-sm font-medium text-foreground mb-2">
+                    {item.avgRating}/10
+                  </div>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="font-bold">{item.title}</p>
+              {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Bottom Group */}
+        <div className="mt-auto pt-2">
+          {/* Availability Icons */}
+          <div className="mb-3">
+            <AvailabilityIcons
+              availability={item.availability}
+              platforms={platforms}
+            />
           </div>
-        )}
 
-        {/* Availability Icons */}
-        <div className="mb-3">
-          <AvailabilityIcons
-            availability={item.availability}
-            platforms={platforms}
-          />
-        </div>
-
-        {/* Watched Date */}
-        <div className="text-xs text-muted-foreground mb-3">
+          {/* Watched Date */}
+          {/* <div className="text-xs text-muted-foreground mb-3">
           Obejrzany: {item.watchedAtLabel}
-        </div>
+        </div> */}
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <RestoreButton
-            onClick={handleRestore}
-            loading={isRestoring}
-            ariaLabel={`Przywróć "${item.title}" do watchlisty`}
-            dataTestId="restore-to-watchlist-button"
-          />
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="flex items-center gap-2"
-            aria-label={`Usuń "${item.title}" z historii obejrzanych`}
-            data-testid="delete-movie-button"
-          >
-            <Trash2 className="w-4 h-4" aria-hidden="true" />
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <RestoreButton
+              onClick={handleRestore}
+              loading={isRestoring}
+              ariaLabel={`Przywróć "${item.title}" do watchlisty`}
+              dataTestId="restore-to-watchlist-button"
+            />
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex items-center gap-2"
+              aria-label={`Usuń "${item.title}" z historii obejrzanych`}
+              data-testid="delete-movie-button"
+            >
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
+            </Button>
+          </div>
         </div>
       </div>
     </article>

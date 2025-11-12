@@ -1,4 +1,4 @@
-# Plan implementacji przycisku "Usuń" w widoku watched movies
+# Plan implementacji przycisku "Usuń" w widoku watched movies - Zaimplementowane
 
 ## Cel
 Dodanie przycisku "Usuń" w widoku `/app/watched`, który pozwoli użytkownikowi usunąć filmy z historii obejrzanych filmów. Przycisk ma być umieszczony w prawym dolnym rogu, z prawej strony przycisku "Przywróć".

@@ -1,4 +1,4 @@
-# Refaktoryzacja widoków Watchlist & Watched
+# Refaktoryzacja widoków Watchlist & Watched - Zaimplementowana
 
 ## 1. Cel i zakres
 - Ujednolicić layout, belkę sterującą i zachowanie `/app/watchlist` oraz `/app/watched`.
