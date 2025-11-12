@@ -335,6 +335,8 @@ class SuggestionItemSerializer(serializers.Serializer):
     tconst = serializers.CharField()
     primary_title = serializers.CharField()
     start_year = serializers.IntegerField(allow_null=True)
+    poster_path = serializers.CharField(allow_null=True, required=False)
+    genres = serializers.ListField(child=serializers.CharField(), required=False)
     justification = serializers.CharField()
     availability = MovieAvailabilitySerializer(many=True)
 

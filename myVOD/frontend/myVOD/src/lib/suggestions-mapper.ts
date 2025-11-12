@@ -1,5 +1,8 @@
 import type { SuggestionItemDto, AISuggestionsDto } from "@/types/api.types";
-import type { AISuggestionCardVM, AISuggestionsViewModel } from "@/types/view/suggestions.types";
+import type {
+  AISuggestionCardVM,
+  AISuggestionsViewModel,
+} from "@/types/view/suggestions.types";
 
 interface ApiError extends Error {
   response?: {
@@ -17,7 +20,7 @@ interface ApiError extends Error {
 function mapSuggestionItemToVM(dto: SuggestionItemDto): AISuggestionCardVM {
   // TMDB poster base URL
   const TMDB_POSTER_BASE = "https://image.tmdb.org/t/p/w500";
-  
+
   let posterUrl: string | null = null;
   if (dto.poster_path) {
     // If poster_path is already a full URL, use it; otherwise construct from base
@@ -32,6 +35,7 @@ function mapSuggestionItemToVM(dto: SuggestionItemDto): AISuggestionCardVM {
     tconst: dto.tconst,
     title: dto.primary_title,
     year: dto.start_year,
+    genres: dto.genres ?? null,
     justification: dto.justification,
     posterUrl,
     availability: dto.availability,
@@ -77,7 +81,8 @@ export function mapAISuggestionsToVM(
       expiresAt: null,
       items: [],
       isRateLimited: false,
-      errorMessage: error.message || "Wystąpił błąd podczas pobierania sugestii",
+      errorMessage:
+        error.message || "Wystąpił błąd podczas pobierania sugestii",
     };
   }
 
@@ -99,4 +104,3 @@ export function mapAISuggestionsToVM(
     isRateLimited: false,
   };
 }
-

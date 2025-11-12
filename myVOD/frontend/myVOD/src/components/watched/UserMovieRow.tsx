@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { cn } from "@/lib/utils";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -30,9 +31,8 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
   onRestore,
   isRestoring,
   onDelete,
-  isDeleting
+  isDeleting,
 }) {
-
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 3).join(", ") : null;
 
@@ -52,15 +52,31 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
     >
       <div className="flex gap-4">
         {/* Poster */}
-        <div className="w-16 h-24 bg-muted rounded flex-shrink-0">
-          <TMDBPoster
-            src={item.posterPath}
-            alt={item.title}
-            width={64}
-            height={96}
-            className="w-full h-full object-cover rounded"
-          />
-        </div>
+        <TMDBPoster
+          src={item.posterPath}
+          alt={item.title}
+          width={64}
+          height={96}
+          className="w-full h-full object-cover rounded"
+        >
+          {({ isPlaceholder, imgProps }) => (
+            <div
+              className={cn(
+                "w-16 h-24 rounded flex-shrink-0",
+                isPlaceholder ? "bg-white" : "bg-muted"
+              )}
+            >
+              <img
+                {...imgProps}
+                alt={item.title}
+                width={64}
+                height={96}
+                className={cn(imgProps.className, "rounded")}
+                loading="lazy"
+              />
+            </div>
+          )}
+        </TMDBPoster>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -76,9 +92,7 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
 
               {/* Year, Genres, Rating */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                {item.year && (
-                  <span>{item.year}</span>
-                )}
+                {item.year && <span>{item.year}</span>}
                 {displayGenres && (
                   <>
                     <span>•</span>
@@ -88,7 +102,9 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
                 {item.avgRating && (
                   <>
                     <span>•</span>
-                    <span className="font-medium text-foreground">{item.avgRating}/10</span>
+                    <span className="font-medium text-foreground">
+                      {item.avgRating}/10
+                    </span>
                   </>
                 )}
               </div>
@@ -100,11 +116,11 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
                   platforms={platforms}
                 />
 
-                {!item.isAvailableOnAnyPlatform && (
+                {/* {!item.isAvailableOnAnyPlatform && (
                   <Badge variant="secondary" className="text-xs">
                     Niedostępny na wybranych platformach
                   </Badge>
-                )}
+                )} */}
               </div>
 
               {/* Watched Date */}

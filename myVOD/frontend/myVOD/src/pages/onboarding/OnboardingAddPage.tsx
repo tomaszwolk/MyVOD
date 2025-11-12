@@ -14,6 +14,7 @@ import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardin
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { deleteUserMovie } from "@/lib/api/movies";
 import type { AddedMovieVM, SearchOptionVM } from "@/types/api.types";
+import { useOnboardingAddController } from "@/hooks/useOnboardingAddController";
 
 interface ApiError extends Error {
   status?: number;
@@ -29,6 +30,7 @@ export function OnboardingAddPage() {
   const [added, setAdded] = useState<AddedMovieVM[]>([]);
   const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
   const [removingTconsts, setRemovingTconsts] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState(""); // <-- DODAJ TEN STAN
   const hasPrefilledFromWatchlistRef = useRef(false);
   const errorSectionRef = useRef<HTMLDivElement>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -214,7 +216,7 @@ export function OnboardingAddPage() {
 
       <OnboardingHeader
         title="Dodaj przynajmniej 3 filmy do watchlisty"
-        hint="Wyszukaj filmy i dodaj je do swojej watchlisty, aby rozpocząć"
+        hint="Dodaj do 3 filmów, które chciałbyś obejrzeć"
         className="mt-4"
       />
 
@@ -222,8 +224,13 @@ export function OnboardingAddPage() {
         {/* Movie search combobox */}
         <div className="max-w-lg mx-auto mt-6">
           <MovieSearchCombobox
-            disabledTconsts={addedSet}
-            onSelectOption={handleAddMovie}
+            value={query} // <-- DODAJ TO
+            onChange={setQuery} // <-- DODAJ TO
+            onSelect={handleAddMovie}
+            selectedTconsts={addedSet}
+            placeholder="Szukaj filmów do dodania..."
+            buttonText="Dodaj"
+            ariaLabel="Dodaj film do watchlisty"
           />
         </div>
 

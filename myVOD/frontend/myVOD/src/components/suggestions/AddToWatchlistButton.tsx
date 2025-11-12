@@ -49,12 +49,8 @@ export function AddToWatchlistButton({
           Dodano
         </>
       ) : (
-        <>
-          <Plus className="h-4 w-4" />
-          Dodaj do watchlisty
-        </>
+        <>Dodaj do watchlisty</>
       )}
     </Button>
   );
 }
-

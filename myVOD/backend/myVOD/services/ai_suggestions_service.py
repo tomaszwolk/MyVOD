@@ -190,21 +190,29 @@ def _format_cached_suggestions(user, cached_batch):
     )
     suggestion_tconsts = [s.get('tconst') for s in suggestions if s.get('tconst')]
 
-    # Enrich suggestions with availability data in a single query
+    # Enrich suggestions with movie data and availability in single queries
+    movies_data = {
+        m['tconst']: m for m in Movie.objects.filter(
+            tconst__in=suggestion_tconsts
+        ).values('tconst', 'primary_title', 'start_year', 'poster_path', 'genres')
+    }
     all_availability = _get_bulk_movie_availability(suggestion_tconsts, user_platform_ids)
 
     enriched_suggestions = []
     for suggestion in suggestions:
         tconst = suggestion.get('tconst')
-        if not tconst:
+        if not tconst or tconst not in movies_data:
             continue
 
+        movie_data = movies_data[tconst]
         availability = all_availability.get(tconst, [])
 
         enriched_suggestions.append({
             'tconst': tconst,
-            'primary_title': suggestion.get('primary_title'),
-            'start_year': suggestion.get('start_year'),
+            'primary_title': movie_data.get('primary_title'),
+            'start_year': movie_data.get('start_year'),
+            'poster_path': movie_data.get('poster_path'),
+            'genres': movie_data.get('genres'),
             'justification': suggestion.get('justification', ''),
             'availability': availability
         })
@@ -809,7 +817,9 @@ def _validate_suggestions(suggestions, user_movies, available_movies, user_platf
             movie = Movie.objects.filter(tconst=tconst).values(
                 'tconst',
                 'primary_title',
-                'start_year'
+                'start_year',
+                'poster_path',
+                'genres'
             ).first()
 
             if not movie:
@@ -821,6 +831,8 @@ def _validate_suggestions(suggestions, user_movies, available_movies, user_platf
                 'tconst': tconst,
                 'primary_title': movie['primary_title'],
                 'start_year': movie['start_year'],
+                'poster_path': movie['poster_path'],
+                'genres': movie['genres'],
                 'justification': justification
             })
 

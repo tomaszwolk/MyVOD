@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { cn } from "@/lib/utils";
 
 type MovieListItemProps = {
   tconst: string;
@@ -26,15 +27,30 @@ export function MovieListItem({
       className="flex items-center gap-3 p-3 border rounded-lg bg-card"
       data-testid={`movie-list-item-${tconst}`}
     >
-      <div className="flex-shrink-0 w-[50px] h-[75px] bg-muted rounded overflow-hidden">
-        <TMDBPoster
-          src={posterUrl}
-          alt={`${primaryTitle} poster`}
-          width={50}
-          height={75}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <TMDBPoster
+        src={posterUrl}
+        alt={`${primaryTitle} poster`}
+        width={50}
+        height={75}
+        className="w-full h-full object-cover"
+      >
+        {({ isPlaceholder, imgProps }) => (
+          <div
+            className={cn(
+              "flex-shrink-0 w-[50px] h-[75px] rounded overflow-hidden",
+              isPlaceholder ? "bg-white" : "bg-muted"
+            )}
+          >
+            <img
+              {...imgProps}
+              alt={`${primaryTitle} poster`}
+              width={50}
+              height={75}
+              loading="lazy"
+            />
+          </div>
+        )}
+      </TMDBPoster>
 
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-sm truncate">{primaryTitle}</h4>

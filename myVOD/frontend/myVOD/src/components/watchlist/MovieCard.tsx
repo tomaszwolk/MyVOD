@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { WatchlistItemVM } from "@/types/view/watchlist.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -55,7 +56,24 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({
           width={200}
           height={300}
           className="w-full h-full object-cover"
-        />
+        >
+          {({ isPlaceholder, imgProps }) => (
+            <div
+              className={cn(
+                "aspect-[2/3] relative",
+                isPlaceholder ? "bg-white" : "bg-muted"
+              )}
+            >
+              <img
+                {...imgProps}
+                alt={item.movie.primary_title}
+                width={200}
+                height={300}
+                loading="lazy"
+              />
+            </div>
+          )}
+        </TMDBPoster>
       </div>
 
       {/* Content */}

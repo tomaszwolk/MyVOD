@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "./AvailabilityIcons";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { cn } from "@/lib/utils";
 import type { WatchlistItemVM } from "@/types/view/watchlist.types";
 import type { PlatformDto } from "@/types/api.types";
 
@@ -21,10 +22,16 @@ type MovieRowProps = {
  * Movie row component for list view.
  * Displays movie poster, title, year, genres, rating, availability, and action buttons in a horizontal layout.
  */
-export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms, onMarkWatched, onDelete }) {
-
+export const MovieRow = memo<MovieRowProps>(function MovieRow({
+  item,
+  platforms,
+  onMarkWatched,
+  onDelete,
+}) {
   const hasGenres = item.movie.genres && item.movie.genres.length > 0;
-  const displayGenres = hasGenres ? item.movie.genres!.slice(0, 3).join(", ") : null;
+  const displayGenres = hasGenres
+    ? item.movie.genres!.slice(0, 3).join(", ")
+    : null;
 
   return (
     <article
@@ -34,15 +41,31 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms,
     >
       <div className="flex gap-4">
         {/* Poster */}
-        <div className="w-16 h-24 bg-muted rounded flex-shrink-0">
-          <TMDBPoster
-            src={item.movie.poster_path}
-            alt={item.movie.primary_title}
-            width={64}
-            height={96}
-            className="w-full h-full object-cover rounded"
-          />
-        </div>
+        <TMDBPoster
+          src={item.movie.poster_path}
+          alt={item.movie.primary_title}
+          width={64}
+          height={96}
+          className="w-full h-full object-cover rounded"
+        >
+          {({ isPlaceholder, imgProps }) => (
+            <div
+              className={cn(
+                "w-16 h-24 rounded flex-shrink-0",
+                isPlaceholder ? "bg-white" : "bg-muted"
+              )}
+            >
+              <img
+                {...imgProps}
+                alt={item.movie.primary_title}
+                width={64}
+                height={96}
+                className={cn(imgProps.className, "rounded")}
+                loading="lazy"
+              />
+            </div>
+          )}
+        </TMDBPoster>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -58,9 +81,7 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms,
 
               {/* Year, Genres, Rating */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                {item.movie.start_year && (
-                  <span>{item.movie.start_year}</span>
-                )}
+                {item.movie.start_year && <span>{item.movie.start_year}</span>}
                 {displayGenres && (
                   <>
                     <span>•</span>
@@ -70,7 +91,9 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms,
                 {item.movie.avg_rating && (
                   <>
                     <span>•</span>
-                    <span className="font-medium text-foreground">{item.movie.avg_rating}/10</span>
+                    <span className="font-medium text-foreground">
+                      {item.movie.avg_rating}/10
+                    </span>
                   </>
                 )}
               </div>
@@ -82,11 +105,11 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({ item, platforms,
                   platforms={platforms}
                 />
 
-                {!item.availabilitySummary.isAvailableOnAny && (
+                {/* {!item.availabilitySummary.isAvailableOnAny && (
                   <Badge variant="secondary" className="text-xs">
                     Niedostępny na wybranych platformach
                   </Badge>
-                )}
+                )} */}
               </div>
             </div>
 

@@ -107,7 +107,7 @@ export type AddUserMovieCommand = {
 };
 
 export type UpdateUserMovieCommand = {
-  action: 'mark_as_watched' | 'restore_to_watchlist';
+  action: "mark_as_watched" | "restore_to_watchlist";
 };
 
 // AI Suggestions types
@@ -116,6 +116,7 @@ export type SuggestionItemDto = {
   primary_title: string;
   start_year: number | null;
   poster_path: string | null;
+  genres?: string[] | null;
   justification: string;
   availability: MovieAvailabilityDto[];
 };

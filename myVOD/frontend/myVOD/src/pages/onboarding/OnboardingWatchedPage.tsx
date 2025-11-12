@@ -2,8 +2,9 @@ import { useRef, useState } from "react";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { WatchedSearchCombobox } from "@/components/onboarding/WatchedSearchCombobox";
+import { MovieSearchCombobox } from "@/components/onboarding/MovieSearchCombobox";
 import { SelectedMoviesList } from "@/components/onboarding/SelectedMoviesList";
+import { MovieListItem } from "@/components/onboarding/MovieListItem";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useOnboardingWatchedController } from "@/hooks/useOnboardingWatchedController";
@@ -68,12 +69,15 @@ export function OnboardingWatchedPage() {
       <div className="space-y-8">
         {/* Movie search combobox */}
         <div className="max-w-lg mx-auto mt-6">
-          <WatchedSearchCombobox
+          <MovieSearchCombobox
             value={viewModel.query}
             onChange={setQuery}
-            onPick={pick}
+            onSelect={pick}
             disabled={viewModel.isSubmitting}
             selectedTconsts={selectedTconsts}
+            placeholder="Szukaj filmów, które widziałeś..."
+            buttonText="Oznacz"
+            ariaLabel="Oznacz jako obejrzany"
           />
         </div>
 

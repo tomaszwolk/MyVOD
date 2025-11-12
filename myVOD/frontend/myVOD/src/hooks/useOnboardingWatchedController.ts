@@ -2,10 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addUserMovie, patchUserMovie, deleteUserMovie, listUserMovies } from "@/lib/api/movies";
+import {
+  addUserMovie,
+  patchUserMovie,
+  deleteUserMovie,
+  listUserMovies,
+} from "@/lib/api/movies";
 import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
-import type { OnboardingSelectedItem, OnboardingWatchedViewModel, SelectedSource } from "@/types/view/onboarding-watched.types";
-import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import type {
+  OnboardingSelectedItem,
+  OnboardingWatchedViewModel,
+  SelectedSource,
+} from "@/types/view/onboarding-watched.types";
+import {
+  getNextOnboardingPath,
+  useOnboardingStatus,
+} from "@/hooks/useOnboardingStatus";
 
 interface ApiError extends Error {
   status?: number;
@@ -14,7 +26,7 @@ interface ApiError extends Error {
 /**
  * Controller hook for the Onboarding Watched Page.
  * Manages the complex flow of marking movies as watched during onboarding.
- * 
+ *
  * Flow for picking a movie:
  * 1. Try POST /api/user-movies (add to watchlist)
  *    - If 201: Success, got userMovieId
@@ -22,7 +34,7 @@ interface ApiError extends Error {
  * 2. PATCH /api/user-movies/:id with action='mark_as_watched'
  *    - If 200: Success, movie marked as watched
  *    - If 400 "already watched": Success (treat as success, lookup userMovieId from watched list)
- * 
+ *
  * @returns Controller object with state and handlers
  */
 export function useOnboardingWatchedController() {
@@ -74,8 +86,13 @@ export function useOnboardingWatchedController() {
 
   // Mutation for patching user movie
   const patchUserMovieMutation = useMutation({
-    mutationFn: ({ id, command }: { id: number; command: { action: 'mark_as_watched' | 'restore_to_watchlist' } }) => 
-      patchUserMovie(id, command),
+    mutationFn: ({
+      id,
+      command,
+    }: {
+      id: number;
+      command: { action: "mark_as_watched" | "restore_to_watchlist" };
+    }) => patchUserMovie(id, command),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-movies"] });
     },
@@ -95,7 +112,7 @@ export function useOnboardingWatchedController() {
    */
   const pick = async (movie: SearchOptionVM) => {
     // Guard: check if already selected in this session
-    if (selected.some(item => item.tconst === movie.tconst)) {
+    if (selected.some((item) => item.tconst === movie.tconst)) {
       toast.info("Ten film został już wybrany");
       return;
     }
@@ -108,15 +125,15 @@ export function useOnboardingWatchedController() {
       poster_path: movie.posterUrl,
       avg_rating: movie.avgRating,
       userMovieId: null,
-      source: 'newly_created', // Will be updated based on API response
-      status: 'loading',
+      source: "newly_created", // Will be updated based on API response
+      status: "loading",
     };
 
-    setSelected(prev => [...prev, tempItem]);
+    setSelected((prev) => [...prev, tempItem]);
 
     try {
       let userMovieId: number | null = null;
-      let source: SelectedSource = 'newly_created';
+      let source: SelectedSource = "newly_created";
 
       try {
         const result: UserMovieDto = await addUserMovieMutation.mutateAsync({
@@ -127,52 +144,58 @@ export function useOnboardingWatchedController() {
         userMovieId = result.id;
 
         if (result.watchlisted_at) {
-          source = 'preexisting_watchlist';
+          source = "preexisting_watchlist";
         } else {
-          source = 'newly_created';
+          source = "newly_created";
         }
 
-        setSelected(prev =>
-          prev.map(item =>
+        setSelected((prev) =>
+          prev.map((item) =>
             item.tconst === movie.tconst
-              ? { ...item, userMovieId, source, status: 'success' }
+              ? { ...item, userMovieId, source, status: "success" }
               : item
           )
         );
 
         toast.success(`"${movie.primaryTitle}" oznaczono jako obejrzany`);
-
       } catch (error) {
         const apiError = error as ApiError;
         if (apiError?.status === 409) {
-          const watched: UserMovieDto[] = await listUserMovies('watched');
-          const existingWatched = watched.find(m => m.movie.tconst === movie.tconst);
+          const watched: UserMovieDto[] = await listUserMovies("watched");
+          const existingWatched = watched.find(
+            (m) => m.movie.tconst === movie.tconst
+          );
 
           if (existingWatched) {
             userMovieId = existingWatched.id;
-            source = 'preexisting_watched';
+            source = "preexisting_watched";
 
-            setSelected(prev =>
-              prev.map(item =>
+            setSelected((prev) =>
+              prev.map((item) =>
                 item.tconst === movie.tconst
-                  ? { ...item, userMovieId, source, status: 'success' }
+                  ? { ...item, userMovieId, source, status: "success" }
                   : item
               )
             );
 
-            toast.info(`"${movie.primaryTitle}" był już oznaczony jako obejrzany`);
+            toast.info(
+              `"${movie.primaryTitle}" był już oznaczony jako obejrzany`
+            );
           } else {
-            throw new Error("Nie znaleziono filmu na liście obejrzanych mimo 409");
+            throw new Error(
+              "Nie znaleziono filmu na liście obejrzanych mimo 409"
+            );
           }
         } else {
           throw error;
         }
       }
-
     } catch (error) {
       const apiError = error as ApiError;
       // Remove item from selected on error
-      setSelected(prev => prev.filter(item => item.tconst !== movie.tconst));
+      setSelected((prev) =>
+        prev.filter((item) => item.tconst !== movie.tconst)
+      );
 
       // Show error toast
       if (apiError?.status === 400) {
@@ -180,7 +203,9 @@ export function useOnboardingWatchedController() {
       } else if (apiError?.status && apiError.status >= 500) {
         toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
       } else {
-        toast.error(apiError?.message || "Wystąpił błąd podczas oznaczania filmu");
+        toast.error(
+          apiError?.message || "Wystąpił błąd podczas oznaczania filmu"
+        );
       }
 
       console.error("Error in pick flow:", error);
@@ -195,19 +220,19 @@ export function useOnboardingWatchedController() {
   const undo = async (item: OnboardingSelectedItem) => {
     if (!item.userMovieId) {
       // No userMovieId - just remove from UI
-      setSelected(prev => prev.filter(i => i.tconst !== item.tconst));
+      setSelected((prev) => prev.filter((i) => i.tconst !== item.tconst));
       return;
     }
 
     // Set loading state
-    setSelected(prev =>
-      prev.map(i =>
-        i.tconst === item.tconst ? { ...i, status: 'loading' } : i
+    setSelected((prev) =>
+      prev.map((i) =>
+        i.tconst === item.tconst ? { ...i, status: "loading" } : i
       )
     );
 
     try {
-      if (item.source === 'newly_created') {
+      if (item.source === "newly_created") {
         // Delete the movie (soft delete)
         await deleteUserMovieMutation.mutateAsync(item.userMovieId);
         toast.success("Anulowano oznaczenie filmu");
@@ -215,20 +240,19 @@ export function useOnboardingWatchedController() {
         // Restore to watchlist
         await patchUserMovieMutation.mutateAsync({
           id: item.userMovieId,
-          command: { action: 'restore_to_watchlist' },
+          command: { action: "restore_to_watchlist" },
         });
         toast.success("Film przywrócono do watchlisty");
       }
 
       // Remove from selected
-      setSelected(prev => prev.filter(i => i.tconst !== item.tconst));
-
+      setSelected((prev) => prev.filter((i) => i.tconst !== item.tconst));
     } catch (error) {
       const apiError = error as ApiError;
       // Restore success state on error
-      setSelected(prev =>
-        prev.map(i =>
-          i.tconst === item.tconst ? { ...i, status: 'success' } : i
+      setSelected((prev) =>
+        prev.map((i) =>
+          i.tconst === item.tconst ? { ...i, status: "success" } : i
         )
       );
 
@@ -248,10 +272,12 @@ export function useOnboardingWatchedController() {
    */
   const finish = () => {
     setIsSubmitting(true);
-    
+
     // Navigate to main app (soft guard allows this)
     toast.success("Onboarding zakończony!");
-    const destination = getNextOnboardingPath(progress, { fromStep: "watched" });
+    const destination = getNextOnboardingPath(progress, {
+      fromStep: "watched",
+    });
     navigate(destination, { replace: true });
   };
 
@@ -260,9 +286,11 @@ export function useOnboardingWatchedController() {
    */
   const skip = () => {
     setIsSubmitting(true);
-    
+
     // Navigate to main app (soft guard allows this)
-    const destination = getNextOnboardingPath(progress, { fromStep: "watched" });
+    const destination = getNextOnboardingPath(progress, {
+      fromStep: "watched",
+    });
     navigate(destination, { replace: true });
   };
 
@@ -283,4 +311,3 @@ export function useOnboardingWatchedController() {
     skip,
   };
 }
-

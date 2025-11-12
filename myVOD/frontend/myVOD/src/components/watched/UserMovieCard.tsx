@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for UserMovieCard component.
@@ -64,7 +65,24 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
           width={200}
           height={300}
           className="w-full h-full object-cover"
-        />
+        >
+          {({ isPlaceholder, imgProps }) => (
+            <div
+              className={cn(
+                "aspect-[2/3] relative",
+                isPlaceholder ? "bg-white" : "bg-muted"
+              )}
+            >
+              <img
+                {...imgProps}
+                alt={item.title}
+                width={200}
+                height={300}
+                loading="lazy"
+              />
+            </div>
+          )}
+        </TMDBPoster>
       </div>
 
       {/* Content */}

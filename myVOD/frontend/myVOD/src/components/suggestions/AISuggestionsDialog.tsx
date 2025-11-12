@@ -48,7 +48,7 @@ export function AISuggestionsDialog({
 }: AISuggestionsDialogProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const debug = searchParams.get('debug') === 'true';
+  const debug = searchParams.get("debug") === "true";
 
   // Fetch suggestions
   const suggestionsQuery = useAISuggestions({
@@ -62,7 +62,9 @@ export function AISuggestionsDialog({
 
   // Track added items and loading states
   const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
-  const [isAddingByTconst, setIsAddingByTconst] = useState<Record<string, boolean>>({});
+  const [isAddingByTconst, setIsAddingByTconst] = useState<
+    Record<string, boolean>
+  >({});
 
   // Map API response to ViewModel
   const viewModel: AISuggestionsViewModel = useMemo(() => {
@@ -74,65 +76,75 @@ export function AISuggestionsDialog({
   const emptyStateVariant: EmptyStateVariant = useMemo(() => {
     const error = suggestionsQuery.error;
     if (isAxiosError<SuggestionsErrorResponse>(error)) {
-      if (error.response?.status === 404) return 'no-data';
-      if (error.response?.status === 429) return 'rate-limited';
-      return 'error';
+      if (error.response?.status === 404) return "no-data";
+      if (error.response?.status === 429) return "rate-limited";
+      return "error";
     }
     if (viewModel.items.length === 0 && !suggestionsQuery.isLoading) {
-      return 'no-suggestions';
+      return "no-suggestions";
     }
-    return 'no-suggestions';
-  }, [suggestionsQuery.error, viewModel.items.length, suggestionsQuery.isLoading]);
+    return "no-suggestions";
+  }, [
+    suggestionsQuery.error,
+    viewModel.items.length,
+    suggestionsQuery.isLoading,
+  ]);
 
   // Handle adding movie to watchlist
-  const handleAdd = useCallback(async (tconst: string) => {
-    if (addedSet.has(tconst) || watchlistTconstSet.has(tconst)) {
-      return;
-    }
+  const handleAdd = useCallback(
+    async (tconst: string) => {
+      if (addedSet.has(tconst) || watchlistTconstSet.has(tconst)) {
+        return;
+      }
 
-    setIsAddingByTconst(prev => ({ ...prev, [tconst]: true }));
+      setIsAddingByTconst((prev) => ({ ...prev, [tconst]: true }));
 
-    try {
-      await addToWatchlistMutation.mutateAsync({ 
-        tconst,
-        added_from_ai_suggestion: true 
-      });
-      setAddedSet(prev => new Set([...prev, tconst]));
-    } catch {
-      // Error handling is done in the mutation (toast notifications)
-      // Don't add to addedSet on error
-    } finally {
-      setIsAddingByTconst(prev => {
-        const next = { ...prev };
-        delete next[tconst];
-        return next;
-      });
-    }
-  }, [addedSet, watchlistTconstSet, addToWatchlistMutation]);
+      try {
+        await addToWatchlistMutation.mutateAsync({
+          tconst,
+          added_from_ai_suggestion: true,
+        });
+        setAddedSet((prev) => new Set([...prev, tconst]));
+      } catch {
+        // Error handling is done in the mutation (toast notifications)
+        // Don't add to addedSet on error
+      } finally {
+        setIsAddingByTconst((prev) => {
+          const next = { ...prev };
+          delete next[tconst];
+          return next;
+        });
+      }
+    },
+    [addedSet, watchlistTconstSet, addToWatchlistMutation]
+  );
 
   // Handle dialog close with navigation
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      // Reset added items when closing
-      setAddedSet(new Set());
-      // Navigate back or to watchlist
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        navigate('/app/watchlist');
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        // Reset added items when closing
+        setAddedSet(new Set());
+        // Navigate back or to watchlist
+        if (window.history.length > 1) {
+          navigate(-1);
+        } else {
+          navigate("/app/watchlist");
+        }
+        onClose();
       }
-      onClose();
-    }
-  }, [navigate, onClose]);
+    },
+    [navigate, onClose]
+  );
 
   // Show loading state
   if (suggestionsQuery.isLoading) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="max-w-4xl max-h-[80vh] overflow-y-auto"
+          className="max-w-7x1 max-h-[100vh] overflow-y-auto"
           aria-describedby="suggestions-loading-description"
-          style={{ backgroundColor: 'var(--search-popover-background)' }}
+          style={{ backgroundColor: "var(--search-popover-background)" }}
           data-testid="ai-suggestions-dialog"
         >
           <DialogHeader>
@@ -141,8 +153,15 @@ export function AISuggestionsDialog({
               Generuję spersonalizowane sugestie...
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+          <div
+            className="flex items-center justify-center py-12"
+            role="status"
+            aria-live="polite"
+          >
+            <Loader2
+              className="h-8 w-8 animate-spin text-muted-foreground"
+              aria-hidden="true"
+            />
             <span className="sr-only">Ładowanie sugestii filmów</span>
           </div>
         </DialogContent>
@@ -155,9 +174,9 @@ export function AISuggestionsDialog({
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="max-w-4xl max-h-[80vh] overflow-y-auto"
+          className="max-w-7xl max-h-[100vh] overflow-y-auto"
           aria-describedby="suggestions-empty-description"
-          style={{ backgroundColor: 'var(--search-popover-background)' }}
+          style={{ backgroundColor: "var(--search-popover-background)" }}
           data-testid="ai-suggestions-dialog"
         >
           <DialogHeader>
@@ -174,8 +193,8 @@ export function AISuggestionsDialog({
           />
 
           <DialogFooter>
-            <Button 
-              onClick={() => handleOpenChange(false)} 
+            <Button
+              onClick={() => handleOpenChange(false)}
               variant="outline"
               aria-label="Zamknij modal sugestii"
             >
@@ -191,9 +210,9 @@ export function AISuggestionsDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-4xl max-h-[80vh] overflow-y-auto"
+        className="max-w-7xl max-h-[100vh] overflow-y-auto"
         aria-describedby="suggestions-description"
-        style={{ backgroundColor: 'var(--search-popover-background)' }}
+        style={{ backgroundColor: "var(--search-popover-background)" }}
         data-testid="ai-suggestions-dialog"
       >
         <DialogHeader>
@@ -220,8 +239,8 @@ export function AISuggestionsDialog({
         </div>
 
         <DialogFooter>
-          <Button 
-            onClick={() => handleOpenChange(false)} 
+          <Button
+            onClick={() => handleOpenChange(false)}
             variant="outline"
             aria-label="Zamknij modal sugestii"
           >
@@ -232,4 +251,3 @@ export function AISuggestionsDialog({
     </Dialog>
   );
 }
-

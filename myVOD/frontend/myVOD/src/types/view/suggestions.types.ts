@@ -10,6 +10,7 @@ export type AISuggestionCardVM = {
   tconst: string;
   title: string;
   year: number | null;
+  genres: string[] | null;
   justification: string;
   posterUrl: string | null; // TMDB URL or null for placeholder
   availability: MovieAvailabilityDto[];
@@ -37,5 +38,8 @@ export type ApiError = {
 /**
  * Empty state variant for different error scenarios.
  */
-export type EmptyStateVariant = 'no-data' | 'rate-limited' | 'no-suggestions' | 'error';
-
+export type EmptyStateVariant =
+  | "no-data"
+  | "rate-limited"
+  | "no-suggestions"
+  | "error";
