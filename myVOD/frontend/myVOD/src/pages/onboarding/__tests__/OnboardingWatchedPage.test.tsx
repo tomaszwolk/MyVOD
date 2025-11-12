@@ -28,20 +28,21 @@ vi.mock('@/components/onboarding/OnboardingHeader', () => ({
   ),
 }));
 
-vi.mock('@/components/onboarding/WatchedSearchCombobox', () => ({
-  WatchedSearchCombobox: ({ value, onChange, onPick, disabled, selectedTconsts }: { value: string; onChange: (value: string) => void; onPick: (option: { tconst: string; primaryTitle: string }) => void; disabled: boolean; selectedTconsts: Set<string> }) => {
+vi.mock('@/components/onboarding/MovieSearchCombobox', () => ({
+  MovieSearchCombobox: ({ value, onChange, onSelect, disabled, selectedTconsts }: { value: string; onChange: (value: string) => void; onSelect: (option: { tconst: string; primaryTitle: string }) => void; disabled: boolean; selectedTconsts: Set<string> }) => {
     const buttonDisabled = disabled || selectedTconsts.has('tt0111161');
     return (
-      <div data-testid="watched-search-combobox" data-value={value} data-disabled={disabled}>
+      <div data-testid="movie-search-combobox-wrapper" data-value={value} data-disabled={disabled}>
         <input
+          data-testid="movie-search-combobox"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          placeholder="Search input"
+          placeholder="Szukaj filmów, które widziałeś..."
         />
         <button
           data-testid="search-pick-button"
-          onClick={() => onPick({ tconst: 'tt0111161', primaryTitle: 'Test Movie' })}
+          onClick={() => onSelect({ tconst: 'tt0111161', primaryTitle: 'Test Movie' })}
           disabled={buttonDisabled}
           data-button-disabled={buttonDisabled.toString()}
         >
@@ -115,7 +116,7 @@ describe('OnboardingWatchedPage', () => {
     expect(screen.getByTestId('onboarding-layout')).toBeInTheDocument();
     expect(screen.getByTestId('progress-bar')).toBeInTheDocument();
     expect(screen.getByTestId('onboarding-header')).toBeInTheDocument();
-    expect(screen.getByTestId('watched-search-combobox')).toBeInTheDocument();
+    expect(screen.getByTestId('movie-search-combobox')).toBeInTheDocument();
     expect(screen.getByTestId('selected-movies-list')).toBeInTheDocument();
     expect(screen.getByTestId('onboarding-footer-nav')).toBeInTheDocument();
 
@@ -166,8 +167,8 @@ describe('OnboardingWatchedPage', () => {
 
     render(<OnboardingWatchedPage />);
 
-    const searchCombobox = screen.getByTestId('watched-search-combobox');
-    expect(searchCombobox).toHaveAttribute('data-disabled', 'false');
+    const searchComboboxWrapper = screen.getByTestId('movie-search-combobox-wrapper');
+    expect(searchComboboxWrapper).toHaveAttribute('data-disabled', 'false');
   });
 
   it('should call controller.pick when movie selected', () => {

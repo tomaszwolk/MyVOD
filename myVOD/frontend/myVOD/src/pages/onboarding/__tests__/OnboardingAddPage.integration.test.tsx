@@ -125,10 +125,10 @@ describe('OnboardingAddPage Integration Tests', () => {
     expect(screen.getByText(/67\s*% ukończony/i)).toBeInTheDocument();
 
     // Check hint text
-    expect(screen.getByText('Wyszukaj filmy i dodaj je do swojej watchlisty, aby rozpocząć')).toBeInTheDocument();
+    expect(screen.getByText('Dodaj do 3 filmów, które chciałbyś obejrzeć')).toBeInTheDocument();
 
     // Check search input
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
 
     // Check empty state
     expect(screen.getByText('Brak dodanych filmów')).toBeInTheDocument();
@@ -195,7 +195,7 @@ describe('OnboardingAddPage Integration Tests', () => {
 
     // Component should handle prefilled movies correctly
     // Since the grid component is mocked, we just verify the component renders
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
   });
 
   it('should show progress bar with correct values', () => {
@@ -227,7 +227,7 @@ describe('OnboardingAddPage Integration Tests', () => {
 
     render(<OnboardingAddPage />);
 
-    const input = screen.getByPlaceholderText('Szukaj filmów...');
+    const input = screen.getByPlaceholderText('Szukaj filmów do dodania...');
 
     // Mock the search combobox behavior - simulate adding a movie
     // Since MovieSearchCombobox is mocked, we'll simulate the onSelectOption call
@@ -268,7 +268,7 @@ describe('OnboardingAddPage Integration Tests', () => {
 
     // Test that duplicate handling works
     // The actual logic is in the component, so we verify the component renders
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
     expect(screen.getByText('Brak dodanych filmów')).toBeInTheDocument();
   });
 
@@ -295,7 +295,7 @@ describe('OnboardingAddPage Integration Tests', () => {
     render(<OnboardingAddPage />);
 
     // Component should handle 3 movies limit
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
 
     // Check that Next button should be enabled when 3 movies are present
     const nextButton = screen.getByRole('button', { name: 'Continue to next onboarding step' });
@@ -323,7 +323,7 @@ describe('OnboardingAddPage Integration Tests', () => {
     render(<OnboardingAddPage />);
 
     // Component should prevent adding duplicates
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
   });
 
   it('should handle undo operations', async () => {
@@ -373,7 +373,7 @@ describe('OnboardingAddPage Integration Tests', () => {
     // This would be handled by the MovieSearchCombobox component
     render(<OnboardingAddPage />);
 
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
   });
 
   it('should handle API errors during add', async () => {
@@ -395,7 +395,7 @@ describe('OnboardingAddPage Integration Tests', () => {
     render(<OnboardingAddPage />);
 
     // Component should handle API errors gracefully
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
   });
 
   it('should show loading states during operations', () => {
@@ -412,13 +412,13 @@ describe('OnboardingAddPage Integration Tests', () => {
     render(<OnboardingAddPage />);
 
     // Component should handle loading states
-    expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Szukaj filmów do dodania...')).toBeInTheDocument();
   });
 
   it('should validate search input', () => {
     render(<OnboardingAddPage />);
 
-    const input = screen.getByPlaceholderText('Szukaj filmów...');
+    const input = screen.getByPlaceholderText('Szukaj filmów do dodania...');
 
     // Test that search input works
     fireEvent.change(input, { target: { value: 'test search' } });

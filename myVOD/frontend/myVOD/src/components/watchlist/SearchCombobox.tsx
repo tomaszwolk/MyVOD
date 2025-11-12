@@ -1,12 +1,17 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Loader2, Search } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import { SearchNoResultsItem } from "@/components/SearchNoResultsItem";
+import { cn } from "@/lib/utils";
 import type { SearchOptionVM } from "@/types/api.types";
 
 /**
@@ -23,7 +28,12 @@ type SearchComboboxProps = {
  * Search combobox for adding movies to watchlist.
  * Provides debounced search with autocomplete functionality.
  */
-export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTconsts, existingWatchedTconsts }: SearchComboboxProps) {
+export function SearchCombobox({
+  onAddToWatchlist,
+  onAddToWatched,
+  existingTconsts,
+  existingWatchedTconsts,
+}: SearchComboboxProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -85,7 +95,9 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
     }
 
     setPendingTconst(result.tconst);
-    await executeAction(() => onAddToWatchlist(result.tconst), { shouldReset: false });
+    await executeAction(() => onAddToWatchlist(result.tconst), {
+      shouldReset: false,
+    });
   };
 
   const handleAddToWatched = async (result: SearchOptionVM) => {
@@ -98,7 +110,9 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
     }
 
     setPendingTconst(result.tconst);
-    await executeAction(() => onAddToWatched(result.tconst), { shouldReset: false });
+    await executeAction(() => onAddToWatched(result.tconst), {
+      shouldReset: false,
+    });
   };
 
   const handleInputChange = (value: string) => {
@@ -138,7 +152,8 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
     }
   };
 
-  const activeId = activeIndex >= 0 ? `result-${results[activeIndex]?.tconst}` : undefined;
+  const activeId =
+    activeIndex >= 0 ? `result-${results[activeIndex]?.tconst}` : undefined;
 
   return (
     <div className="relative">
@@ -173,9 +188,9 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
           className="w-full p-0 text-foreground border border-border shadow-lg"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          style={{ 
+          style={{
             width: inputRef.current?.offsetWidth,
-            backgroundColor: 'var(--search-popover-background)'
+            backgroundColor: "var(--search-popover-background)",
           }}
         >
           {error ? (
@@ -184,14 +199,15 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
             </div>
           ) : null}
 
-          {!error && results.length === 0 && query.length >= 2 && !isLoading && (
-            <SearchNoResultsItem query={query} />
-          )}
+          {!error &&
+            results.length === 0 &&
+            query.length >= 2 &&
+            !isLoading && <SearchNoResultsItem query={query} />}
 
           {results.length > 0 && (
             <div
               className="max-h-60 overflow-y-auto divide-y divide-border"
-              style={{ backgroundColor: 'var(--search-popover-background)' }}
+              style={{ backgroundColor: "var(--search-popover-background)" }}
               role="listbox"
               data-testid="search-results-list"
             >
@@ -199,7 +215,9 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                 const isActive = index === activeIndex;
                 const isOnWatchlist = existingTconsts.includes(result.tconst);
                 const isPending = pendingTconst === result.tconst;
-                const isWatched = existingWatchedTconsts.includes(result.tconst);
+                const isWatched = existingWatchedTconsts.includes(
+                  result.tconst
+                );
 
                 return (
                   <div
@@ -220,14 +238,32 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                     data-testid={`search-result-item-${result.tconst}`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-18 bg-muted rounded flex-shrink-0">
+                      <div className="w-12 h-18 bg-muted rounded flex-shrink-0 overflow-hidden">
                         <TMDBPoster
                           src={result.posterUrl}
                           alt={result.primaryTitle}
                           width={48}
                           height={72}
                           className="w-full h-full object-cover rounded"
-                        />
+                        >
+                          {({ isPlaceholder, imgProps }) => (
+                            <div
+                              className={cn(
+                                "w-full h-full rounded",
+                                isPlaceholder ? "bg-white" : "bg-muted"
+                              )}
+                            >
+                              <img
+                                {...imgProps}
+                                alt={result.primaryTitle}
+                                width={48}
+                                height={72}
+                                className={cn(imgProps.className, "rounded")}
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                        </TMDBPoster>
                       </div>
                       <div className="flex flex-1 flex-col justify-between self-stretch min-w-0">
                         <div>
@@ -235,8 +271,10 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                             {result.primaryTitle}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {result.startYear && `${result.startYear}`} • 
-                            ⭐ {result.avgRating ? `${result.avgRating}/10` : "Brak oceny"}
+                            {result.startYear && `${result.startYear}`} • ⭐{" "}
+                            {result.avgRating
+                              ? `${result.avgRating}/10`
+                              : "Brak oceny"}
                           </div>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
@@ -245,7 +283,11 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                             variant="outline"
                             className="whitespace-nowrap"
                             disabled={isOnWatchlist || isPending}
-                            aria-label={isOnWatchlist ? "Film jest już na watchliście" : `Dodaj ${result.primaryTitle} do watchlist`}
+                            aria-label={
+                              isOnWatchlist
+                                ? "Film jest już na watchliście"
+                                : `Dodaj ${result.primaryTitle} do watchlist`
+                            }
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
@@ -260,7 +302,11 @@ export function SearchCombobox({ onAddToWatchlist, onAddToWatched, existingTcons
                             variant="outline"
                             className="whitespace-nowrap"
                             disabled={isPending || isWatched}
-                            aria-label={isWatched ? "Film jest już na liście obejrzanych" : `Dodaj ${result.primaryTitle} do obejrzanych`}
+                            aria-label={
+                              isWatched
+                                ? "Film jest już na liście obejrzanych"
+                                : `Dodaj ${result.primaryTitle} do obejrzanych`
+                            }
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();

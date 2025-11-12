@@ -29,14 +29,19 @@ class UserRegistrationServiceTests(TestCase):
         """
         Set up test data for each test.
 
-        Creates test users that may be needed for duplicate checks.
+        Note: Django TestCase automatically handles database cleanup
+        between tests using transactions, so manual cleanup is not needed.
         """
-        # Clean up any existing test users
-        User.objects.filter(email__icontains='test').delete()
+        pass
 
     def tearDown(self):
-        """Clean up test data after each test."""
-        User.objects.filter(email__icontains='test').delete()
+        """
+        Clean up test data after each test.
+        
+        Note: Django TestCase automatically handles database cleanup
+        between tests using transactions, so manual cleanup is not needed.
+        """
+        pass
 
     def test_register_user_success(self):
         """Test successful user registration with valid data."""

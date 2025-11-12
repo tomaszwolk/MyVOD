@@ -28,6 +28,34 @@ vi.mock('lucide-react', () => ({
   Info: () => <div data-testid="info-icon" />,
 }));
 
+vi.mock('@/components/TMDBPoster', () => ({
+  TMDBPoster: ({ src, alt, width, height, className, children }: any) => {
+    // TMDBPoster uses render prop pattern - children must be a function
+    if (typeof children === 'function') {
+      return children({
+        isPlaceholder: !src,
+        imgProps: {
+          src: src || '/src/assets/poster-myVOD.png',
+          className,
+          onError: () => {},
+        },
+      });
+    }
+    // Fallback for tests that don't provide children
+    return (
+      <img
+        src={src || '/src/assets/poster-myVOD.png'}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        loading="lazy"
+        data-testid="tmdb-poster"
+      />
+    );
+  },
+}));
+
 describe('SearchCombobox', () => {
   const defaultResult: SearchOptionVM = {
     tconst: 'tt1234567',

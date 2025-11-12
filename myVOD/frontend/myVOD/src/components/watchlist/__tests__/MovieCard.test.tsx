@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MovieCard } from '../MovieCard';
 import type { WatchlistItemVM, PlatformDto } from '@/types/view/watchlist.types';
 
@@ -70,7 +70,9 @@ describe('MovieCard', () => {
 
     render(<MovieCard {...defaultProps} item={itemWithoutPoster} />);
 
-    expect(screen.getByTestId('image-icon')).toBeInTheDocument();
+    // TMDBPoster now renders placeholder as img with poster-myVOD.png
+    const img = screen.getByAltText('The Shawshank Redemption');
+    expect(img).toHaveAttribute('src', expect.stringContaining('poster-myVOD.png'));
   });
 
   it('should show availability icons for user platforms', () => {
@@ -133,14 +135,17 @@ describe('MovieCard', () => {
     expect(screen.getByTestId('trash-icon')).toBeInTheDocument();
   });
 
-  it('should handle image error gracefully', () => {
+  it('should handle image error gracefully', async () => {
     render(<MovieCard {...defaultProps} />);
 
     const img = screen.getByAltText('The Shawshank Redemption');
     fireEvent.error(img);
 
-    // Should show placeholder after error
-    expect(screen.getByTestId('image-icon')).toBeInTheDocument();
+    // Should show placeholder after error (src changes to poster-myVOD.png)
+    await waitFor(() => {
+      const updatedImg = screen.getByAltText('The Shawshank Redemption');
+      expect(updatedImg).toHaveAttribute('src', expect.stringContaining('poster-myVOD.png'));
+    });
   });
 
   it('should limit genres display to 2 items', () => {

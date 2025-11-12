@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@/test/utils';
+import { useState } from 'react';
 import { MovieSearchCombobox } from '../MovieSearchCombobox';
 import { useMovieSearch } from '@/hooks/useMovieSearch';
 
@@ -41,7 +42,8 @@ vi.mock('@/hooks/useMovieSearch', () => ({
 const mockUseMovieSearch = vi.mocked(useMovieSearch);
 
 describe('MovieSearchCombobox', () => {
-  const mockOnSelectOption = vi.fn();
+  const mockOnSelect = vi.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -57,8 +59,10 @@ describe('MovieSearchCombobox', () => {
   it('should render search input with correct placeholder', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -70,8 +74,10 @@ describe('MovieSearchCombobox', () => {
   it('should handle keyboard navigation keys', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -88,12 +94,14 @@ describe('MovieSearchCombobox', () => {
   });
 
   it('should handle disabled movies prop', () => {
-    const disabledTconsts = new Set(['tt0111161']);
+    const selectedTconsts = new Set(['tt0111161']);
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={disabledTconsts}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={selectedTconsts}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -101,23 +109,27 @@ describe('MovieSearchCombobox', () => {
     expect(screen.getByPlaceholderText('Szukaj filmów...')).toBeInTheDocument();
   });
 
-  it('should accept onSelectOption callback', () => {
+  it('should accept onSelect callback', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
     // Component should accept the callback
-    expect(typeof mockOnSelectOption).toBe('function');
+    expect(typeof mockOnSelect).toBe('function');
   });
 
   it('should have correct ARIA attributes', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -143,8 +155,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -161,8 +175,10 @@ describe('MovieSearchCombobox', () => {
   it('should not show results when query length < 2', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -175,7 +191,7 @@ describe('MovieSearchCombobox', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
-  it('should call onSelectOption when item is clicked', async () => {
+  it('should call onSelect when item is clicked', async () => {
     const mockResults = [
       { tconst: 'tt0111161', primaryTitle: 'The Shawshank Redemption', startYear: 1994, avgRating: '9.3', posterUrl: '/poster.jpg' },
     ];
@@ -189,8 +205,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -202,7 +220,7 @@ describe('MovieSearchCombobox', () => {
       fireEvent.click(resultItem);
     });
 
-    expect(mockOnSelectOption).toHaveBeenCalledWith(mockResults[0]);
+    expect(mockOnSelect).toHaveBeenCalledWith(mockResults[0]);
   });
 
   it('should navigate with arrow keys', async () => {
@@ -220,8 +238,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -260,8 +280,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -278,7 +300,7 @@ describe('MovieSearchCombobox', () => {
     // Select with Enter
     fireEvent.keyDown(input, { key: 'Enter' });
 
-    expect(mockOnSelectOption).toHaveBeenCalledWith(mockResults[0]);
+    expect(mockOnSelect).toHaveBeenCalledWith(mockResults[0]);
   });
 
   it('should close on Escape key', async () => {
@@ -295,8 +317,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -326,8 +350,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -351,8 +377,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -374,8 +402,10 @@ describe('MovieSearchCombobox', () => {
 
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -399,12 +429,20 @@ describe('MovieSearchCombobox', () => {
       metrics: { lastDurationMs: 100, lastQuery: 'movie', completedCount: 1, abortedCount: 0 },
     });
 
-    render(
-      <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
-      />
-    );
+    // Use controlled component with state
+    const TestWrapper = () => {
+      const [value, setValue] = useState('');
+      return (
+        <MovieSearchCombobox
+          value={value}
+          onChange={setValue}
+          selectedTconsts={new Set()}
+          onSelect={mockOnSelect}
+        />
+      );
+    };
+
+    render(<TestWrapper />);
 
     const input = screen.getByPlaceholderText('Szukaj filmów...');
     fireEvent.change(input, { target: { value: 'mo' } });
@@ -415,6 +453,7 @@ describe('MovieSearchCombobox', () => {
     });
 
     // Search results should remain visible after adding a movie
+    // The query should remain unchanged (component keeps it open)
     expect(input).toHaveValue('mo');
     expect(screen.getByRole('option')).toBeInTheDocument();
   });
@@ -422,8 +461,10 @@ describe('MovieSearchCombobox', () => {
   it('should call onChange when typing', () => {
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -431,7 +472,7 @@ describe('MovieSearchCombobox', () => {
 
     fireEvent.change(input, { target: { value: 'test query' } });
 
-    expect(input).toHaveValue('test query');
+    expect(mockOnChange).toHaveBeenCalledWith('test query');
   });
 
   it('should use debounced search query', () => {
@@ -440,8 +481,10 @@ describe('MovieSearchCombobox', () => {
     // Here we just verify that useMovieSearch is called with the query value
     render(
       <MovieSearchCombobox
-        disabledTconsts={new Set()}
-        onSelectOption={mockOnSelectOption}
+        value=""
+        onChange={mockOnChange}
+        selectedTconsts={new Set()}
+        onSelect={mockOnSelect}
       />
     );
 
@@ -450,6 +493,8 @@ describe('MovieSearchCombobox', () => {
     // Change input value
     fireEvent.change(input, { target: { value: 'test' } });
 
+    // Verify that onChange was called
+    expect(mockOnChange).toHaveBeenCalledWith('test');
     // Verify that useMovieSearch was called (mock verification)
     // The debounce behavior is tested separately in useDebouncedValue tests
     expect(mockUseMovieSearch).toHaveBeenCalled();

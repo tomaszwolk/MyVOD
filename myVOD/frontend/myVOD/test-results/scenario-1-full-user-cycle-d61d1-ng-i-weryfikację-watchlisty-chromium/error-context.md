@@ -1,0 +1,52 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e6]:
+          - heading "Dodaj filmy do watchlisty" [level=1] [ref=e8]
+          - generic [ref=e10]:
+            - generic [ref=e11]: Ciemny
+            - button "Przełącz na tryb jasny" [ref=e12] [cursor=pointer]:
+              - img [ref=e13]
+              - generic [ref=e19]: Przełącz na tryb jasny
+      - main "Onboarding content" [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e23]:
+            - generic [ref=e24]: Krok 2 z 3
+            - generic [ref=e25]: 67% ukończony
+          - generic [ref=e28]:
+            - heading "Dodaj przynajmniej 3 filmy do watchlisty" [level=2] [ref=e29]
+            - paragraph [ref=e30]: Dodaj do 3 filmów, które chciałbyś obejrzeć
+          - generic [ref=e31]:
+            - generic [ref=e33]:
+              - combobox "Szukaj filmów do dodania..." [expanded] [active] [ref=e35]: Glass Onion
+              - paragraph [ref=e36]: "Ostatnie wyszukiwanie \"Glass Onion\" trwało 1206 ms • ukończone: 1 • anulowane: 0"
+            - paragraph [ref=e39]: Brak dodanych filmów
+            - group "Onboarding navigation" [ref=e41]:
+              - button "Skip adding movies and continue to next step" [ref=e42] [cursor=pointer]: Pomiń
+              - button "Continue to next onboarding step" [ref=e43] [cursor=pointer]: Dalej
+    - region "Notifications alt+T"
+  - dialog [ref=e45]:
+    - listbox "Movie search results" [ref=e46]:
+      - option "Glass Onion poster Glass Onion 2022 • ⭐ 7.1 Dodaj film do watchlisty Glass Onion" [ref=e47] [cursor=pointer]:
+        - img "Glass Onion poster" [ref=e49]
+        - generic [ref=e50]:
+          - heading "Glass Onion" [level=3] [ref=e51]
+          - generic [ref=e52]:
+            - generic [ref=e53]: "2022"
+            - generic [ref=e54]: •
+            - generic [ref=e55]: ⭐ 7.1
+        - button "Dodaj film do watchlisty Glass Onion" [ref=e56]: Dodaj
+      - option "Glass poster Glass 2019 • ⭐ 6.6 Dodaj film do watchlisty Glass" [ref=e57] [cursor=pointer]:
+        - img "Glass poster" [ref=e59]
+        - generic [ref=e60]:
+          - heading "Glass" [level=3] [ref=e61]
+          - generic [ref=e62]:
+            - generic [ref=e63]: "2019"
+            - generic [ref=e64]: •
+            - generic [ref=e65]: ⭐ 6.6
+        - button "Dodaj film do watchlisty Glass" [ref=e66]: Dodaj
+```
