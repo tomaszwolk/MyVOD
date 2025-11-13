@@ -24,6 +24,7 @@ type MovieSearchComboboxProps = {
   placeholder?: string;
   buttonText?: string;
   ariaLabel?: string;
+  testId?: string;
 };
 
 /**
@@ -38,7 +39,8 @@ export function MovieSearchCombobox({
   selectedTconsts,
   placeholder = "Szukaj filmów...",
   buttonText = "Oznacz",
-  ariaLabel = "Oznacz film jako obejrzany"
+  ariaLabel = "Oznacz film jako obejrzany",
+  testId = "movie-search-combobox",
 }: MovieSearchComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -128,7 +130,7 @@ export function MovieSearchCombobox({
               aria-autocomplete="list"
               aria-activedescendant={activeId}
               className="w-full"
-              data-testid="movie-search-combobox"
+              data-testid={testId}
             />
             {isLoading && !disabled && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -157,6 +159,7 @@ export function MovieSearchCombobox({
               aria-label="Movie search results"
               className="max-h-[300px] overflow-y-auto"
               style={{ backgroundColor: "var(--search-popover-background)" }}
+              data-testid="search-results-list"
             >
               {results.map((movie, index) => {
                 const isSelected = selectedTconsts.has(movie.tconst);

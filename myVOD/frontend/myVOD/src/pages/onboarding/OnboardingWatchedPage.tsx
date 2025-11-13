@@ -4,7 +4,6 @@ import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { MovieSearchCombobox } from "@/components/onboarding/MovieSearchCombobox";
 import { SelectedMoviesList } from "@/components/onboarding/SelectedMoviesList";
-import { MovieListItem } from "@/components/onboarding/MovieListItem";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useOnboardingWatchedController } from "@/hooks/useOnboardingWatchedController";
@@ -17,12 +16,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
  * Both Skip and Finish buttons are always enabled.
  */
 export function OnboardingWatchedPage() {
-  const { viewModel, setQuery, pick, undo, finish, skip } = useOnboardingWatchedController();
+  const { viewModel, setQuery, pick, undo, finish, skip } =
+    useOnboardingWatchedController();
   const [validationError, setValidationError] = useState<string | null>(null);
   const errorSectionRef = useRef<HTMLDivElement>(null);
 
-  const hasMinimumMovies = viewModel.selected.length >= viewModel.requiredSelected;
-  const selectedTconsts = new Set(viewModel.selected.map(item => item.tconst));
+  const hasMinimumMovies =
+    viewModel.selected.length >= viewModel.requiredSelected;
+  const selectedTconsts = new Set(
+    viewModel.selected.map((item) => item.tconst)
+  );
 
   const handleSkip = () => {
     setValidationError(null);
@@ -31,7 +34,9 @@ export function OnboardingWatchedPage() {
 
   const handleNext = () => {
     if (viewModel.selected.length < viewModel.requiredSelected) {
-      setValidationError(`Oznacz przynajmniej ${viewModel.requiredSelected} filmy jako obejrzane, aby zakończyć onboarding.`);
+      setValidationError(
+        `Oznacz przynajmniej ${viewModel.requiredSelected} filmy jako obejrzane, aby zakończyć onboarding.`
+      );
       errorSectionRef.current?.focus();
       return;
     }
@@ -40,9 +45,7 @@ export function OnboardingWatchedPage() {
     finish();
   };
 
-  const headerActions = (
-    <ThemeToggle key="theme-toggle" />
-  );
+  const headerActions = <ThemeToggle key="theme-toggle" />;
 
   const title = hasMinimumMovies
     ? "Idź dalej lub dodaj kolejne filmy"
@@ -53,62 +56,63 @@ export function OnboardingWatchedPage() {
     : "Wyszukaj i oznacz filmy które oglądałeś, aby dostosować rekomendacje";
 
   return (
-    <OnboardingLayout title="Oznacz filmy które już widziałeś" headerActions={headerActions}>
+    <OnboardingLayout
+      title="Oznacz filmy które już widziałeś"
+      headerActions={headerActions}
+    >
       <div data-testid="onboarding-step-3">
-      <ProgressBar
-        current={3} total={3}
-        className="mt-2"
-      />
+        <ProgressBar current={3} total={3} className="mt-2" />
 
-      <OnboardingHeader
-        title={title}
-        hint={hint}
-        className="mt-4"
-      />
+        <OnboardingHeader title={title} hint={hint} className="mt-4" />
 
-      <div className="space-y-8">
-        {/* Movie search combobox */}
-        <div className="max-w-lg mx-auto mt-6">
-          <MovieSearchCombobox
-            value={viewModel.query}
-            onChange={setQuery}
-            onSelect={pick}
-            disabled={viewModel.isSubmitting}
-            selectedTconsts={selectedTconsts}
-            placeholder="Szukaj filmów, które widziałeś..."
-            buttonText="Oznacz"
-            ariaLabel="Oznacz jako obejrzany"
-          />
+        <div className="space-y-8">
+          {/* Movie search combobox */}
+          <div className="max-w-lg mx-auto mt-6">
+            <MovieSearchCombobox
+              value={viewModel.query}
+              onChange={setQuery}
+              onSelect={pick}
+              disabled={viewModel.isSubmitting}
+              selectedTconsts={selectedTconsts}
+              placeholder="Szukaj filmów, które widziałeś..."
+              buttonText="Oznacz"
+              ariaLabel="Oznacz jako obejrzany"
+              testId="watched-search-combobox"
+            />
+          </div>
+
+          {/* Selected movies list */}
+          <div className="max-w-lg mx-auto">
+            <SelectedMoviesList
+              items={viewModel.selected}
+              maxItems={viewModel.requiredSelected}
+              onUndo={undo}
+            />
+          </div>
+
+          {/* Footer navigation */}
+          <div className="pt-4">
+            <OnboardingFooterNav
+              onSkip={handleSkip}
+              onNext={handleNext}
+              nextButtonText="Zakończ"
+              nextButtonTestId="onboarding-finish-button"
+            />
+          </div>
         </div>
 
-        {/* Selected movies list */}
-        <div className="max-w-lg mx-auto">
-          <SelectedMoviesList
-            items={viewModel.selected}
-            maxItems={viewModel.requiredSelected}
-            onUndo={undo}
-          />
-        </div>
-
-        {/* Footer navigation */}
-        <div className="pt-4">
-          <OnboardingFooterNav
-            onSkip={handleSkip}
-            onNext={handleNext}
-            nextButtonText="Zakończ"
-            nextButtonTestId="onboarding-finish-button"
-          />
-        </div>
-      </div>
-
-      {validationError && (
-        <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1} className="mt-6">
-          <AlertTitle>Brakuje filmów</AlertTitle>
-          <AlertDescription>{validationError}</AlertDescription>
-        </Alert>
-      )}
+        {validationError && (
+          <Alert
+            variant="destructive"
+            ref={errorSectionRef}
+            tabIndex={-1}
+            className="mt-6"
+          >
+            <AlertTitle>Brakuje filmów</AlertTitle>
+            <AlertDescription>{validationError}</AlertDescription>
+          </Alert>
+        )}
       </div>
     </OnboardingLayout>
   );
 }
-

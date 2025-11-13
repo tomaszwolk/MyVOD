@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { MovieListItem } from "./MovieListItem";
 import type { OnboardingSelectedItem } from "@/types/view/onboarding-watched.types";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 type SelectedMoviesListProps = {
   items: OnboardingSelectedItem[];
@@ -9,12 +9,18 @@ type SelectedMoviesListProps = {
   onUndo: (item: OnboardingSelectedItem) => void;
 };
 
-export function SelectedMoviesList({ items, maxItems, onUndo }: SelectedMoviesListProps) {
+export function SelectedMoviesList({
+  items,
+  maxItems,
+  onUndo,
+}: SelectedMoviesListProps) {
   if (items.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p className="text-sm">Brak oznaczonych filmów</p>
-        <p className="text-xs mt-1">Wyszukaj i oznacz filmy które już widziałeś</p>
+        <p className="text-xs mt-1">
+          Wyszukaj i oznacz filmy które już widziałeś
+        </p>
       </div>
     );
   }
@@ -40,16 +46,16 @@ export function SelectedMoviesList({ items, maxItems, onUndo }: SelectedMoviesLi
               posterUrl={item.poster_path}
               avgRating={item.avg_rating}
               onRemove={() => onUndo(item)}
-              isRemoving={item.status === 'loading'}
+              isRemoving={item.status === "loading"}
             />
             <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
-              {item.status === 'loading' && (
+              {item.status === "loading" && (
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               )}
               {/* {item.status === 'success' && (
                 <CheckCircle2 className="h-6 w-6 text-green-600" /> */}
               {/* )} */}
-              {item.status === 'error' && (
+              {item.status === "error" && (
                 <AlertCircle className="h-6 w-6 text-destructive" />
               )}
             </div>
@@ -58,4 +64,4 @@ export function SelectedMoviesList({ items, maxItems, onUndo }: SelectedMoviesLi
       </div>
     </div>
   );
-} 
+}

@@ -10,11 +10,13 @@ import { AddedMoviesList } from "@/components/onboarding/AddedMoviesList";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAddUserMovie } from "@/hooks/useAddUserMovie";
-import { getNextOnboardingPath, useOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import {
+  getNextOnboardingPath,
+  useOnboardingStatus,
+} from "@/hooks/useOnboardingStatus";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { deleteUserMovie } from "@/lib/api/movies";
 import type { AddedMovieVM, SearchOptionVM } from "@/types/api.types";
-import { useOnboardingAddController } from "@/hooks/useOnboardingAddController";
 
 interface ApiError extends Error {
   status?: number;
@@ -29,7 +31,9 @@ export function OnboardingAddPage() {
   const navigate = useNavigate();
   const [added, setAdded] = useState<AddedMovieVM[]>([]);
   const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
-  const [removingTconsts, setRemovingTconsts] = useState<Set<string>>(new Set());
+  const [removingTconsts, setRemovingTconsts] = useState<Set<string>>(
+    new Set()
+  );
   const [query, setQuery] = useState(""); // <-- DODAJ TEN STAN
   const hasPrefilledFromWatchlistRef = useRef(false);
   const errorSectionRef = useRef<HTMLDivElement>(null);
@@ -87,32 +91,37 @@ export function OnboardingAddPage() {
         posterUrl: searchOption.posterUrl,
       };
 
-      setAdded(prev => {
+      setAdded((prev) => {
         const updated = [...prev, tempAddedMovie];
         if (updated.length >= REQUIRED_MOVIES) {
           setValidationError(null);
         }
         return updated;
       });
-      setAddedSet(prev => new Set(prev).add(searchOption.tconst));
+      setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
 
       // Call API
-      const savedMovie = await addUserMovieMutation.mutateAsync({ tconst: searchOption.tconst });
+      const savedMovie = await addUserMovieMutation.mutateAsync({
+        tconst: searchOption.tconst,
+      });
 
-      setAdded(prev =>
-        prev.map(movie =>
+      setAdded((prev) =>
+        prev.map((movie) =>
           movie.tconst === searchOption.tconst ? savedMovie : movie
         )
       );
 
       // Success toast
-      toast.success(`"${searchOption.primaryTitle}" został dodany do Twojej watchlisty`);
-
+      toast.success(
+        `"${searchOption.primaryTitle}" został dodany do Twojej watchlisty`
+      );
     } catch (error) {
       const apiError = error as ApiError;
       // Remove from state on error
-      setAdded(prev => prev.filter(movie => movie.tconst !== searchOption.tconst));
-      setAddedSet(prev => {
+      setAdded((prev) =>
+        prev.filter((movie) => movie.tconst !== searchOption.tconst)
+      );
+      setAddedSet((prev) => {
         const newSet = new Set(prev);
         newSet.delete(searchOption.tconst);
         return newSet;
@@ -121,7 +130,7 @@ export function OnboardingAddPage() {
       // Handle different error types
       if (apiError?.status === 409) {
         // Movie already on watchlist - disable in session and show info toast
-        setAddedSet(prev => new Set(prev).add(searchOption.tconst));
+        setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
         toast.info("Ten film jest już na Twojej watchliście");
       } else if (apiError?.status === 400) {
         // Invalid tconst or movie not found
@@ -133,7 +142,6 @@ export function OnboardingAddPage() {
         // Other errors (network, etc.)
         toast.error("Wystąpił błąd podczas dodawania filmu");
       }
-
     }
   };
 
@@ -142,7 +150,7 @@ export function OnboardingAddPage() {
       return;
     }
 
-    setRemovingTconsts(prev => {
+    setRemovingTconsts((prev) => {
       const updated = new Set(prev);
       updated.add(movie.tconst);
       return updated;
@@ -153,8 +161,8 @@ export function OnboardingAddPage() {
         await deleteUserMovie(movie.userMovieId);
       }
 
-      setAdded(prev => prev.filter(item => item.tconst !== movie.tconst));
-      setAddedSet(prev => {
+      setAdded((prev) => prev.filter((item) => item.tconst !== movie.tconst));
+      setAddedSet((prev) => {
         const updated = new Set(prev);
         updated.delete(movie.tconst);
         return updated;
@@ -166,7 +174,7 @@ export function OnboardingAddPage() {
     } catch (error) {
       const apiError = error as ApiError;
       if (apiError?.status === 401 || apiError?.status === 403) {
-        navigate('/auth/login');
+        navigate("/auth/login");
         return;
       }
 
@@ -176,7 +184,7 @@ export function OnboardingAddPage() {
         toast.error("Nie udało się usunąć filmu");
       }
     } finally {
-      setRemovingTconsts(prev => {
+      setRemovingTconsts((prev) => {
         const updated = new Set(prev);
         updated.delete(movie.tconst);
         return updated;
@@ -193,7 +201,9 @@ export function OnboardingAddPage() {
 
   const handleNext = () => {
     if (added.length < REQUIRED_MOVIES) {
-      setValidationError(`Dodaj przynajmniej ${REQUIRED_MOVIES} filmy, aby przejść dalej.`);
+      setValidationError(
+        `Dodaj przynajmniej ${REQUIRED_MOVIES} filmy, aby przejść dalej.`
+      );
       errorSectionRef.current?.focus();
       return;
     }
@@ -202,62 +212,62 @@ export function OnboardingAddPage() {
     navigate(nextPath, { replace: true });
   };
 
-  const headerActions = (
-    <ThemeToggle key="theme-toggle" />
-  );
+  const headerActions = <ThemeToggle key="theme-toggle" />;
 
   return (
-    <OnboardingLayout title="Dodaj filmy do watchlisty" headerActions={headerActions}>
+    <OnboardingLayout
+      title="Dodaj filmy do watchlisty"
+      headerActions={headerActions}
+    >
       <div data-testid="onboarding-step-2">
-      <ProgressBar
-        current={2} total={3}
-        className="mt-2"
-      />
+        <ProgressBar current={2} total={3} className="mt-2" />
 
-      <OnboardingHeader
-        title="Dodaj przynajmniej 3 filmy do watchlisty"
-        hint="Dodaj do 3 filmów, które chciałbyś obejrzeć"
-        className="mt-4"
-      />
+        <OnboardingHeader
+          title="Dodaj przynajmniej 3 filmy do watchlisty"
+          hint="Dodaj do 3 filmów, które chciałbyś obejrzeć"
+          className="mt-4"
+        />
 
-      <div className="space-y-8">
-        {/* Movie search combobox */}
-        <div className="max-w-lg mx-auto mt-6">
-          <MovieSearchCombobox
-            value={query} // <-- DODAJ TO
-            onChange={setQuery} // <-- DODAJ TO
-            onSelect={handleAddMovie}
-            selectedTconsts={addedSet}
-            placeholder="Szukaj filmów do dodania..."
-            buttonText="Dodaj"
-            ariaLabel="Dodaj film do watchlisty"
-          />
+        <div className="space-y-8">
+          {/* Movie search combobox */}
+          <div className="max-w-lg mx-auto mt-6">
+            <MovieSearchCombobox
+              value={query} // <-- DODAJ TO
+              onChange={setQuery} // <-- DODAJ TO
+              onSelect={handleAddMovie}
+              selectedTconsts={addedSet}
+              placeholder="Szukaj filmów do dodania..."
+              buttonText="Dodaj"
+              ariaLabel="Dodaj film do watchlisty"
+            />
+          </div>
+
+          {/* Added movies grid */}
+          <div className="max-w-lg mx-auto">
+            <AddedMoviesList
+              items={added}
+              onRemove={handleRemoveMovie}
+              removingTconsts={removingTconsts}
+            />
+          </div>
+
+          {/* Footer navigation */}
+          <div className="pt-4">
+            <OnboardingFooterNav onSkip={handleSkip} onNext={handleNext} />
+          </div>
         </div>
 
-        {/* Added movies grid */}
-        <div className="max-w-lg mx-auto">
-          <AddedMoviesList
-            items={added}
-            onRemove={handleRemoveMovie}
-            removingTconsts={removingTconsts}
-          />
-        </div>
-
-        {/* Footer navigation */}
-        <div className="pt-4">
-          <OnboardingFooterNav
-            onSkip={handleSkip}
-            onNext={handleNext}
-          />
-        </div>
-      </div>
-
-      {validationError && (
-        <Alert variant="destructive" ref={errorSectionRef} tabIndex={-1} className="mt-6">
-          <AlertTitle>Brakuje filmów</AlertTitle>
-          <AlertDescription>{validationError}</AlertDescription>
-        </Alert>
-      )}
+        {validationError && (
+          <Alert
+            variant="destructive"
+            ref={errorSectionRef}
+            tabIndex={-1}
+            className="mt-6"
+          >
+            <AlertTitle>Brakuje filmów</AlertTitle>
+            <AlertDescription>{validationError}</AlertDescription>
+          </Alert>
+        )}
       </div>
     </OnboardingLayout>
   );

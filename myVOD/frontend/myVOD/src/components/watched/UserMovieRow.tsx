@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
@@ -115,12 +114,6 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
                   availability={item.availability}
                   platforms={platforms}
                 />
-
-                {/* {!item.isAvailableOnAnyPlatform && (
-                  <Badge variant="secondary" className="text-xs">
-                    Niedostępny na wybranych platformach
-                  </Badge>
-                )} */}
               </div>
 
               {/* Watched Date */}

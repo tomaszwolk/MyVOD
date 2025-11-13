@@ -1,6 +1,5 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Eye, Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "./AvailabilityIcons";
 import { TMDBPoster } from "@/components/TMDBPoster";
@@ -104,12 +103,6 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({
                   availability={item.availability}
                   platforms={platforms}
                 />
-
-                {/* {!item.availabilitySummary.isAvailableOnAny && (
-                  <Badge variant="secondary" className="text-xs">
-                    Niedostępny na wybranych platformach
-                  </Badge>
-                )} */}
               </div>
             </div>
 

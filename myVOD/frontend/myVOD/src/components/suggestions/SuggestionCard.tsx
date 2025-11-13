@@ -37,7 +37,7 @@ export const SuggestionCard = memo<SuggestionCardProps>(
   }) {
     const isDisabled = isAlreadyOnWatchlist || isAdding;
 
-    const genres = (item as any).genres?.join(", ");
+    const genres = item.genres?.join(", ");
     const metaLine = [item.year, genres].filter(Boolean).join(" • ");
 
     return (

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
 /**
  * Props for AddToWatchlistButton component.
