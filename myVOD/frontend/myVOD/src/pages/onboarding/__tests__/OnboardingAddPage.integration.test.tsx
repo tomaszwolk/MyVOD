@@ -160,7 +160,7 @@ describe("OnboardingAddPage Integration Tests", () => {
 
     // Check hint text
     expect(
-      screen.getByText("Dodaj do 3 filmów, które chciałbyś obejrzeć")
+      screen.getByText("Większa ilość filmów poprawi rekomendacje")
     ).toBeInTheDocument();
 
     // Check search input

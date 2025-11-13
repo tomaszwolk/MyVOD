@@ -19,10 +19,14 @@ export function OnboardingFooterNav({
   onSkip,
   onNext,
   nextButtonText = "Dalej",
-  nextButtonTestId = "onboarding-next-button"
+  nextButtonTestId = "onboarding-next-button",
 }: OnboardingFooterNavProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-3 sm:justify-between" role="group" aria-label="Onboarding navigation">
+    <div
+      className="-mt-6 flex flex-col sm:flex-row gap-3 sm:justify-between"
+      role="group"
+      aria-label="Onboarding navigation"
+    >
       <Button
         variant="outline"
         onClick={onSkip}

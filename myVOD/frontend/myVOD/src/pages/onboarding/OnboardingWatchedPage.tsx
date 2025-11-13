@@ -48,11 +48,11 @@ export function OnboardingWatchedPage() {
   const headerActions = <ThemeToggle key="theme-toggle" />;
 
   const title = hasMinimumMovies
-    ? "Idź dalej lub dodaj kolejne filmy"
+    ? "Dodaj przynajmniej 3 filmy do listy obejrzanych"
     : "Oznacz przynajmniej 3 filmy które już widziałeś";
 
   const hint = hasMinimumMovies
-    ? "Możesz dodać więcej filmów lub przejść dalej"
+    ? "Większa ilość filmów poprawi rekomendacje"
     : "Wyszukaj i oznacz filmy które oglądałeś, aby dostosować rekomendacje";
 
   return (

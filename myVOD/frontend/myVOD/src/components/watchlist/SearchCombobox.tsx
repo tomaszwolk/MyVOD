@@ -185,12 +185,11 @@ export function SearchCombobox({
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="w-full p-0 text-foreground border border-border shadow-lg"
+          className="w-full p-0 text-foreground border border-border shadow-lg bg-popover"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
           style={{
             width: inputRef.current?.offsetWidth,
-            backgroundColor: "var(--search-popover-background)",
           }}
         >
           {error ? (

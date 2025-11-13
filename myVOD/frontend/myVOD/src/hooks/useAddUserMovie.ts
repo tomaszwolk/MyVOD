@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addUserMovie } from "@/lib/api/movies";
-import type { AddUserMovieCommand, UserMovieDto, AddedMovieVM } from "@/types/api.types";
+import type {
+  AddUserMovieCommand,
+  UserMovieDto,
+  AddedMovieVM,
+} from "@/types/api.types";
 
 /**
  * Maps UserMovieDto to AddedMovieVM for the onboarding added movies list.
@@ -12,6 +16,7 @@ function mapToAddedMovieVM(dto: UserMovieDto): AddedMovieVM {
     primaryTitle: dto.movie.primary_title,
     startYear: dto.movie.start_year,
     posterUrl: dto.movie.poster_path,
+    avgRating: dto.movie.avg_rating,
   };
 }
 

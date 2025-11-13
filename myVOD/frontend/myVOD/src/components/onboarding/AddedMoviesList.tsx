@@ -8,7 +8,11 @@ type AddedMoviesListProps = {
   removingTconsts?: Set<string>;
 };
 
-export function AddedMoviesList({ items, onRemove, removingTconsts }: AddedMoviesListProps) {
+export function AddedMoviesList({
+  items,
+  onRemove,
+  removingTconsts,
+}: AddedMoviesListProps) {
   if (items.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -18,7 +22,7 @@ export function AddedMoviesList({ items, onRemove, removingTconsts }: AddedMovie
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
           Dodane filmy

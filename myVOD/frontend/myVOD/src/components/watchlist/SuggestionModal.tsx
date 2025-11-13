@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Plus, Check } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import type { AISuggestionsDto } from "@/types/api.types";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for SuggestionModal component.
@@ -26,12 +27,17 @@ type SuggestionModalProps = {
  * Modal displaying AI-powered movie suggestions.
  * Shows movie cards with posters, details, and availability icons.
  */
-export function SuggestionModal({ open, onOpenChange, data, onAdd }: SuggestionModalProps) {
+export function SuggestionModal({
+  open,
+  onOpenChange,
+  data,
+  onAdd,
+}: SuggestionModalProps) {
   const [addedTconsts, setAddedTconsts] = useState<Set<string>>(new Set());
 
   const handleAdd = (tconst: string) => {
     onAdd(tconst);
-    setAddedTconsts(prev => new Set([...prev, tconst]));
+    setAddedTconsts((prev) => new Set([...prev, tconst]));
   };
 
   const resetAdded = () => {
@@ -52,7 +58,7 @@ export function SuggestionModal({ open, onOpenChange, data, onAdd }: SuggestionM
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -74,7 +80,24 @@ export function SuggestionModal({ open, onOpenChange, data, onAdd }: SuggestionM
                     width={80}
                     height={112}
                     className="w-full h-full object-cover rounded"
-                  />
+                  >
+                    {({ isPlaceholder, imgProps }) => (
+                      <div
+                        className={cn(
+                          "w-full h-full rounded overflow-hidden",
+                          isPlaceholder ? "bg-muted" : ""
+                        )}
+                      >
+                        <img
+                          {...imgProps}
+                          alt={suggestion.primary_title}
+                          width={80}
+                          height={112}
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                  </TMDBPoster>
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -89,7 +112,11 @@ export function SuggestionModal({ open, onOpenChange, data, onAdd }: SuggestionM
 
                   <div className="flex flex-wrap gap-1 mt-2">
                     {suggestion.availability.slice(0, 3).map((avail) => (
-                      <Badge key={avail.platform_id} variant="outline" className="text-xs">
+                      <Badge
+                        key={avail.platform_id}
+                        variant="outline"
+                        className="text-xs"
+                      >
                         {avail.platform_name}
                       </Badge>
                     ))}

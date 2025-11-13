@@ -224,7 +224,7 @@ export function OnboardingAddPage() {
 
         <OnboardingHeader
           title="Dodaj przynajmniej 3 filmy do watchlisty"
-          hint="Dodaj do 3 filmów, które chciałbyś obejrzeć"
+          hint="Większa ilość filmów poprawi rekomendacje"
           className="mt-4"
         />
 

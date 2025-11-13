@@ -143,7 +143,6 @@ export function MovieSearchCombobox({
           className="w-full p-0 bg-popover"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          style={{ backgroundColor: "var(--search-popover-background)" }}
         >
           {error ? (
             <div className="p-4 text-center text-destructive text-sm">
@@ -158,7 +157,6 @@ export function MovieSearchCombobox({
               role="listbox"
               aria-label="Movie search results"
               className="max-h-[300px] overflow-y-auto"
-              style={{ backgroundColor: "var(--search-popover-background)" }}
               data-testid="search-results-list"
             >
               {results.map((movie, index) => {

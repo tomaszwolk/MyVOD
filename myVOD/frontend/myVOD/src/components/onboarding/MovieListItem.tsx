@@ -24,7 +24,7 @@ export function MovieListItem({
 }: MovieListItemProps) {
   return (
     <div
-      className="flex items-center gap-3 p-3 border rounded-lg bg-card"
+      className="flex items-center gap-3 p-3 border rounded-lg bg-card shadow-sm"
       data-testid={`movie-list-item-${tconst}`}
     >
       <TMDBPoster

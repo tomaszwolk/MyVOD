@@ -8,7 +8,7 @@ export function OnboardingLayout({
   title,
   subtitle,
   headerActions,
-  children
+  children,
 }: {
   title: string;
   subtitle?: string;
@@ -36,7 +36,7 @@ export function OnboardingLayout({
         </header>
 
         {/* Main content section */}
-        <main className="space-y-6" role="main" aria-label="Onboarding content">
+        <main className="space-y-2" role="main" aria-label="Onboarding content">
           {children}
         </main>
       </div>
