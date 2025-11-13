@@ -5,6 +5,12 @@ import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import { MovieRating } from "./MovieRating";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
@@ -92,13 +98,35 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              {/* Title */}
-              <h3
-                id={`movie-title-${item.id}`}
-                className="font-medium text-base line-clamp-1 mb-1 text-foreground"
-              >
-                {item.title}
-              </h3>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Title */}
+                    <h3
+                      id={`movie-title-${item.id}`}
+                      className="font-medium text-base line-clamp-1 mb-1 text-foreground"
+                    >
+                      {item.title}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start">
+                    <p className="font-bold">{item.title}</p>
+                    {displayGenres && (
+                      <p className="text-sm">
+                        {item.year} • {displayGenres}
+                      </p>
+                    )}
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <p className="text-sm">
+                        IMDB.com rating: {item.avgRating || "-"}
+                      </p>
+                      <p className="text-sm">
+                        User rating: {item.userRating || "-"}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               {/* Year, Genres, Rating */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

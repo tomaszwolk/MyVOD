@@ -282,7 +282,7 @@ export function WatchedPage() {
       try {
         if (watchedId) {
           const result = await patchUserMovieMutation.mutateAsync({
-            id: watchedId,
+            id: watchedId.id,
             command: { action: "restore_to_watchlist" },
           });
           toast.success(

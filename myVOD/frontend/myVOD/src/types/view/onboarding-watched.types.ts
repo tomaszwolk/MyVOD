@@ -7,13 +7,16 @@
  * Source of a selected movie in the onboarding flow.
  * Tracks whether the movie was already on watchlist, already watched, or newly created.
  */
-export type SelectedSource = 'preexisting_watchlist' | 'preexisting_watched' | 'newly_created';
+export type SelectedSource =
+  | "preexisting_watchlist"
+  | "preexisting_watched"
+  | "newly_created";
 
 /**
  * Status of a selected movie operation.
  * Tracks the async operation state for each selected movie.
  */
-export type SelectedStatus = 'idle' | 'loading' | 'success' | 'error';
+export type SelectedStatus = "idle" | "loading" | "success" | "error";
 
 /**
  * Represents a single selected movie item in the onboarding watched flow.
@@ -23,8 +26,10 @@ export type OnboardingSelectedItem = {
   tconst: string;
   primary_title: string;
   start_year: number | null;
+  genres: string[] | null;
   poster_path: string | null;
   avg_rating: string | null;
+  user_rating: number | null; // User's rating if already rated
   userMovieId: number | null; // Known after POST/lookup
   source: SelectedSource;
   status: SelectedStatus;
@@ -41,4 +46,3 @@ export type OnboardingWatchedViewModel = {
   selected: OnboardingSelectedItem[]; // At least 3 required
   requiredSelected: number; // Always 3 for MVP
 };
-

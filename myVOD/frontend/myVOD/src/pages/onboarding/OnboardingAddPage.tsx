@@ -62,6 +62,7 @@ export function OnboardingAddPage() {
         tconst: movie.movie.tconst,
         primaryTitle: movie.movie.primary_title,
         startYear: movie.movie.start_year,
+        genres: movie.movie.genres,
         avgRating: movie.movie.avg_rating,
         posterUrl: movie.movie.poster_path,
       }));
@@ -87,6 +88,7 @@ export function OnboardingAddPage() {
         tconst: searchOption.tconst,
         primaryTitle: searchOption.primaryTitle,
         startYear: searchOption.startYear,
+        genres: null, // New movies from search don't have genres yet
         avgRating: searchOption.avgRating,
         posterUrl: searchOption.posterUrl,
       };

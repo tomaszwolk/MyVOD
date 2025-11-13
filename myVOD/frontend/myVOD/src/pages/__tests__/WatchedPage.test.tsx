@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render } from "@/test/utils";
 import React from "react";
 
 const watchedToolbarMock = vi.fn();
@@ -12,14 +12,20 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => vi.fn(),
-  useSearchParams: () => [
-    new URLSearchParams(),
-    vi.fn(),
-  ],
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  BrowserRouter: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 vi.mock("@/components/library/MediaLibraryLayout", () => ({
-  MediaLibraryLayout: ({ toolbar, children }: { toolbar: React.ReactNode; children: React.ReactNode }) => (
+  MediaLibraryLayout: ({
+    toolbar,
+    children,
+  }: {
+    toolbar: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
     <div>
       <div data-testid="toolbar-slot">{toolbar}</div>
       <div data-testid="content-slot">{children}</div>
@@ -142,7 +148,9 @@ describe("WatchedPage filtering", () => {
     isAvailableOnAnyPlatform: false,
   };
 
-  function setupWatchedPreferences(overrides?: Partial<ReturnType<typeof useWatchedPreferences>>) {
+  function setupWatchedPreferences(
+    overrides?: Partial<ReturnType<typeof useWatchedPreferences>>
+  ) {
     mockUseWatchedPreferences.mockReturnValue({
       viewMode: "grid",
       sort: "added_desc",
@@ -156,7 +164,10 @@ describe("WatchedPage filtering", () => {
 
   it("filters out unavailable items when user has selected platforms", () => {
     setupWatchedPreferences({ hideUnavailable: true });
-    mockUseUserProfile.mockReturnValue({ data: { platforms: [{ id: 1 }] }, isLoading: false });
+    mockUseUserProfile.mockReturnValue({
+      data: { platforms: [{ id: 1 }] },
+      isLoading: false,
+    });
     mockUseUserMoviesWatched.mockReturnValue({
       items: [availableItem, unavailableItem],
       isLoading: false,
@@ -183,7 +194,10 @@ describe("WatchedPage filtering", () => {
 
   it("does not filter items when user has no selected platforms", () => {
     setupWatchedPreferences({ hideUnavailable: true });
-    mockUseUserProfile.mockReturnValue({ data: { platforms: [] }, isLoading: false });
+    mockUseUserProfile.mockReturnValue({
+      data: { platforms: [] },
+      isLoading: false,
+    });
     mockUseUserMoviesWatched.mockReturnValue({
       items: [availableItem, unavailableItem],
       isLoading: false,
@@ -204,7 +218,10 @@ describe("WatchedPage filtering", () => {
 
   it("passes empty state when all items are filtered out", () => {
     setupWatchedPreferences({ hideUnavailable: true });
-    mockUseUserProfile.mockReturnValue({ data: { platforms: [{ id: 1 }] }, isLoading: false });
+    mockUseUserProfile.mockReturnValue({
+      data: { platforms: [{ id: 1 }] },
+      isLoading: false,
+    });
     mockUseUserMoviesWatched.mockReturnValue({
       items: [unavailableItem],
       isLoading: false,
@@ -227,7 +244,10 @@ describe("WatchedPage filtering", () => {
 
   it("exposes toggle handler that enables hiding when currently disabled", () => {
     setupWatchedPreferences({ hideUnavailable: false });
-    mockUseUserProfile.mockReturnValue({ data: { platforms: [{ id: 1 }] }, isLoading: false });
+    mockUseUserProfile.mockReturnValue({
+      data: { platforms: [{ id: 1 }] },
+      isLoading: false,
+    });
     mockUseUserMoviesWatched.mockReturnValue({
       items: [availableItem, unavailableItem],
       isLoading: false,
@@ -241,5 +261,3 @@ describe("WatchedPage filtering", () => {
     expect(setHideUnavailableMock).toHaveBeenCalledWith(true);
   });
 });
-
-

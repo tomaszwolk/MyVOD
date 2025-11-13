@@ -7,12 +7,18 @@ type SelectedMoviesListProps = {
   items: OnboardingSelectedItem[];
   maxItems: number;
   onUndo: (item: OnboardingSelectedItem) => void;
+  onRateMovie: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 export function SelectedMoviesList({
   items,
   maxItems,
   onUndo,
+  onRateMovie,
 }: SelectedMoviesListProps) {
   if (items.length === 0) {
     return (
@@ -43,8 +49,20 @@ export function SelectedMoviesList({
               tconst={item.tconst}
               primaryTitle={item.primary_title}
               startYear={item.start_year}
+              genres={item.genres}
               posterUrl={item.poster_path}
               avgRating={item.avg_rating}
+              userRating={item.user_rating}
+              onRateClick={
+                item.userMovieId
+                  ? () =>
+                      onRateMovie(
+                        item.userMovieId!,
+                        item.primary_title,
+                        item.user_rating
+                      )
+                  : undefined
+              }
               onRemove={() => onUndo(item)}
               isRemoving={item.status === "loading"}
             />

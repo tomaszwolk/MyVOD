@@ -141,6 +141,7 @@ export type AddedMovieVM = {
   tconst: string;
   primaryTitle: string;
   startYear: number | null;
+  genres: string[] | null;
   avgRating: string | null;
   posterUrl: string | null;
   userMovieId: number | null;

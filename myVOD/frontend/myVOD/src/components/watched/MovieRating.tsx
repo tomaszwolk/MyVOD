@@ -6,6 +6,7 @@ interface MovieRatingProps {
   userRating: number | null;
   onRateClick: () => void;
   tconst: string;
+  showUserRating?: boolean;
 }
 
 export const MovieRating = ({
@@ -13,6 +14,7 @@ export const MovieRating = ({
   userRating,
   onRateClick,
   tconst,
+  showUserRating = true,
 }: MovieRatingProps) => {
   return (
     <div className="flex items-center gap-4">
@@ -22,29 +24,34 @@ export const MovieRating = ({
           {imdbRating ? `${imdbRating} / 10` : "N/A"}
         </span>
       </div>
-      <div
-        className="flex items-center gap-1 cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRateClick();
-        }}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+      {showUserRating && (
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          onClick={(e) => {
             e.stopPropagation();
             onRateClick();
-          }
-        }}
-        aria-label={`Rate movie ${tconst}`}
-      >
-        <Star
-          className={cn("h-4 w-4 text-blue-400", userRating && "fill-blue-400")}
-        />
-        <span className="text-sm">
-          {userRating ? `${userRating} / 10` : "Rate"}
-        </span>
-      </div>
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              onRateClick();
+            }
+          }}
+          aria-label={`Rate movie ${tconst}`}
+        >
+          <Star
+            className={cn(
+              "h-4 w-4 text-blue-400",
+              userRating && "fill-blue-400"
+            )}
+          />
+          <span className="text-sm">
+            {userRating ? `${userRating} / 10` : "Rate"}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

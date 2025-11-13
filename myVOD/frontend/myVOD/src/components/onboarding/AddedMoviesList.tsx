@@ -39,6 +39,7 @@ export function AddedMoviesList({
             tconst={item.tconst}
             primaryTitle={item.primaryTitle}
             startYear={item.startYear}
+            genres={item.genres}
             posterUrl={item.posterUrl}
             avgRating={item.avgRating}
             onRemove={() => onRemove(item)}

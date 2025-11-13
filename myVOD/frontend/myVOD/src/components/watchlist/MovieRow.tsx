@@ -1,8 +1,14 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, Star } from "lucide-react";
 import { AvailabilityIcons } from "./AvailabilityIcons";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { WatchlistItemVM } from "@/types/view/watchlist.types";
 import type { PlatformDto } from "@/types/api.types";
@@ -70,17 +76,36 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              {/* Title */}
-              <h3
-                id={`movie-title-${item.id}`}
-                className="font-medium text-base line-clamp-1 mb-1 text-foreground"
-              >
-                {item.movie.primary_title}
-              </h3>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Title */}
+                    <h3
+                      id={`movie-title-${item.id}`}
+                      className="font-medium text-base line-clamp-1 mb-1 text-foreground"
+                    >
+                      {item.movie.primary_title}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start">
+                    <p className="font-bold">{item.movie.primary_title}</p>
+                    {displayGenres && (
+                      <p className="text-sm">
+                        {item.movie.start_year} • {displayGenres}
+                      </p>
+                    )}
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <p className="text-sm">
+                        IMDB.com rating: {item.movie.avg_rating || "-"}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               {/* Year, Genres, Rating */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                {item.movie.start_year && <span>{item.movie.start_year}</span>}
+                <span>{item.movie.start_year}</span>
                 {displayGenres && (
                   <>
                     <span>•</span>
@@ -90,7 +115,8 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({
                 {item.movie.avg_rating && (
                   <>
                     <span>•</span>
-                    <span className="font-medium text-foreground">
+                    <span className="flex items-center gap-1 font-medium text-foreground">
+                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                       {item.movie.avg_rating}/10
                     </span>
                   </>

@@ -8,8 +8,11 @@ type MovieListItemProps = {
   tconst: string;
   primaryTitle: string;
   startYear: number | null;
+  genres: string[] | null;
   posterUrl: string | null;
   avgRating?: string | null;
+  userRating?: number | null;
+  onRateClick?: () => void;
   onRemove: () => void;
   isRemoving?: boolean;
 };
@@ -18,11 +21,17 @@ export function MovieListItem({
   tconst,
   primaryTitle,
   startYear,
+  genres,
   posterUrl,
   avgRating,
+  userRating,
+  onRateClick,
   onRemove,
   isRemoving,
 }: MovieListItemProps) {
+  const hasGenres = genres && genres.length > 0;
+  const displayGenres = hasGenres ? genres!.slice(0, 3).join(", ") : null;
+
   return (
     <div
       className="flex items-center gap-3 p-3 border rounded-lg bg-card shadow-sm"
@@ -57,13 +66,20 @@ export function MovieListItem({
         <h4 className="font-medium text-sm truncate">{primaryTitle}</h4>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {startYear && <span>{startYear}</span>}
+          {displayGenres && (
+            <>
+              <span>•</span>
+              <span className="truncate">{displayGenres}</span>
+            </>
+          )}
         </div>
         <div className="mt-1">
           <MovieRating
             imdbRating={avgRating ?? null}
-            userRating={null}
-            onRateClick={() => {}} // No rating functionality in onboarding
+            userRating={userRating ?? null}
+            onRateClick={onRateClick ?? (() => {})} // Empty function if no rating functionality
             tconst={tconst}
+            showUserRating={!!onRateClick}
           />
         </div>
       </div>

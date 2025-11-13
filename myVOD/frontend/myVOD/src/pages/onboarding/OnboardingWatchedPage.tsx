@@ -8,6 +8,7 @@ import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useOnboardingWatchedController } from "@/hooks/useOnboardingWatchedController";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RatingModal } from "@/components/watched/RatingModal";
 
 /**
  * Onboarding page for marking movies as watched.
@@ -16,16 +17,50 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
  * Both Skip and Finish buttons are always enabled.
  */
 export function OnboardingWatchedPage() {
-  const { viewModel, setQuery, pick, undo, finish, skip } =
+  const { viewModel, setQuery, pick, undo, rateMovie, finish, skip } =
     useOnboardingWatchedController();
   const [validationError, setValidationError] = useState<string | null>(null);
   const errorSectionRef = useRef<HTMLDivElement>(null);
+
+  const [ratingModalState, setRatingModalState] = useState<{
+    open: boolean;
+    userMovieId: number | null;
+    movieTitle: string;
+    currentRating: number | null;
+  }>({
+    open: false,
+    userMovieId: null,
+    movieTitle: "",
+    currentRating: null,
+  });
 
   const hasMinimumMovies =
     viewModel.selected.length >= viewModel.requiredSelected;
   const selectedTconsts = new Set(
     viewModel.selected.map((item) => item.tconst)
   );
+
+  const handleRateClick = (userMovieId: number, movieTitle: string, currentRating: number | null) => {
+    setRatingModalState({
+      open: true,
+      userMovieId,
+      movieTitle,
+      currentRating,
+    });
+  };
+
+  const handleRateSubmit = (rating: number) => {
+    if (!ratingModalState.userMovieId) return;
+
+    rateMovie(ratingModalState.userMovieId, rating).then(() => {
+      setRatingModalState({
+        open: false,
+        userMovieId: null,
+        movieTitle: "",
+        currentRating: null,
+      });
+    });
+  };
 
   const handleSkip = () => {
     setValidationError(null);
@@ -87,6 +122,7 @@ export function OnboardingWatchedPage() {
               items={viewModel.selected}
               maxItems={viewModel.requiredSelected}
               onUndo={undo}
+              onRateMovie={handleRateClick}
             />
           </div>
 
@@ -112,6 +148,21 @@ export function OnboardingWatchedPage() {
             <AlertDescription>{validationError}</AlertDescription>
           </Alert>
         )}
+
+        <RatingModal
+          isOpen={ratingModalState.open}
+          onClose={() =>
+            setRatingModalState({
+              open: false,
+              userMovieId: null,
+              movieTitle: "",
+              currentRating: null,
+            })
+          }
+          onSubmit={handleRateSubmit}
+          movieTitle={ratingModalState.movieTitle}
+          currentRating={ratingModalState.currentRating}
+        />
       </div>
     </OnboardingLayout>
   );

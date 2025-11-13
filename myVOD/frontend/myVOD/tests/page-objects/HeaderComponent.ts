@@ -33,31 +33,59 @@ export class HeaderComponent {
    * Find and add the first available movie from the provided list that hasn't been processed yet
    */
   async findAndAddFirstAvailableMovie(movieList: Array<{ title: string; tconst: string }>): Promise<{ title: string; tconst: string } | null> {
+    console.log(`Checking ${movieList.length} movies for availability...`);
+
+    // First, collect all movie tconsts that are already on watchlist
+    const watchlistMovieIds = new Set<string>();
     for (const movie of movieList) {
       try {
-        // Check if movie is already on watchlist
         const movieCard = this.page.getByTestId(`movie-card-${movie.tconst}`);
-        const isOnWatchlist = await movieCard.isVisible().catch(() => false);
-
-        // Check if movie is already in watched list
-        await this.navigateToWatched();
-        const watchedMovieCard = this.page.getByTestId(`watched-movie-card-${movie.tconst}`);
-        const isOnWatched = await watchedMovieCard.isVisible().catch(() => false);
-
-        // Go back to watchlist
-        await this.navigateToWatchlist();
-
-        // If movie is not on watchlist and not on watched list, we can add it
-        if (!isOnWatchlist && !isOnWatched) {
-          await this.searchForMovie(movie.title);
-          return movie;
+        const isVisible = await movieCard.isVisible({ timeout: 1000 }).catch(() => false);
+        if (isVisible) {
+          watchlistMovieIds.add(movie.tconst);
         }
       } catch (error) {
-        // Continue to next movie if this one fails
+        // Continue checking other movies
         continue;
       }
     }
 
+    // Then check watched movies
+    await this.navigateToWatched();
+    await this.page.waitForTimeout(1000); // Wait for page to load
+
+    const watchedMovieIds = new Set<string>();
+    for (const movie of movieList) {
+      try {
+        const watchedMovieCard = this.page.getByTestId(`watched-movie-card-${movie.tconst}`);
+        const isVisible = await watchedMovieCard.isVisible({ timeout: 1000 }).catch(() => false);
+        if (isVisible) {
+          watchedMovieIds.add(movie.tconst);
+        }
+      } catch (error) {
+        // Continue checking other movies
+        continue;
+      }
+    }
+
+    // Go back to watchlist
+    await this.navigateToWatchlist();
+
+    // Find the first movie that's not in either list
+    for (const movie of movieList) {
+      if (!watchlistMovieIds.has(movie.tconst) && !watchedMovieIds.has(movie.tconst)) {
+        console.log(`Found available movie: ${movie.title} (${movie.tconst})`);
+        try {
+          await this.searchForMovie(movie.title);
+          return movie;
+        } catch (error) {
+          console.log(`Failed to add movie ${movie.title}, trying next one...`);
+          continue;
+        }
+      }
+    }
+
+    console.log('No available movies found - all test movies have been processed');
     // No available movie found
     return null;
   }

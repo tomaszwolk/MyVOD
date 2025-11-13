@@ -102,7 +102,7 @@ class UserRegistrationServiceTests(TestCase):
         with self.assertRaises(IntegrityError) as context:
             register_user(email, password)
 
-        self.assertIn("already exists", str(context.exception))
+        self.assertIn("już istnieje", str(context.exception))
 
     def test_register_user_duplicate_email_case_insensitive(self):
         """Test that email uniqueness is case-insensitive."""
@@ -117,7 +117,7 @@ class UserRegistrationServiceTests(TestCase):
         with self.assertRaises(IntegrityError) as context:
             register_user(email2, password)
 
-        self.assertIn("already exists", str(context.exception))
+        self.assertIn("już istnieje", str(context.exception))
 
     def test_register_user_empty_email(self):
         """Test that empty email raises ValueError."""

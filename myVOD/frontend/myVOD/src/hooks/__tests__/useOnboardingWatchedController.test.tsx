@@ -1,38 +1,45 @@
-import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useOnboardingWatchedController } from '../useOnboardingWatchedController';
-import { addUserMovie, patchUserMovie, deleteUserMovie, listUserMovies } from '@/lib/api/movies';
-import { getNextOnboardingPath, useOnboardingStatus } from '@/hooks/useOnboardingStatus';
-import { toast } from 'sonner';
-import type { SearchOptionVM, UserMovieDto } from '@/types/api.types';
+import React from "react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useOnboardingWatchedController } from "../useOnboardingWatchedController";
+import {
+  addUserMovie,
+  patchUserMovie,
+  deleteUserMovie,
+  listUserMovies,
+} from "@/lib/api/movies";
+import {
+  getNextOnboardingPath,
+  useOnboardingStatus,
+} from "@/hooks/useOnboardingStatus";
+import { toast } from "sonner";
+import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
 
 // Mock dependencies
 const mockNavigate = vi.fn();
 
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
   };
 });
 
-
-vi.mock('@/lib/api/movies', () => ({
+vi.mock("@/lib/api/movies", () => ({
   addUserMovie: vi.fn(),
   patchUserMovie: vi.fn(),
   deleteUserMovie: vi.fn(),
   listUserMovies: vi.fn(),
 }));
 
-vi.mock('@/hooks/useOnboardingStatus', () => ({
+vi.mock("@/hooks/useOnboardingStatus", () => ({
   useOnboardingStatus: vi.fn(),
   getNextOnboardingPath: vi.fn(),
 }));
 
-vi.mock('sonner', () => ({
+vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
@@ -50,24 +57,24 @@ const mockToast = vi.mocked(toast);
 
 // Mock data
 const mockMovie: SearchOptionVM = {
-  tconst: 'tt0111161',
-  primaryTitle: 'The Shawshank Redemption',
+  tconst: "tt0111161",
+  primaryTitle: "The Shawshank Redemption",
   startYear: 1994,
-  avgRating: '9.3',
-  posterUrl: '/poster.jpg',
+  avgRating: "9.3",
+  posterUrl: "/poster.jpg",
 };
 
 const mockUserMovieDto: UserMovieDto = {
   id: 123,
-  watchlisted_at: '2025-01-01T10:00:00Z',
-  watched_at: '2025-01-01T11:00:00Z',
+  watchlisted_at: "2025-01-01T10:00:00Z",
+  watched_at: "2025-01-01T11:00:00Z",
   movie: {
-    tconst: 'tt0111161',
-    primary_title: 'The Shawshank Redemption',
+    tconst: "tt0111161",
+    primary_title: "The Shawshank Redemption",
     start_year: 1994,
-    genres: ['Drama'],
-    avg_rating: '9.3',
-    poster_path: '/poster.jpg',
+    genres: ["Drama"],
+    avg_rating: "9.3",
+    poster_path: "/poster.jpg",
   },
   availability: [],
 };
@@ -75,10 +82,10 @@ const mockUserMovieDto: UserMovieDto = {
 const mockWatchedMovie: UserMovieDto = {
   ...mockUserMovieDto,
   id: 456,
-  watched_at: '2025-01-02T10:00:00Z',
+  watched_at: "2025-01-02T10:00:00Z",
 };
 
-describe('useOnboardingWatchedController', () => {
+describe("useOnboardingWatchedController", () => {
   let queryClient: QueryClient;
   let navigateSpy: ReturnType<typeof vi.fn>;
 
@@ -91,9 +98,7 @@ describe('useOnboardingWatchedController', () => {
     });
 
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
     return { Wrapper, queryClient };
@@ -117,7 +122,7 @@ describe('useOnboardingWatchedController', () => {
       watchedMovies: [], // Empty by default
     });
 
-    mockGetNextOnboardingPath.mockReturnValue('/app');
+    mockGetNextOnboardingPath.mockReturnValue("/app");
 
     navigateSpy = mockNavigate;
   });
@@ -126,9 +131,9 @@ describe('useOnboardingWatchedController', () => {
     vi.clearAllTimers();
   });
 
-  describe('initialization', () => {
-    it('should initialize with empty state', () => {
-    mockUseOnboardingStatus.mockReturnValue({
+  describe("initialization", () => {
+    it("should initialize with empty state", () => {
+      mockUseOnboardingStatus.mockReturnValue({
         isLoading: false,
         isOnboardingComplete: false,
         requiredStep: null,
@@ -148,39 +153,39 @@ describe('useOnboardingWatchedController', () => {
         wrapper: Wrapper,
       });
 
-      expect(result.current.viewModel.query).toBe('');
+      expect(result.current.viewModel.query).toBe("");
       expect(result.current.viewModel.isSubmitting).toBe(false);
       expect(result.current.viewModel.selected).toEqual([]);
       expect(result.current.viewModel.requiredSelected).toBe(3);
     });
 
-    it('should prefill with existing watched movies', () => {
+    it("should prefill with existing watched movies", () => {
       const existingWatchedMovies: UserMovieDto[] = [
         {
           id: 1,
-          watchlisted_at: '2025-01-01T10:00:00Z',
-          watched_at: '2025-01-01T11:00:00Z',
+          watchlisted_at: "2025-01-01T10:00:00Z",
+          watched_at: "2025-01-01T11:00:00Z",
           movie: {
-            tconst: 'tt0111161',
-            primary_title: 'The Shawshank Redemption',
+            tconst: "tt0111161",
+            primary_title: "The Shawshank Redemption",
             start_year: 1994,
-            genres: ['Drama'],
-            avg_rating: '9.3',
-            poster_path: '/poster.jpg',
+            genres: ["Drama"],
+            avg_rating: "9.3",
+            poster_path: "/poster.jpg",
           },
           availability: [],
         },
         {
           id: 2,
-          watchlisted_at: '2025-01-02T10:00:00Z',
-          watched_at: '2025-01-02T11:00:00Z',
+          watchlisted_at: "2025-01-02T10:00:00Z",
+          watched_at: "2025-01-02T11:00:00Z",
           movie: {
-            tconst: 'tt0068646',
-            primary_title: 'The Godfather',
+            tconst: "tt0068646",
+            primary_title: "The Godfather",
             start_year: 1972,
-            genres: ['Crime', 'Drama'],
-            avg_rating: '9.2',
-            poster_path: '/godfather.jpg',
+            genres: ["Crime", "Drama"],
+            avg_rating: "9.2",
+            poster_path: "/godfather.jpg",
           },
           availability: [],
         },
@@ -209,44 +214,51 @@ describe('useOnboardingWatchedController', () => {
 
       expect(result.current.viewModel.selected).toHaveLength(2);
       expect(result.current.viewModel.selected[0]).toEqual({
-        tconst: 'tt0111161',
-        primary_title: 'The Shawshank Redemption',
+        tconst: "tt0111161",
+        primary_title: "The Shawshank Redemption",
         start_year: 1994,
-        poster_path: '/poster.jpg',
-        avg_rating: '9.3',
+        genres: ["Drama"],
+        poster_path: "/poster.jpg",
+        avg_rating: "9.3",
+        user_rating: undefined,
         userMovieId: 1,
-        source: 'preexisting_watched',
-        status: 'success',
+        source: "preexisting_watched",
+        status: "success",
       });
       expect(result.current.viewModel.selected[1]).toEqual({
-        tconst: 'tt0068646',
-        primary_title: 'The Godfather',
+        tconst: "tt0068646",
+        primary_title: "The Godfather",
         start_year: 1972,
-        poster_path: '/godfather.jpg',
-        avg_rating: '9.2',
+        genres: ["Crime", "Drama"],
+        poster_path: "/godfather.jpg",
+        avg_rating: "9.2",
+        user_rating: undefined,
         userMovieId: 2,
-        source: 'preexisting_watched',
-        status: 'success',
+        source: "preexisting_watched",
+        status: "success",
       });
     });
 
-    it('should limit prefilled movies to max 3', () => {
-      const fourWatchedMovies: UserMovieDto[] = Array.from({ length: 4 }, (_, i) => ({
-        id: i + 1,
-        watchlisted_at: `2025-01-0${i + 1}T10:00:00Z`,
-        watched_at: `2025-01-0${i + 1}T11:00:00Z`,
-        movie: {
-          tconst: `tt000000${i + 1}`,
-          primary_title: `Movie ${i + 1}`,
-          start_year: 2000 + i,
-          genres: ['Drama'],
-          avg_rating: '8.0',
-          poster_path: `/movie${i + 1}.jpg`,
-        },
-        availability: [],
-      }));
+    it("should limit prefilled movies to max 3", () => {
+      const fourWatchedMovies: UserMovieDto[] = Array.from(
+        { length: 4 },
+        (_, i) => ({
+          id: i + 1,
+          watchlisted_at: `2025-01-0${i + 1}T10:00:00Z`,
+          watched_at: `2025-01-0${i + 1}T11:00:00Z`,
+          movie: {
+            tconst: `tt000000${i + 1}`,
+            primary_title: `Movie ${i + 1}`,
+            start_year: 2000 + i,
+            genres: ["Drama"],
+            avg_rating: "8.0",
+            poster_path: `/movie${i + 1}.jpg`,
+          },
+          availability: [],
+        })
+      );
 
-    mockUseOnboardingStatus.mockReturnValue({
+      mockUseOnboardingStatus.mockReturnValue({
         isLoading: false,
         isOnboardingComplete: false,
         requiredStep: null,
@@ -270,8 +282,8 @@ describe('useOnboardingWatchedController', () => {
     });
   });
 
-  describe('pick() - guards', () => {
-    it('should allow adding more than 3 movies', async () => {
+  describe("pick() - guards", () => {
+    it("should allow adding more than 3 movies", async () => {
       // Add 4 movies
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
@@ -286,17 +298,19 @@ describe('useOnboardingWatchedController', () => {
 
       // Add 4 movies
       await act(async () => {
-        await result.current.pick({ ...mockMovie, tconst: 'tt001' });
-        await result.current.pick({ ...mockMovie, tconst: 'tt002' });
-        await result.current.pick({ ...mockMovie, tconst: 'tt003' });
-        await result.current.pick({ ...mockMovie, tconst: 'tt004' });
+        await result.current.pick({ ...mockMovie, tconst: "tt001" });
+        await result.current.pick({ ...mockMovie, tconst: "tt002" });
+        await result.current.pick({ ...mockMovie, tconst: "tt003" });
+        await result.current.pick({ ...mockMovie, tconst: "tt004" });
       });
 
       expect(result.current.viewModel.selected).toHaveLength(4);
-      expect(mockToast.info).not.toHaveBeenCalledWith('Możesz oznaczyć maksymalnie 3 filmy');
+      expect(mockToast.info).not.toHaveBeenCalledWith(
+        "Możesz oznaczyć maksymalnie 3 filmy"
+      );
     });
 
-    it('should not add duplicate movie', async () => {
+    it("should not add duplicate movie", async () => {
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null,
@@ -319,22 +333,26 @@ describe('useOnboardingWatchedController', () => {
       });
 
       expect(result.current.viewModel.selected).toHaveLength(1);
-      expect(mockToast.info).toHaveBeenCalledWith('Ten film został już wybrany');
+      expect(mockToast.info).toHaveBeenCalledWith(
+        "Ten film został już wybrany"
+      );
     });
   });
 
-  describe('pick() - 409 conflict (already on watchlist)', () => {
-    it('should handle 409 by looking up userMovieId from watchlist', async () => {
+  describe("pick() - 409 conflict (already on watchlist)", () => {
+    it("should handle 409 by looking up userMovieId from watchlist", async () => {
       // POST returns 409 (already exists)
       const conflictError = { status: 409 };
       mockAddUserMovie.mockRejectedValue(conflictError);
 
       // listUserMovies returns existing movie
-      mockListUserMovies.mockResolvedValue([{
-        ...mockUserMovieDto,
-        watchlisted_at: '2025-01-01T10:00:00Z',
-        watched_at: '2025-01-01T11:00:00Z', // Already watched
-      }]);
+      mockListUserMovies.mockResolvedValue([
+        {
+          ...mockUserMovieDto,
+          watchlisted_at: "2025-01-01T10:00:00Z",
+          watched_at: "2025-01-01T11:00:00Z", // Already watched
+        },
+      ]);
 
       const { Wrapper } = createWrapper();
 
@@ -346,17 +364,19 @@ describe('useOnboardingWatchedController', () => {
         await result.current.pick(mockMovie);
       });
 
-      expect(mockListUserMovies).toHaveBeenCalledWith('watched');
+      expect(mockListUserMovies).toHaveBeenCalledWith("watched");
       expect(result.current.viewModel.selected[0]).toMatchObject({
-        tconst: 'tt0111161',
-        source: 'preexisting_watched',
-        status: 'success',
+        tconst: "tt0111161",
+        source: "preexisting_watched",
+        status: "success",
         userMovieId: 123,
       });
-      expect(mockToast.info).toHaveBeenCalledWith('"The Shawshank Redemption" był już oznaczony jako obejrzany');
+      expect(mockToast.info).toHaveBeenCalledWith(
+        '"The Shawshank Redemption" był już oznaczony jako obejrzany'
+      );
     });
 
-    it('should throw error if lookup fails after 409', async () => {
+    it("should throw error if lookup fails after 409", async () => {
       // POST returns 409
       const conflictError = { status: 409 };
       mockAddUserMovie.mockRejectedValue(conflictError);
@@ -375,13 +395,15 @@ describe('useOnboardingWatchedController', () => {
       });
 
       expect(result.current.viewModel.selected).toHaveLength(0); // Movie removed on error
-      expect(mockToast.error).toHaveBeenCalledWith('Nie znaleziono filmu na liście obejrzanych mimo 409');
+      expect(mockToast.error).toHaveBeenCalledWith(
+        "Nie znaleziono filmu na liście obejrzanych mimo 409"
+      );
     });
   });
 
-  describe('pick() - errors', () => {
-    it('should remove movie from selected on error', async () => {
-      mockAddUserMovie.mockRejectedValue(new Error('Network error'));
+  describe("pick() - errors", () => {
+    it("should remove movie from selected on error", async () => {
+      mockAddUserMovie.mockRejectedValue(new Error("Network error"));
 
       const { Wrapper } = createWrapper();
 
@@ -394,11 +416,11 @@ describe('useOnboardingWatchedController', () => {
       });
 
       expect(result.current.viewModel.selected).toHaveLength(0);
-      expect(mockToast.error).toHaveBeenCalledWith('Network error');
+      expect(mockToast.error).toHaveBeenCalledWith("Network error");
     });
 
-    it('should handle network errors', async () => {
-      mockAddUserMovie.mockRejectedValue(new Error('Network Error'));
+    it("should handle network errors", async () => {
+      mockAddUserMovie.mockRejectedValue(new Error("Network Error"));
 
       const { Wrapper } = createWrapper();
 
@@ -410,12 +432,12 @@ describe('useOnboardingWatchedController', () => {
         await result.current.pick(mockMovie);
       });
 
-      expect(mockToast.error).toHaveBeenCalledWith('Network Error');
+      expect(mockToast.error).toHaveBeenCalledWith("Network Error");
     });
   });
 
-  describe('undo() - newly created', () => {
-    it('should DELETE newly created movie', async () => {
+  describe("undo() - newly created", () => {
+    it("should DELETE newly created movie", async () => {
       // First add a movie
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
@@ -442,16 +464,18 @@ describe('useOnboardingWatchedController', () => {
 
       expect(mockDeleteUserMovie).toHaveBeenCalledWith(123, expect.any(Object));
       expect(result.current.viewModel.selected).toHaveLength(0);
-      expect(mockToast.success).toHaveBeenCalledWith('Anulowano oznaczenie filmu');
+      expect(mockToast.success).toHaveBeenCalledWith(
+        "Anulowano oznaczenie filmu"
+      );
     });
   });
 
-  describe('undo() - preexisting watchlist', () => {
-    it('should PATCH restore_to_watchlist for preexisting movies', async () => {
+  describe("undo() - preexisting watchlist", () => {
+    it("should PATCH restore_to_watchlist for preexisting movies", async () => {
       // Add movie that already exists on watchlist
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
-        watchlisted_at: '2025-01-01T10:00:00Z', // preexisting
+        watchlisted_at: "2025-01-01T10:00:00Z", // preexisting
       });
 
       mockPatchUserMovie.mockResolvedValue({
@@ -476,15 +500,17 @@ describe('useOnboardingWatchedController', () => {
       });
 
       expect(mockPatchUserMovie).toHaveBeenCalledWith(123, {
-        action: 'restore_to_watchlist',
+        action: "restore_to_watchlist",
       });
       expect(result.current.viewModel.selected).toHaveLength(0);
-      expect(mockToast.success).toHaveBeenCalledWith('Film przywrócono do watchlisty');
+      expect(mockToast.success).toHaveBeenCalledWith(
+        "Film przywrócono do watchlisty"
+      );
     });
   });
 
-  describe('finish() & skip()', () => {
-    it('should set onboardingComplete and navigate to next path', async () => {
+  describe("finish() & skip()", () => {
+    it("should set onboardingComplete and navigate to next path", async () => {
       const { Wrapper } = createWrapper();
 
       const { result } = renderHook(() => useOnboardingWatchedController(), {
@@ -496,19 +522,19 @@ describe('useOnboardingWatchedController', () => {
       });
 
       expect(result.current.viewModel.isSubmitting).toBe(true);
-      expect(mockToast.success).toHaveBeenCalledWith('Onboarding zakończony!');
+      expect(mockToast.success).toHaveBeenCalledWith("Onboarding zakończony!");
       expect(mockGetNextOnboardingPath).toHaveBeenCalledWith(
         expect.objectContaining({
           hasPlatforms: true,
           hasWatchlistMovies: true,
           hasWatchedMovies: false,
         }),
-        { fromStep: 'watched' }
+        { fromStep: "watched" }
       );
-      expect(navigateSpy).toHaveBeenCalledWith('/app', { replace: true });
+      expect(navigateSpy).toHaveBeenCalledWith("/app", { replace: true });
     });
 
-    it('should skip navigate without marking movies', async () => {
+    it("should skip navigate without marking movies", async () => {
       const { Wrapper } = createWrapper();
 
       const { result } = renderHook(() => useOnboardingWatchedController(), {
@@ -527,14 +553,14 @@ describe('useOnboardingWatchedController', () => {
           hasWatchlistMovies: true,
           hasWatchedMovies: false,
         }),
-        { fromStep: 'watched' }
+        { fromStep: "watched" }
       );
-      expect(navigateSpy).toHaveBeenCalledWith('/app', { replace: true });
+      expect(navigateSpy).toHaveBeenCalledWith("/app", { replace: true });
     });
   });
 
-  describe('pick() - happy path', () => {
-    it('should add movie to selected with loading status', async () => {
+  describe("pick() - happy path", () => {
+    it("should add movie to selected with loading status", async () => {
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null, // Not previously on watchlist - newly created
@@ -552,17 +578,17 @@ describe('useOnboardingWatchedController', () => {
 
       expect(result.current.viewModel.selected).toHaveLength(1);
       expect(result.current.viewModel.selected[0]).toMatchObject({
-        tconst: 'tt0111161',
-        primary_title: 'The Shawshank Redemption',
+        tconst: "tt0111161",
+        primary_title: "The Shawshank Redemption",
         start_year: 1994,
-        poster_path: '/poster.jpg',
+        poster_path: "/poster.jpg",
         userMovieId: 123,
-        source: 'newly_created',
-        status: 'success',
+        source: "newly_created",
+        status: "success",
       });
     });
 
-    it('should call POST /api/user-movies with tconst and mark_as_watched=true', async () => {
+    it("should call POST /api/user-movies with tconst and mark_as_watched=true", async () => {
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null,
@@ -578,22 +604,22 @@ describe('useOnboardingWatchedController', () => {
         await result.current.pick(mockMovie);
       });
 
-    expect(mockAddUserMovie).toHaveBeenCalledWith(
-      {
-        tconst: 'tt0111161',
-        mark_as_watched: true,
-      },
-      expect.any(Object) // Additional mutation options
-    );
+      expect(mockAddUserMovie).toHaveBeenCalledWith(
+        {
+          tconst: "tt0111161",
+          mark_as_watched: true,
+        },
+        expect.any(Object) // Additional mutation options
+      );
       expect(mockAddUserMovie).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle successful movie addition with mark_as_watched=true', async () => {
+    it("should handle successful movie addition with mark_as_watched=true", async () => {
       // POST with mark_as_watched=true should handle everything in one call
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null, // newly created
-        watched_at: '2025-01-01T11:00:00Z', // already marked as watched by backend
+        watched_at: "2025-01-01T11:00:00Z", // already marked as watched by backend
       });
 
       const { Wrapper } = createWrapper();
@@ -608,7 +634,7 @@ describe('useOnboardingWatchedController', () => {
 
       expect(mockAddUserMovie).toHaveBeenCalledWith(
         {
-          tconst: 'tt0111161',
+          tconst: "tt0111161",
           mark_as_watched: true,
         },
         expect.any(Object)
@@ -617,15 +643,15 @@ describe('useOnboardingWatchedController', () => {
       expect(mockPatchUserMovie).not.toHaveBeenCalled();
     });
 
-    it('should show success toast after marking as watched', async () => {
+    it("should show success toast after marking as watched", async () => {
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
-        watchlisted_at: '2025-01-01T10:00:00Z',
+        watchlisted_at: "2025-01-01T10:00:00Z",
       });
 
       mockPatchUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
-        watched_at: '2025-01-01T11:00:00Z',
+        watched_at: "2025-01-01T11:00:00Z",
       });
 
       const { Wrapper } = createWrapper();
@@ -638,7 +664,9 @@ describe('useOnboardingWatchedController', () => {
         await result.current.pick(mockMovie);
       });
 
-      expect(mockToast.success).toHaveBeenCalledWith('"The Shawshank Redemption" oznaczono jako obejrzany');
+      expect(mockToast.success).toHaveBeenCalledWith(
+        '"The Shawshank Redemption" oznaczono jako obejrzany'
+      );
     });
   });
 });

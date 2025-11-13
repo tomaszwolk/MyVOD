@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, Star } from "lucide-react";
 import { AvailabilityIcons } from "./AvailabilityIcons";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import {
@@ -81,40 +81,41 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              {/* Top Group */}
-              <div>
-                {/* Title */}
-                <h3
-                  id={`movie-title-${item.id}`}
-                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
-                >
-                  {item.movie.primary_title}
-                </h3>
-
-                {/* Year, Genres, Rating */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                  {item.movie.start_year && (
-                    <span>{item.movie.start_year}</span>
-                  )}
-                  {displayGenres && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate">{displayGenres}</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Rating */}
-                {item.movie.avg_rating && (
-                  <div className="text-sm font-medium text-foreground mb-2">
-                    {item.movie.avg_rating}/10
-                  </div>
-                )}
-              </div>
+              {/* Title */}
+              <h3
+                id={`movie-title-${item.id}`}
+                className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+              >
+                {item.movie.primary_title}
+              </h3>
             </TooltipTrigger>
-            <TooltipContent>
+
+            {/* Year, Genres, Rating */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+              {item.movie.start_year && <span>{item.movie.start_year}</span>}
+              {displayGenres && (
+                <>
+                  <span>•</span>
+                  <span className="truncate">{displayGenres}</span>
+                </>
+              )}
+            </div>
+
+            {/* Rating */}
+            {item.movie.avg_rating && (
+              <div className="flex items-center gap-1 text-sm font-medium text-foreground mb-2">
+                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                <span>{item.movie.avg_rating}/10</span>
+              </div>
+            )}
+            <TooltipContent side="bottom" align="start">
               <p className="font-bold">{item.movie.primary_title}</p>
               {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-sm">
+                  IMDB.com rating: {item.movie.avg_rating || "-"}
+                </p>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
