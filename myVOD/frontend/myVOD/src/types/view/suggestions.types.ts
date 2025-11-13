@@ -10,7 +10,7 @@ export type AISuggestionCardVM = {
   tconst: string;
   title: string;
   year: number | null;
-  genres: string[] | null;
+  genres: string[];
   justification: string;
   posterUrl: string | null; // TMDB URL or null for placeholder
   availability: MovieAvailabilityDto[];

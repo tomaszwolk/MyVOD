@@ -35,7 +35,7 @@ function mapSuggestionItemToVM(dto: SuggestionItemDto): AISuggestionCardVM {
     tconst: dto.tconst,
     title: dto.primary_title,
     year: dto.start_year,
-    genres: dto.genres ?? null,
+    genres: dto.genres ?? [],
     justification: dto.justification,
     posterUrl,
     availability: dto.availability,

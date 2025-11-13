@@ -1190,32 +1190,50 @@ Sekcja 5: Growth
 
 ## 7. Planowane nowe funkcjonalności.
 
-### 7.1 Funkcjonalności jakie planuje się po implementacji podstawowych funkcji MVP:
+### 7.1 Funkcjonalności jakie planuje się po implementacji podstawowych funkcji MVP: # TODO
 7.1.1 Dodanie filtrowania dostępnych filmów na konkretnych platformach:
 - na wysokości menu gdzie jest wybór podstron Watchlist, obejrzane, Profil, Admin z prawej strony przy krawędzi znajdują się ikony wyboru platform
 - ikony wyboru platform zawierają: wszystkie dostępne platformy (po dodaniu nowych platform powinny same się pojawiać nowe, nie hardcodowane)
 - przycisk wyboru wszystkich platform / odznaczenia wszystkich platform - maksymalnie z prawej strony
 - przycisk "Ukryj niedostępne" zamienić na "Na moich platformach" - do uzgodnienia
 
-7.1.2 Pobieranie i zapisywanie ocen obejrzanych filmów.
+7.1.2 Pobieranie i zapisywanie ocen obejrzanych filmów. # TODO
 - sprawdzić możliwość automatycznego pobierania listy obejrzanych filmów i ich ocen (np raz dziennie)
 - możliwość ręcznego odświeżenia listy
 
-7.1.3 Możliwość pobierania automatycznego watchlisty oraz obejrzanych filmów z IMDB:
+7.1.3 Możliwość pobierania automatycznego watchlisty oraz obejrzanych filmów z IMDB: # TODO
 - wymaga to podania nazwy użytkownika z IMDB
 - ustawienia list jako publiczne
 - nazwę użytkownika IMDB można podać podczas onboardingu lub w profilu
 - w profilu po podaniu nazwy użytkownika jest możliwość odświeżenia list
 
-7.1.4 Możliwość zalogowania jako mock user.
+7.1.4 Możliwość zalogowania jako mock user. # TODO
 - dla nowych użytkowników, by sprawdzić jak działa aplikacja dodana zostanie opcja "Zaloguj jako ..."
 - typy użytkowników: fan anime, fan kina akcji, romantyk, entyzjasta horrorów, fan komedii
 
 7.1.5 Reset hasła na stronie głównej. Forgot Password? ---- DONE
 
-7.1.6 Dodać ikony platform (Netflix etc)
+7.1.6 Dodać ikony platform (Netflix etc) ---- DONE
 
-7.1.7 Plakaty
+7.1.7 Plakaty ---- DONE
+
+7.1.8 Przyśpieszyć wyszukiwanie: # TODO
+    - wyszukuje pośrednie zapytania, np.
+        + Mat
+        + Matrix
+
+7.1.9 Zmienić by użytkownik miał dodać minimum 3 filmy do watchlist i do watched. Brak maksimum. ---- DONE
+
+7.1.10 Dodać kilka rekomendacji na początek, na podstawie popularnych filmów - może w formie karuzeli? # TODO
+
+7.1.11 W watchlist dodać przycisk anuluj/cofnij. ---- Dodano przycisk Obejrzane oraz Usuń ---- DONE
+
+7.1.12 Dodać informacje do góry z nazwą zalogowanego użytkownika. ---- Dodano w zakładce profil ---- DONE
+
+## 8. Known issues.
+
+8.1 Onboarding/add i onboarding/watched:
+  - Jeśli istnieje na watchlist / watched więcej filmów niż 3, i użytkownik usunie pozycje, to zwróci błąd braku 3 pozycji, mimo że te 3 pozycje są na liście - poziom: niski, onboarding jest do wstępnego użycia, tam ten problem nie występuje, użytkownik musi intencjonalnie wrócić do tej strony (co również specjalnie nie jest blokowane)
 ---
 Ostrzeżenia - to tylko warningi generatora dokumentacji OpenAPI, nie wpływają na działanie aplikacji. Jeśli chcesz je usunąć w przyszłości, możesz:
 - Dodać @extend_schema_field dla pól typu callable
