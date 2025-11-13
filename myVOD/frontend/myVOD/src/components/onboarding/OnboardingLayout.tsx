@@ -23,7 +23,7 @@ export function OnboardingLayout({
           {/* Header section */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <img src={ICONS.appLogo} alt="myVOD Logo" className="h-10 w-10" />
+              <img src={ICONS.appLogo} alt="myVOD Logo" className="h-12 w-10" />
               <div className="text-center md:text-left space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
                 {subtitle && (

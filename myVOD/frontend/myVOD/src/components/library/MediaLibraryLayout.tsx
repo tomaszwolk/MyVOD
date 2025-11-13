@@ -37,7 +37,7 @@ export function MediaLibraryLayout({
         <header className="mb-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
-              <img src={ICONS.appLogo} alt="myVOD Logo" className="h-12 w-12" />
+              <img src={ICONS.appLogo} alt="myVOD Logo" className="h-16 w-12" />
               <div className="flex-1">
                 <h1 className="text-2xl lg:text-4xl font-bold text-foreground">
                   {title}
@@ -59,10 +59,10 @@ export function MediaLibraryLayout({
               {tabs.map((tab) => {
                 const isActive = tab.isActive;
                 const baseClasses =
-                  "px-4 py-2 rounded-lg font-medium transition-colors";
+                  "px-4 py-2 rounded-lg font-medium transition-colors shadow-sm";
                 const activeClasses = "bg-primary text-primary-foreground";
                 const inactiveClasses =
-                  "bg-muted hover:bg-muted/80 text-muted-foreground";
+                  "border border-input bg-background hover:bg-accent hover:text-accent-foreground";
 
                 return (
                   <button
