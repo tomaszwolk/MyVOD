@@ -251,7 +251,8 @@ def _generate_new_suggestions(user, expires_at):
                 'tconst__genres',
                 'tconst__start_year',
                 'watchlisted_at',
-                'watched_at'
+                'watched_at',
+                'user_rating'  # Include user_rating
             )[:50]  # Limit for API call
 
             # Get user's platforms
@@ -629,10 +630,16 @@ def _build_gemini_prompt(watchlist, watched, available_movies, user_platform_nam
             title = movie.get('tconst__primary_title', 'Unknown')
             year = movie.get('tconst__start_year', 'N/A')
             genres = movie.get('tconst__genres', [])
-            rating = movie.get('tconst__avg_rating', 'N/A')
+            imdb_rating = movie.get('tconst__avg_rating', 'N/A')
+            user_rating = movie.get('user_rating')
             genres_str = ', '.join(genres) if genres else 'N/A'
+            
+            rating_info = f"IMDb Rating: {imdb_rating}/10"
+            if user_rating:
+                rating_info += f", Your Rating: {user_rating}/10"
+
             prompt_parts.append(
-                f"- {title} ({year}) - Genres: {genres_str} - Rating: {rating}/10"
+                f"- {title} ({year}) - Genres: {genres_str} - {rating_info}"
             )
     else:
         prompt_parts.append("(No watched movies)")

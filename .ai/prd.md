@@ -246,7 +246,7 @@ Funkcjonalności:
   - Informację o dostępności na platformach użytkownika
 
 Prompt dla AI:
-"Na podstawie obejrzanych filmów: [lista filmów z gatunkami] i obecnej watchlisty: [lista filmów], zasugeruj 5 filmów dostępnych na: [platformy użytkownika]. Dla każdego podaj tytuł, rok i 1-2 zdaniowe uzasadnienie."
+"Na podstawie obejrzanych filmów: [lista filmów z gatunkami i ocenami użytkownika] i obecnej watchlisty: [lista filmów], zasugeruj 5 filmów dostępnych na: [platformy użytkownika]. Dla każdego podaj tytuł, rok i 1-2 zdaniowe uzasadnienie."
 
 Przykład uzasadnienia:
 "Ponieważ podobał Ci się Inception i Interstellar, polecamy Tenet - sci-fi o manipulacji czasem od Christophera Nolana"
@@ -755,7 +755,7 @@ Kryteria akceptacji:
 - Operacja jest natychmiastowa (brak przeładowania strony)
 
 US-024: Przeglądanie zakładki Obejrzane
-Jako użytkownik chcę zobaczyć historię moich obejrzanych filmów, aby przypomnieć sobie co oglądałem.
+Jako użytkownik chcę zobaczyć historię moich obejrzanych filmów, aby przypomnieć sobie co oglądałem i dodać własną ocenę.
 
 Kryteria akceptacji:
 - Zakładka "Obejrzane" jest widoczna w głównej nawigacji
@@ -763,6 +763,9 @@ Kryteria akceptacji:
 - Domyślne sortowanie: data obejrzenia (najnowsze pierwsze)
 - Te same widoki dostępne: kafelkowy i listowy
 - Każdy film pokazuje datę obejrzenia
+- Obok oceny IMDb znajduje się miejsce na ocenę użytkownika (1-10) w postaci niebieskiej gwiazdki.
+- Kliknięcie w gwiazdkę otwiera modal, w którym można wybrać ocenę.
+- Po dodaniu oceny, jest ona widoczna na karcie filmu.
 - Brak limitu liczby filmów w zakładce "Obejrzane"
 - Filmy zachowują informacje o dostępności VOD
 

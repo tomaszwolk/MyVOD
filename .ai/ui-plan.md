@@ -210,17 +210,20 @@ Nawigacja kluczowych akcji:
 - OnboardingProgress: pasek postępu 1/3, 2/3, 3/3 i nawigacja krokami (z „Skip”).
 - EmptyState: ilustracje i CTA dla pustych list (watchlista, obejrzane, brak sugestii).
 - ConfirmDialog: confirm dla usuwania i akcji destrukcyjnych. Używany zarówno w watchliście (soft delete z undo) jak i w watched movies (hard delete bez undo) z odpowiednim komunikatem o nieodwracalności operacji.
-- useDeleteFromWatched: hook React Query do obsługi usuwania filmów z historii obejrzanych. Implementuje optimistic updates, rollback przy błędzie oraz toast notyfikacje. Operacja hard delete (nieodwracalna).
-- useIsStaff: hook do sprawdzania uprawnień staff użytkownika. Wykorzystuje pole `is_staff` z profilu użytkownika (`/api/me/`). Używany do warunkowego wyświetlania zakładki "Admin" w nawigacji.
-- AdminDashboardPage: główny komponent admin dashboard wykorzystujący `MediaLibraryLayout` z zakładkami nawigacyjnymi.
-- MetricsCardsGrid: komponent siatki kart metryk z tooltipami i ikonami. Wyświetla 8 metryk w responsywnym gridzie.
-- ChartsRow: komponent zawierający dwa wykresy (retention line chart, users growth bar chart) używające Chart.js.
-- TopMoviesSection: sekcja z filtrami typu i zakresu czasowego, tabelą top 10 filmów oraz eksportem CSV.
-- ErrorLogsSection: sekcja z filtrami (API type, data od/do, user_id), tabelą z paginacją i sortowaniem, oraz eksportem CSV.
-- ErrorLogsFilters: komponenty filtrów dla logów błędów z debounce dla pola user_id (300ms).
-- ErrorLogsTable: tabela logów błędów z paginacją (50/strona), sortowaniem po kolumnach oraz możliwością kliknięcia user_id do filtrowania.
-- TopMoviesFilters: filtry dla sekcji top filmów (typ: watchlist/watched, zakres: 7d/30d/all).
-- TopMoviesTable: tabela top 10 filmów z kolumnami: pozycja, tytuł, rok, liczba.
+- `useDeleteFromWatched`: hook React Query do obsługi usuwania filmów z historii obejrzanych. Implementuje optimistic updates, rollback przy błędzie oraz toast notyfikacje. Operacja hard delete (nieodwracalna).
+- `MovieRating`: Wyświetla ocenę IMDb i ocenę użytkownika. Umożliwia otwarcie modala do oceniania.
+- `RatingModal`: Modal z 10 gwiazdkami pozwalający na wybór i zapisanie oceny filmu.
+- `useRateMovie`: Hook React Query do obsługi mutacji oceniania filmu (`PATCH` z akcją `rate_movie`).
+- `useIsStaff`: hook do sprawdzania uprawnień staff użytkownika. Wykorzystuje pole `is_staff` z profilu użytkownika (`/api/me/`). Używany do warunkowego wyświetlania zakładki "Admin" w nawigacji.
+- `AdminDashboardPage`: główny komponent admin dashboard wykorzystujący `MediaLibraryLayout` z zakładkami nawigacyjnymi.
+- `MetricsCardsGrid`: komponent siatki kart metryk z tooltipami i ikonami. Wyświetla 8 metryk w responsywnym gridzie.
+- `ChartsRow`: komponent zawierający dwa wykresy (retention line chart, users growth bar chart) używające Chart.js.
+- `TopMoviesSection`: sekcja z filtrami typu i zakresu czasowego, tabelą top 10 filmów oraz eksportem CSV.
+- `ErrorLogsSection`: sekcja z filtrami (API type, data od/do, user_id), tabelą z paginacją i sortowaniem, oraz eksportem CSV.
+- `ErrorLogsFilters`: komponenty filtrów dla logów błędów z debounce dla pola user_id (300ms).
+- `ErrorLogsTable`: tabela logów błędów z paginacją (50/strona), sortowaniem po kolumnach oraz możliwością kliknięcia user_id do filtrowania.
+- `TopMoviesFilters`: filtry dla sekcji top filmów (typ: watchlist/watched, zakres: 7d/30d/all).
+- `TopMoviesTable`: tabela top 10 filmów z kolumnami: pozycja, tytuł, rok, liczba.
 
 **NOWE KOMPONENTY ZAIMPLEMENTOWANE (Widoki błędów i fallbacki):**
 

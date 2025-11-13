@@ -69,6 +69,7 @@ Tracks a user's interaction with a movie (watchlist, watched history).
 | `watchlisted_at`| `timestamptz` | | Timestamp when the movie was added to the watchlist. |
 | `watchlist_deleted_at`| `timestamptz` | | Timestamp for soft-deleting from the watchlist. |
 | `watched_at` | `timestamptz` | | Timestamp when the user marked the movie as watched. |
+| `user_rating` | `smallint` | `CHECK (user_rating >= 1 AND user_rating <= 10)` | User's personal rating for the movie (1-10). |
 | `added_from_ai_suggestion`| `boolean` | Not Null, `default false` | Flag indicating if it was added from an AI suggestion. |
 | | | **Unique** (`user_id`, `tconst`) | Ensures a single interaction record per user per movie. |
 

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Uwaga: Modele te zostały wygenerowane ręcznie na podstawie schematu SQL.
 # UWAGA TYMCZASOWA: user_id jest obecnie UUIDField, ponieważ baza danych używa UUID.
@@ -56,6 +57,11 @@ class UserMovie(models.Model):
     watchlist_deleted_at = models.DateTimeField(blank=True, null=True)
     watched_at = models.DateTimeField(blank=True, null=True)
     added_from_ai_suggestion = models.BooleanField(default=False)
+    user_rating = models.SmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        blank=True,
+        null=True
+    )
 
     class Meta:
         managed = False

@@ -12,19 +12,35 @@ type WatchedGridProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
  * Grid layout for displaying watched movies in card format.
  * Responsive grid with different column counts for different screen sizes.
  */
-export function WatchedGrid({ items, platforms, onRestore, isRestoring, onDelete, isDeleting }: WatchedGridProps) {
+export function WatchedGrid({
+  items,
+  platforms,
+  onRestore,
+  isRestoring,
+  onDelete,
+  isDeleting,
+  onRate,
+}: WatchedGridProps) {
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="watched-grid">
+    <div
+      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+      data-testid="watched-grid"
+    >
       {items.map((item) => (
         <UserMovieCard
           key={item.id}
@@ -34,6 +50,7 @@ export function WatchedGrid({ items, platforms, onRestore, isRestoring, onDelete
           isRestoring={isRestoring}
           onDelete={onDelete}
           isDeleting={isDeleting}
+          onRate={onRate}
         />
       ))}
     </div>

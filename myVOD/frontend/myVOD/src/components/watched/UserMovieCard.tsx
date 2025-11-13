@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { MovieRating } from "./MovieRating";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +25,11 @@ type UserMovieCardProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
@@ -37,6 +43,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   isRestoring,
   onDelete,
   isDeleting,
+  onRate,
 }) {
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 2).join(", ") : null;
@@ -48,6 +55,10 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
 
   const handleDelete = () => {
     onDelete(item.id);
+  };
+
+  const handleRate = () => {
+    onRate(item.id, item.title, item.userRating);
   };
 
   return (
@@ -112,11 +123,14 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
                 </div>
 
                 {/* Rating */}
-                {item.avgRating && (
-                  <div className="text-sm font-medium text-foreground mb-2">
-                    {item.avgRating}/10
-                  </div>
-                )}
+                <div className="mb-2">
+                  <MovieRating
+                    imdbRating={item.avgRating}
+                    userRating={item.userRating}
+                    onRateClick={handleRate}
+                    tconst={item.tconst}
+                  />
+                </div>
               </div>
             </TooltipTrigger>
             <TooltipContent>

@@ -96,6 +96,7 @@ export type UserMovieDto = {
   id: number;
   watchlisted_at: string | null;
   watched_at: string | null;
+  user_rating: number | null;
   movie: UserMovieDetailDto;
   availability: MovieAvailabilityDto[];
 };
@@ -107,7 +108,8 @@ export type AddUserMovieCommand = {
 };
 
 export type UpdateUserMovieCommand = {
-  action: "mark_as_watched" | "restore_to_watchlist";
+  action: "mark_as_watched" | "restore_to_watchlist" | "rate_movie";
+  rating?: number;
 };
 
 // AI Suggestions types

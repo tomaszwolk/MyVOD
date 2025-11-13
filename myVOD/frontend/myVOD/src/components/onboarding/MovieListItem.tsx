@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { MovieRating } from "@/components/watched/MovieRating";
 import { cn } from "@/lib/utils";
 
 type MovieListItemProps = {
@@ -56,7 +57,14 @@ export function MovieListItem({
         <h4 className="font-medium text-sm truncate">{primaryTitle}</h4>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {startYear && <span>{startYear}</span>}
-          {avgRating && <span>• ⭐ {avgRating}/10</span>}
+        </div>
+        <div className="mt-1">
+          <MovieRating
+            imdbRating={avgRating ?? null}
+            userRating={null}
+            onRateClick={() => {}} // No rating functionality in onboarding
+            tconst={tconst}
+          />
         </div>
       </div>
 

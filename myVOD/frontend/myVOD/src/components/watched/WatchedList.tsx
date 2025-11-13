@@ -12,13 +12,26 @@ type WatchedListProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
  * List layout for displaying watched movies in row format.
  * Vertical stack of movie rows with consistent spacing.
  */
-export function WatchedList({ items, platforms, onRestore, isRestoring, onDelete, isDeleting }: WatchedListProps) {
+export function WatchedList({
+  items,
+  platforms,
+  onRestore,
+  isRestoring,
+  onDelete,
+  isDeleting,
+  onRate,
+}: WatchedListProps) {
   if (items.length === 0) {
     return null;
   }
@@ -34,6 +47,7 @@ export function WatchedList({ items, platforms, onRestore, isRestoring, onDelete
           isRestoring={isRestoring}
           onDelete={onDelete}
           isDeleting={isDeleting}
+          onRate={onRate}
         />
       ))}
     </div>
