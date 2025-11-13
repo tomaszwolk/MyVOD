@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginForm } from "@/pages/auth/components/LoginForm";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * Login page container.
@@ -25,7 +26,12 @@ export function LoginPage() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-visible">
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -54,4 +60,3 @@ export function LoginPage() {
     </div>
   );
 }
-

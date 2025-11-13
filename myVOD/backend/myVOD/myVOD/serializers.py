@@ -251,7 +251,7 @@ class RegisterUserSerializer(serializers.Serializer):
         # Check if email already exists
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError(
-                "A user with this email already exists"
+                "Użytkownik o tym emailu już istnieje"
             )
 
         return email

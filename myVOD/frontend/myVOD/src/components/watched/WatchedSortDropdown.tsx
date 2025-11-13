@@ -1,5 +1,5 @@
 import type { WatchedSortKey } from "@/types/view/watched.types";
-import { SortDropdown } from "@/components/watchlist/SortDropdown";
+import { SortDropdown } from "@/components/ui/SortDropdown";
 
 type WatchedSortDropdownProps = {
   value: WatchedSortKey;
@@ -9,11 +9,9 @@ type WatchedSortDropdownProps = {
 /**
  * Reuse watchlist sort dropdown for watched view to keep options and styling unified.
  */
-export function WatchedSortDropdown({ value, onChange }: WatchedSortDropdownProps) {
-  return (
-    <SortDropdown
-      value={value}
-      onChange={onChange}
-    />
-  );
+export function WatchedSortDropdown({
+  value,
+  onChange,
+}: WatchedSortDropdownProps) {
+  return <SortDropdown value={value} onChange={onChange} />;
 }

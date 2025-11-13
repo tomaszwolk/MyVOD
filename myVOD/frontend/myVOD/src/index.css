@@ -66,6 +66,10 @@
   --spacing: 0.25rem;
   --overlay-background: hsl(var(--background) / 0.8);
   --overlay-backdrop-blur: 4px;
+  --search-popover-background: rgba(255, 255, 255, 0.95);
+  --error-alert-text: hsl(var(--destructive));
+  --error-alert-border: hsl(var(--destructive));
+  --error-alert-icon: hsl(var(--destructive));
 }
 
 .dark {
@@ -128,6 +132,10 @@
   --shadow-2xl: 3px 3px 4.5px 0px hsl(0 0% 0% / 0.75);
   --overlay-background: hsl(var(--background) / 0.9);
   --overlay-backdrop-blur: 4px;
+  --search-popover-background: rgba(0, 0, 0, 0.8);
+  --error-alert-text: hsl(var(--destructive));
+  --error-alert-border: hsl(var(--destructive));
+  --error-alert-icon: hsl(var(--destructive));
 }
 
 @theme inline {

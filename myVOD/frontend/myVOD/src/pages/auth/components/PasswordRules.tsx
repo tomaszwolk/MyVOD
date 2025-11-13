@@ -13,20 +13,28 @@ export function PasswordRules({ password }: PasswordRulesProps) {
   const rules = checkPasswordRules(password);
 
   const ruleItems = [
-    { key: "minLength", label: "Co najmniej 8 znaków", met: rules.hasMinLength },
+    {
+      key: "minLength",
+      label: "Co najmniej 8 znaków",
+      met: rules.hasMinLength,
+    },
     { key: "letter", label: "Zawiera literę", met: rules.hasLetter },
     { key: "number", label: "Zawiera cyfrę", met: rules.hasNumber },
   ];
 
   return (
     <div className="mt-2 space-y-1">
-      <p className="text-xs font-medium text-slate-300">Wymagania hasła:</p>
+      <p className="text-xs font-medium text-muted-foreground">
+        Wymagania hasła:
+      </p>
       <ul className="space-y-1">
         {ruleItems.map((rule) => (
           <li
             key={rule.key}
             className={`text-xs flex items-center gap-2 ${
-              rule.met ? "text-green-400" : "text-slate-400"
+              rule.met
+                ? "text-green-600 dark:text-green-400"
+                : "text-muted-foreground"
             }`}
           >
             {rule.met ? (
@@ -41,4 +49,3 @@ export function PasswordRules({ password }: PasswordRulesProps) {
     </div>
   );
 }
-

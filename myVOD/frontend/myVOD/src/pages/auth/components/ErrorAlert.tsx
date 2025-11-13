@@ -29,11 +29,17 @@ export function ErrorAlert({ message }: ErrorAlertProps) {
       role="alert"
       aria-live="assertive"
       tabIndex={-1}
-      className="mb-4 bg-red-900/20 border-red-800 text-red-200"
+      className="mb-4"
+      style={{
+        color: "var(--error-alert-text)",
+        borderColor: "var(--error-alert-border)",
+      }}
     >
-      <AlertCircle className="h-4 w-4" />
+      <AlertCircle
+        className="h-4 w-4"
+        style={{ color: "var(--error-alert-icon)" }}
+      />
       <AlertDescription>{message}</AlertDescription>
     </Alert>
   );
 }
-

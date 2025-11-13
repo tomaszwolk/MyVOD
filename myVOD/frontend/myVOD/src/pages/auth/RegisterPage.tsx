@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { RegisterForm } from "@/pages/auth/components/RegisterForm";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * Registration page container.
@@ -24,7 +25,12 @@ export function RegisterPage() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-visible">
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -44,4 +50,3 @@ export function RegisterPage() {
     </div>
   );
 }
-

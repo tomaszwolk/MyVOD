@@ -568,7 +568,7 @@ class RegisterView(APIView):
                 f"Integrity error during registration: {str(e)}"
             )
             return Response(
-                {"email": ["A user with this email already exists"]},
+                {"email": ["Użytkownik o tym emailu już istnieje"]},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

@@ -1,10 +1,14 @@
 import { SearchCombobox } from "./SearchCombobox";
 import { ViewToggle } from "./ViewToggle";
-import { SortDropdown } from "./SortDropdown";
+import { SortDropdown } from "@/components/ui/SortDropdown";
 import { FiltersBar } from "./FiltersBar";
 import { SuggestAIButton } from "./SuggestAIButton";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
-import type { ViewMode, SortOption, FiltersState } from "@/types/view/watchlist.types";
+import type {
+  ViewMode,
+  SortOption,
+  FiltersState,
+} from "@/types/view/watchlist.types";
 
 /**
  * Props for WatchlistControlsBar component.
@@ -69,14 +73,8 @@ export function WatchlistControlsBar({
       }
       viewControlsSlot={
         <>
-          <ViewToggle
-            value={viewMode}
-            onChange={onViewModeChange}
-          />
-          <SortDropdown
-            value={sort}
-            onChange={onSortChange}
-          />
+          <ViewToggle value={viewMode} onChange={onViewModeChange} />
+          <SortDropdown value={sort} onChange={onSortChange} />
         </>
       }
       secondaryControlsSlot={

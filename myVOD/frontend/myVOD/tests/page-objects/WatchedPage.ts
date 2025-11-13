@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page } from "@playwright/test";
 
 /**
  * Page Object Model for Watched movies page
@@ -14,7 +14,7 @@ export class WatchedPage {
   private async waitForNewToast(previousToastCount: number): Promise<void> {
     await this.page.waitForFunction(
       (initialCount) => {
-        const toastElements = document.querySelectorAll('[data-sonner-toast]');
+        const toastElements = document.querySelectorAll("[data-sonner-toast]");
         return toastElements.length > initialCount;
       },
       previousToastCount,
@@ -30,15 +30,21 @@ export class WatchedPage {
    */
   async waitForPageLoad(): Promise<void> {
     // Wait for URL to be /app/watched
-    await this.page.waitForURL('**/app/watched**', { timeout: 60000 });
+    await this.page.waitForURL("**/app/watched**", { timeout: 60000 });
 
     // Wait for network to be idle
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
 
     // Wait for watched grid or empty state to appear
     await Promise.race([
-      this.page.getByTestId('watched-grid').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {}),
-      this.page.getByText('Nie masz jeszcze obejrzanych filmów').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
+      this.page
+        .getByTestId("watched-grid")
+        .waitFor({ state: "visible", timeout: 30000 })
+        .catch(() => {}),
+      this.page
+        .getByText("Nie masz jeszcze obejrzanych filmów")
+        .waitFor({ state: "visible", timeout: 30000 })
+        .catch(() => {}),
     ]);
   }
 
@@ -46,61 +52,94 @@ export class WatchedPage {
    * Verify that the watched movies grid is visible
    */
   async verifyWatchedGridVisible(): Promise<void> {
-    await this.page.getByTestId('watched-grid').waitFor({ state: 'visible' });
+    await this.page.getByTestId("watched-grid").waitFor({ state: "visible" });
   }
 
   /**
    * Verify that a specific watched movie card is present
    */
   async verifyWatchedMoviePresent(movieId: string): Promise<void> {
-    await this.page.getByTestId(`watched-movie-card-${movieId}`).waitFor({ state: 'visible' });
+    await this.page
+      .getByTestId(`watched-movie-card-${movieId}`)
+      .waitFor({ state: "visible" });
   }
 
   /**
    * Restore a movie from watched back to watchlist
    */
   async restoreMovieToWatchlist(movieId: string): Promise<void> {
+    console.log(`Starting restore operation for movie: ${movieId}`);
+
     // Check if movie is actually on watched list before trying to restore
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
-    const movieExists = await movieCard.count() > 0;
+    const movieExists = (await movieCard.count()) > 0;
+    console.log(`Movie exists on watched list: ${movieExists}`);
 
     if (!movieExists) {
       // Movie is not on watched list, skip restoration
+      console.log(
+        `Movie ${movieId} not found on watched list, skipping restore`
+      );
       return;
     }
 
     // Check if restore button exists and is clickable
-    const restoreButton = movieCard.getByTestId('restore-to-watchlist-button');
-    const buttonExists = await restoreButton.count() > 0;
+    const restoreButton = movieCard.getByTestId("restore-to-watchlist-button");
+    const buttonExists = (await restoreButton.count()) > 0;
+    console.log(`Restore button exists: ${buttonExists}`);
 
     if (!buttonExists) {
       // Restore button doesn't exist, skip restoration
+      console.log(`Restore button not found for movie ${movieId}`);
       return;
     }
 
     // Click restore button
+    console.log(`Clicking restore button for movie ${movieId}`);
     await restoreButton.click();
 
     // Wait for movie card to disappear from watched list (primary verification)
-    await this.page.getByTestId(`watched-movie-card-${movieId}`).waitFor({ 
-      state: 'detached', 
-      timeout: 10000 
-    });
+    console.log(`Waiting for movie card ${movieId} to be detached from DOM`);
+    try {
+      await this.page.getByTestId(`watched-movie-card-${movieId}`).waitFor({
+        state: "detached",
+        timeout: 10000,
+      });
+      console.log(`Movie card ${movieId} successfully detached from DOM`);
+    } catch (error) {
+      console.log(
+        `Movie card ${movieId} did not detach within timeout:`,
+        error
+      );
+      // Let's take a screenshot for debugging
+      await this.page.screenshot({ path: `debug-restore-${movieId}.png` });
+      throw error;
+    }
 
     // Optionally wait for toast if it appears, but don't fail if it doesn't
     // Some operations may complete successfully without showing a toast
-    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
-    await this.page.waitForFunction(
-      (initialCount) => {
-        const toastElements = document.querySelectorAll('[data-sonner-toast]');
-        return toastElements.length > initialCount;
-      },
-      initialToastCount,
-      { timeout: 3000 }
-    ).catch(() => {
-      // Toast didn't appear, but operation succeeded (movie was removed)
-      // This is acceptable - not all operations show toasts
-    });
+    const initialToastCount = await this.page
+      .locator("[data-sonner-toast]")
+      .count();
+    console.log(`Initial toast count: ${initialToastCount}`);
+    await this.page
+      .waitForFunction(
+        (initialCount) => {
+          const toastElements = document.querySelectorAll(
+            "[data-sonner-toast]"
+          );
+          return toastElements.length > initialCount;
+        },
+        initialToastCount,
+        { timeout: 3000 }
+      )
+      .catch(() => {
+        console.log(
+          `No toast appeared for restore operation of movie ${movieId}`
+        );
+        // Toast didn't appear, but operation succeeded (movie was removed)
+        // This is acceptable - not all operations show toasts
+      });
   }
 
   /**
@@ -109,7 +148,7 @@ export class WatchedPage {
   async deleteMovieFromWatched(movieId: string): Promise<void> {
     // Check if movie is actually on watched list before trying to delete
     const movieCard = this.page.getByTestId(`watched-movie-card-${movieId}`);
-    const movieExists = await movieCard.count() > 0;
+    const movieExists = (await movieCard.count()) > 0;
 
     if (!movieExists) {
       // Movie is not on watched list, skip deletion
@@ -117,13 +156,17 @@ export class WatchedPage {
     }
 
     // Click the delete button for the specific movie
-    const deleteButton = movieCard.getByTestId('delete-movie-button');
+    const deleteButton = movieCard.getByTestId("delete-movie-button");
     await deleteButton.click();
 
     // Wait for confirmation dialog and confirm deletion
-    await this.page.getByTestId('confirm-delete-dialog').waitFor({ state: 'visible' });
-    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
-    await this.page.getByTestId('confirm-delete-button').click();
+    await this.page
+      .getByTestId("confirm-delete-dialog")
+      .waitFor({ state: "visible" });
+    const initialToastCount = await this.page
+      .locator("[data-sonner-toast]")
+      .count();
+    await this.page.getByTestId("confirm-delete-button").click();
 
     // Wait for toast notification confirming the deletion
     await this.waitForNewToast(initialToastCount);

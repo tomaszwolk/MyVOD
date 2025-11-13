@@ -1230,6 +1230,8 @@ Sekcja 5: Growth
 
 7.1.12 Dodać informacje do góry z nazwą zalogowanego użytkownika. ---- Dodano w zakładce profil ---- DONE
 
+7.1.13 Dodać polskie tytuły filmów # TODO
+
 ## 8. Known issues.
 
 8.1 Onboarding/add i onboarding/watched:

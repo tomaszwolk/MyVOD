@@ -53,7 +53,7 @@ def register_user(email: str, password: str) -> dict:
                     f"Attempt to register with existing email: {email}"
                 )
                 raise IntegrityError(
-                    "A user with this email already exists"
+                    "Użytkownik o tym emailu już istnieje"
                 )
 
             # Create user with hashed password using default auth user model
@@ -77,7 +77,7 @@ def register_user(email: str, password: str) -> dict:
             f"Integrity error during user registration for {email}: {str(e)}"
         )
         # Re-raise as a more specific error for the view to handle
-        raise IntegrityError("A user with this email already exists")
+        raise IntegrityError("Użytkownik o tym emailu już istnieje")
 
     except DatabaseError as e:
         logger.error(

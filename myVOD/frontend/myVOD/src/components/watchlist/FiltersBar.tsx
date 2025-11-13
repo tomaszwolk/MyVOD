@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { FiltersState } from "@/types/view/watchlist.types";
 
 /**
@@ -38,21 +43,31 @@ export function FiltersBar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleToggleUnavailable}
-              disabled={!hasUserPlatforms}
-              className="text-sm"
-            >
-              {filters.onlyAvailable ? "Pokaż niedostępne" : "Ukryj niedostępne"}
-            </Button>
+            <div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleUnavailable}
+                disabled={!hasUserPlatforms}
+                className="text-sm"
+              >
+                {filters.onlyAvailable
+                  ? "Pokaż niedostępne"
+                  : "Ukryj niedostępne"}
+              </Button>
+            </div>
           </TooltipTrigger>
-          {!hasUserPlatforms && (
-            <TooltipContent>
+          <TooltipContent>
+            {!hasUserPlatforms ? (
               <p>Wybierz platformy VOD w ustawieniach profilu</p>
-            </TooltipContent>
-          )}
+            ) : (
+              <p>
+                {filters.onlyAvailable
+                  ? "Pokaż wszystkie filmy"
+                  : "Ukryj filmy, których nie ma na moich platformach"}
+              </p>
+            )}
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
