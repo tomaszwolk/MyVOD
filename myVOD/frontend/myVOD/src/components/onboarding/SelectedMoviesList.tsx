@@ -48,17 +48,19 @@ export function SelectedMoviesList({
               onRemove={() => onUndo(item)}
               isRemoving={item.status === "loading"}
             />
-            <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
-              {item.status === "loading" && (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              )}
-              {/* {item.status === 'success' && (
+            {(item.status === "loading" || item.status === "error") && (
+              <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                {item.status === "loading" && (
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                )}
+                {/* {item.status === 'success' && (
                 <CheckCircle2 className="h-6 w-6 text-green-600" /> */}
-              {/* )} */}
-              {item.status === "error" && (
-                <AlertCircle className="h-6 w-6 text-destructive" />
-              )}
-            </div>
+                {/* )} */}
+                {item.status === "error" && (
+                  <AlertCircle className="h-6 w-6 text-destructive" />
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
