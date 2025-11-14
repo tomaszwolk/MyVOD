@@ -24,3 +24,5 @@ Content-Type
 GET
 Host
 User-Agent
+llm_response_*.json
+llm_response_*.txt
