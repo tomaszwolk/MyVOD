@@ -55,7 +55,7 @@ class UserMovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserMovie
-        fields = ["id", "movie", "availability", "watchlisted_at", "watched_at"]
+        fields = ["id", "movie", "availability", "watchlisted_at", "watched_at", "user_rating"]
 
     def get_availability(self, obj):
         """Get availability data from prefetched attribute or query directly."""
@@ -112,10 +112,19 @@ class UpdateUserMovieCommandSerializer(serializers.Serializer):
     Validates that action is one of the allowed values.
     """
     action = serializers.ChoiceField(
-        choices=['mark_as_watched', 'restore_to_watchlist'],
+        choices=['mark_as_watched', 'restore_to_watchlist', 'rate_movie'],
         required=True,
         error_messages={
             'required': 'action field is required',
-            'invalid_choice': 'Invalid action. Must be "mark_as_watched" or "restore_to_watchlist"'
+            'invalid_choice': 'Invalid action. Must be "mark_as_watched", "restore_to_watchlist", or "rate_movie"'
         }
     )
+    rating = serializers.IntegerField(min_value=1, max_value=10, required=False)
+
+    def validate(self, data):
+        """
+        Check that rating is provided when action is 'rate_movie'.
+        """
+        if data.get('action') == 'rate_movie' and 'rating' not in data:
+            raise serializers.ValidationError({"rating": "Rating is required when action is 'rate_movie'."})
+        return data

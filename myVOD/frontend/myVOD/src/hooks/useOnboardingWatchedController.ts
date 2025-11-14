@@ -8,6 +8,7 @@ import {
   deleteUserMovie,
   listUserMovies,
 } from "@/lib/api/movies";
+import { useRateMovie } from "@/hooks/useRateMovie";
 import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
 import type {
   OnboardingSelectedItem,
@@ -73,8 +74,10 @@ export function useOnboardingWatchedController() {
         tconst: movie.movie.tconst,
         primary_title: movie.movie.primary_title,
         start_year: movie.movie.start_year,
+        genres: movie.movie.genres,
         poster_path: movie.movie.poster_path,
         avg_rating: movie.movie.avg_rating,
+        user_rating: movie.user_rating,
         userMovieId: movie.id,
         source: "preexisting_watched",
         status: "success",
@@ -97,6 +100,9 @@ export function useOnboardingWatchedController() {
       queryClient.invalidateQueries({ queryKey: ["user-movies"] });
     },
   });
+
+  // Mutation for rating movies
+  const rateMovieMutation = useRateMovie();
 
   // Mutation for deleting user movie
   const deleteUserMovieMutation = useMutation({
@@ -122,8 +128,10 @@ export function useOnboardingWatchedController() {
       tconst: movie.tconst,
       primary_title: movie.primaryTitle,
       start_year: movie.startYear,
+      genres: null, // New movies from search don't have genres yet
       poster_path: movie.posterUrl,
       avg_rating: movie.avgRating,
+      user_rating: null, // New movies don't have user rating yet
       userMovieId: null,
       source: "newly_created", // Will be updated based on API response
       status: "loading",
@@ -268,6 +276,42 @@ export function useOnboardingWatchedController() {
   };
 
   /**
+   * Rates a movie that is already marked as watched.
+   */
+  const rateMovie = async (userMovieId: number, rating: number) => {
+    if (!userMovieId) {
+      toast.error("Nie można ocenić filmu");
+      return;
+    }
+
+    try {
+      await rateMovieMutation.mutateAsync({
+        id: userMovieId,
+        command: { action: "rate_movie", rating },
+      });
+
+      // Update the rating in local state
+      setSelected((prev) =>
+        prev.map((item) =>
+          item.userMovieId === userMovieId
+            ? { ...item, user_rating: rating }
+            : item
+        )
+      );
+
+      toast.success("Ocena została zapisana");
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError?.status && apiError.status >= 500) {
+        toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
+      } else {
+        toast.error("Nie udało się zapisać oceny");
+      }
+      console.error("Error rating movie:", error);
+    }
+  };
+
+  /**
    * Finishes the onboarding and navigates to the main app.
    */
   const finish = () => {
@@ -307,6 +351,7 @@ export function useOnboardingWatchedController() {
     setQuery,
     pick,
     undo,
+    rateMovie,
     finish,
     skip,
   };

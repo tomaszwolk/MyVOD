@@ -12,10 +12,10 @@ import type { SortOption } from "@/types/view/watchlist.types";
 function formatWatchedAtLabel(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("pl-PL", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   } catch {
     return dateString; // Fallback to original string if parsing fails
@@ -26,11 +26,14 @@ function formatWatchedAtLabel(dateString: string): string {
  * Maps UserMovieDto to WatchedMovieItemVM.
  * Calculates availability summary and formats watched date.
  */
-function mapToWatchedMovieItemVM(dto: UserMovieDto, userPlatforms: PlatformDto[]): WatchedMovieItemVM {
+function mapToWatchedMovieItemVM(
+  dto: UserMovieDto,
+  userPlatforms: PlatformDto[]
+): WatchedMovieItemVM {
   // Calculate if available on any user's platform
-  const userPlatformIds = new Set(userPlatforms.map(p => p.id));
-  const isAvailableOnAnyPlatform = dto.availability.some(a =>
-    a.is_available === true && userPlatformIds.has(a.platform_id)
+  const userPlatformIds = new Set(userPlatforms.map((p) => p.id));
+  const isAvailableOnAnyPlatform = dto.availability.some(
+    (a) => a.is_available === true && userPlatformIds.has(a.platform_id)
   );
 
   return {
@@ -40,9 +43,10 @@ function mapToWatchedMovieItemVM(dto: UserMovieDto, userPlatforms: PlatformDto[]
     year: dto.movie.start_year,
     genres: dto.movie.genres,
     avgRating: dto.movie.avg_rating,
+    userRating: dto.user_rating,
     posterPath: dto.movie.poster_path,
-    watchedAt: dto.watched_at || '', // Should exist for watched status, but fallback
-    watchedAtLabel: dto.watched_at ? formatWatchedAtLabel(dto.watched_at) : '',
+    watchedAt: dto.watched_at || "", // Should exist for watched status, but fallback
+    watchedAtLabel: dto.watched_at ? formatWatchedAtLabel(dto.watched_at) : "",
     availability: dto.availability,
     isAvailableOnAnyPlatform,
   };
@@ -52,7 +56,9 @@ function mapToWatchedMovieItemVM(dto: UserMovieDto, userPlatforms: PlatformDto[]
  * Sorts watched movies by watched date (descending).
  * Movies without watched_at are placed at the end.
  */
-function sortByWatchedAtDesc(items: WatchedMovieItemVM[]): WatchedMovieItemVM[] {
+function sortByWatchedAtDesc(
+  items: WatchedMovieItemVM[]
+): WatchedMovieItemVM[] {
   return [...items].sort((a, b) => {
     // Handle null/empty watchedAt values
     if (!a.watchedAt && !b.watchedAt) return 0;
@@ -102,10 +108,22 @@ type UseUserMoviesWatchedProps = {
  * Custom hook for fetching and processing user's watched movies.
  * Handles sorting (backend vs client-side) and data transformation.
  */
-export function useUserMoviesWatched({ sortKey, userPlatforms, enabled = true }: UseUserMoviesWatchedProps) {
+export function useUserMoviesWatched({
+  sortKey,
+  userPlatforms,
+  enabled = true,
+}: UseUserMoviesWatchedProps) {
   const query = useQuery<UserMovieDto[], Error>({
-    queryKey: ["user-movies", "watched", sortKey === 'imdb_desc' ? { ordering: '-tconst__avg_rating' } : {}],
-    queryFn: () => listUserMovies('watched', sortKey === 'imdb_desc' ? '-tconst__avg_rating' : undefined),
+    queryKey: [
+      "user-movies",
+      "watched",
+      sortKey === "imdb_desc" ? { ordering: "-tconst__avg_rating" } : {},
+    ],
+    queryFn: () =>
+      listUserMovies(
+        "watched",
+        sortKey === "imdb_desc" ? "-tconst__avg_rating" : undefined
+      ),
     staleTime: 30_000, // Consider data fresh for 30 seconds
     enabled,
   });
@@ -119,20 +137,22 @@ export function useUserMoviesWatched({ sortKey, userPlatforms, enabled = true }:
     }
 
     // Map to view models
-    let items = query.data.map(dto => mapToWatchedMovieItemVM(dto, userPlatforms));
+    let items = query.data.map((dto) =>
+      mapToWatchedMovieItemVM(dto, userPlatforms)
+    );
 
     // Apply client-side sorting if needed
     switch (sortKey) {
-      case 'added_desc':
+      case "added_desc":
         items = sortByWatchedAtDesc(items);
         break;
-      case 'imdb_desc':
+      case "imdb_desc":
         items = sortByRatingDesc(items);
         break;
-      case 'year_desc':
+      case "year_desc":
         items = sortByYearDesc(items);
         break;
-      case 'year_asc':
+      case "year_asc":
         items = sortByYearAsc(items);
         break;
       default:

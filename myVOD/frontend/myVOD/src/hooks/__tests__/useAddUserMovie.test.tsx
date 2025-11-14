@@ -71,6 +71,7 @@ describe("useAddUserMovie", () => {
       tconst: "tt0111161",
       primaryTitle: "The Shawshank Redemption",
       startYear: 1994,
+      genres: ["Drama"],
       posterUrl: "/poster.jpg",
       avgRating: "9.3",
     });
@@ -274,6 +275,7 @@ describe("useAddUserMovie", () => {
       tconst: "tt0068646",
       primaryTitle: "The Godfather",
       startYear: 1972,
+      genres: ["Drama"],
       posterUrl: null,
       avgRating: "9.3",
     });

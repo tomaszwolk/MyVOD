@@ -236,13 +236,15 @@ class UserMovieViewSet(viewsets.ModelViewSet):
             return Response(command_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         action = command_serializer.validated_data['action']
+        rating = command_serializer.validated_data.get('rating')
 
         try:
             # Use service layer for business logic
             user_movie = update_user_movie(
                 user=request.user,
                 user_movie_id=pk,
-                action=action
+                action=action,
+                rating=rating  # Pass rating to the service layer
             )
 
             # Serialize and return response

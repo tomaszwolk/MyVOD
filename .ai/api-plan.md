@@ -245,7 +245,8 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
         "availability": [
           {"platform_id": 1, "platform_name": "Netflix", "is_available": true}
         ],
-        "watchlisted_at": "2025-10-12T10:00:00Z"
+        "watchlisted_at": "2025-10-12T10:00:00Z",
+        "user_rating": null
       }
     ]
     ```
@@ -282,7 +283,8 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
       {"platform_id": 2, "platform_name": "HBO Max", "is_available": false}
     ],
     "watchlisted_at": "2025-10-12T14:30:00Z",
-    "watched_at": null
+    "watched_at": null,
+    "user_rating": null
   }
   ```
 -   **Error Responses**:
@@ -295,7 +297,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 
 #### `PATCH /api/user-movies/<id>/`
 
--   **Description**: Updates a user-movie entry. Used to move a movie to "watched", restore it to the watchlist, or soft-delete it.
+-   **Description**: Updates a user-movie entry. Used to move a movie to "watched", restore it to the watchlist, rate a movie, or soft-delete it.
 -   **Authentication**: Required.
 -   **Request Body** (to mark as watched):
     ```json
@@ -308,6 +310,14 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     ```json
     {
       "action": "restore_to_watchlist"
+    }
+    ```
+
+-   **Request Body** (to rate a movie):
+    ```json
+    {
+      "action": "rate_movie",
+      "rating": 8
     }
     ```
 

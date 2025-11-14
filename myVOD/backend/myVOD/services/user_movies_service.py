@@ -284,32 +284,13 @@ def add_movie_as_watched(*, user, tconst: str, added_from_ai_suggestion: bool = 
 
 
 @transaction.atomic
-def update_user_movie(*, user, user_movie_id: int, action: str):
-    """Updates a user-movie entry to mark as watched or restore to watchlist.
+def update_user_movie(*, user, user_movie_id: int, action: str, rating: int | None = None):
+    """Updates a user-movie entry.
 
-    Business Logic:
-    - Authorization: Ensures the user_movie belongs to the authenticated user
-    - mark_as_watched: Sets watched_at to current timestamp
-      - Precondition: Movie must be on watchlist and NOT already watched
-      - Preserves watchlisted_at (does not change original watchlist date)
-    - restore_to_watchlist: Clears watched_at (sets to NULL)
-      - Precondition: Movie must be marked as watched
-    - Returns the updated UserMovie with full data (movie, availability)
-
-    Args:
-        user: The authenticated user object with `email` attribute
-        user_movie_id: The ID of the user_movie entry to update
-        action: 'mark_as_watched' or 'restore_to_watchlist'
-
-    Returns:
-        UserMovie: The updated user_movie instance with:
-            - tconst (Movie) prefetched via select_related
-            - availability_filtered prefetched for user's platforms
-
-    Raises:
-        UserMovie.DoesNotExist: If user_movie not found or doesn't belong to user
-        ValueError: If business logic preconditions are violated
-        Exception: If Supabase user not found
+    Actions:
+    - mark_as_watched: Sets watched_at, soft-deletes from watchlist.
+    - restore_to_watchlist: Clears watched_at, restores to watchlist.
+    - rate_movie: Sets user_rating for a watched movie.
     """
     # Resolve canonical user UUID for the user
     supabase_user_uuid = _resolve_user_uuid(user)
@@ -350,6 +331,16 @@ def update_user_movie(*, user, user_movie_id: int, action: str):
         user_movie.watched_at = None
         user_movie.watchlist_deleted_at = None
         user_movie.save(update_fields=['watched_at', 'watchlist_deleted_at'])
+
+    # Handle rate_movie action
+    elif action == 'rate_movie':
+        # Precondition: Movie must be marked as watched
+        if user_movie.watched_at is None:
+            raise ValueError("Movie must be watched to be rated")
+        
+        # Update user_rating
+        user_movie.user_rating = rating
+        user_movie.save(update_fields=['user_rating'])
 
     # Fetch with related data for response
     platform_ids = _get_user_platform_ids(supabase_user_uuid)

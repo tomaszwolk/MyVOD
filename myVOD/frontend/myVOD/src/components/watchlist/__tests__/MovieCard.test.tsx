@@ -10,6 +10,7 @@ import type {
 vi.mock("lucide-react", () => ({
   Eye: () => <div data-testid="eye-icon" />,
   Trash2: () => <div data-testid="trash-icon" />,
+  Star: () => <div data-testid="star-icon" />,
   ImageIcon: () => <div data-testid="image-icon" />,
 }));
 

@@ -4,6 +4,13 @@ import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { MovieRating } from "./MovieRating";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
@@ -18,6 +25,11 @@ type UserMovieRowProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
@@ -31,6 +43,7 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
   isRestoring,
   onDelete,
   isDeleting,
+  onRate,
 }) {
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 3).join(", ") : null;
@@ -41,6 +54,10 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
 
   const handleDelete = () => {
     onDelete(item.id);
+  };
+
+  const handleRate = () => {
+    onRate(item.id, item.title, item.userRating);
   };
 
   return (
@@ -81,13 +98,35 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              {/* Title */}
-              <h3
-                id={`movie-title-${item.id}`}
-                className="font-medium text-base line-clamp-1 mb-1 text-foreground"
-              >
-                {item.title}
-              </h3>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Title */}
+                    <h3
+                      id={`movie-title-${item.id}`}
+                      className="font-medium text-base line-clamp-1 mb-1 text-foreground"
+                    >
+                      {item.title}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start">
+                    <p className="font-bold">{item.title}</p>
+                    {displayGenres && (
+                      <p className="text-sm">
+                        {item.year} • {displayGenres}
+                      </p>
+                    )}
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <p className="text-sm">
+                        IMDB.com rating: {item.avgRating || "-"}
+                      </p>
+                      <p className="text-sm">
+                        User rating: {item.userRating || "-"}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               {/* Year, Genres, Rating */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -98,14 +137,14 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
                     <span className="truncate">{displayGenres}</span>
                   </>
                 )}
-                {item.avgRating && (
-                  <>
-                    <span>•</span>
-                    <span className="font-medium text-foreground">
-                      {item.avgRating}/10
-                    </span>
-                  </>
-                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <MovieRating
+                  imdbRating={item.avgRating}
+                  userRating={item.userRating}
+                  onRateClick={handleRate}
+                  tconst={item.tconst}
+                />
               </div>
 
               {/* Availability */}

@@ -321,7 +321,7 @@ VOD_PLATFORMS = {
     'Netflix': 'netflix',
     'HBO Max': 'hbomax',
     'Disney+': 'disneyplus',
-    'Prime Video': 'primevideo',
+    'Amazon Prime Video': 'primevideo',
     'Apple TV+': 'appletvplus',
 }
 

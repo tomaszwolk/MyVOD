@@ -15,6 +15,7 @@ function mapToAddedMovieVM(dto: UserMovieDto): AddedMovieVM {
     tconst: dto.movie.tconst,
     primaryTitle: dto.movie.primary_title,
     startYear: dto.movie.start_year,
+    genres: dto.movie.genres,
     posterUrl: dto.movie.poster_path,
     avgRating: dto.movie.avg_rating,
   };

@@ -17,7 +17,14 @@ const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'Qwed4$5T56n.';
 const TEST_MOVIES = [
   { title: 'Pulp Fiction', tconst: 'tt0110912' },
   { title: 'Gladiator', tconst: 'tt0172495' },
-  { title: 'The Wolf of Wall Street', tconst: 'tt0993846' }
+  { title: 'The Wolf of Wall Street', tconst: 'tt0993846' },
+  { title: 'Inception', tconst: 'tt1375666' },
+  { title: 'The Dark Knight', tconst: 'tt0468569' },
+  { title: 'Parasite', tconst: 'tt6751668' },
+  { title: 'Interstellar', tconst: 'tt0816692' },
+  { title: 'The Matrix', tconst: 'tt0133093' },
+  { title: 'Fight Club', tconst: 'tt0137523' },
+  { title: 'Forrest Gump', tconst: 'tt0109830' }
 ];
 
 // Will be set during test execution
@@ -25,7 +32,7 @@ let selectedMovie = TEST_MOVIES[0];
 
 test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
   test('Powinien przeprowadzić pełny cykl zarządzania filmem: wyszukiwanie, dodawanie, oznaczanie jako obejrzany, przywracanie i usuwanie', async ({ page }) => {
-    test.setTimeout(120000);
+    test.setTimeout(180000); // Increase timeout to 3 minutes
 
     // Clean up any leftover data from previous tests
     await page.context().clearCookies();

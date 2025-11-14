@@ -48,6 +48,7 @@ When modifying the directory structure, always update this section.
 - **Consistency:** For consistent error handling, consider using custom error types or factories.
 - **Using Terminal** Don't use terminal directly. Tell me what you need and I will do it.
 - **Deleting files:** Don't delete files without my accept.
+- **Running scripts:** When problem with running script, stop and ask for User help to run it manualy.
 
 ## Testing
 

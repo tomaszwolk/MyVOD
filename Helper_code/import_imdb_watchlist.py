@@ -7,8 +7,9 @@ from supabase import create_client, Client
 
 
 # --- CONFIGURATION ---
-# ID of the user in the Django `auth_user` table to whom the watchlist will be assigned.
-DJANGO_AUTH_USER_ID = 46
+# UUID or ID of the user in the Django `users_user` table to whom the watchlist will be assigned.
+# Can be either: UUID (direct) or integer Django user ID (will be resolved to UUID)
+DJANGO_USER_ID = "f37d6a22-6362-4a0d-808b-fde7e7faa1d7"
 
 # Filename of the IMDb watchlist CSV export.
 # This file should be placed in the IMDB_DATA_SET_LITE_DIR directory.
@@ -38,33 +39,43 @@ def get_supabase_client() -> Client:
     return create_client(supabase_url, supabase_key)
 
 
-def get_supabase_uuid(supabase: Client, django_user_id: int) -> str | None:
+def get_user_uuid(supabase: Client, user_id: str) -> str | None:
     """
-    Retrieves the Supabase user UUID based on the Django auth_user.id.
-    It does this by looking up the user's email in auth_user and then
-    finding the corresponding user in Supabase's auth.users table.
+    Retrieves the user UUID from Django's users_user table.
+    Since the app uses Django Auth + JWT (not Supabase Auth),
+    the user UUID is stored directly in the Django users table.
     """
     try:
-        # 1. Get email from Django's auth_user table (in public schema)
-        user_response = supabase.table('auth_user').select('email').eq('id', django_user_id).execute()
-        if not user_response.data:
-            print(f"No user found in auth_user with ID {django_user_id}")
+        # Check if the input looks like a UUID (36 characters with dashes)
+        import re
+        uuid_pattern = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
+        if re.match(uuid_pattern, user_id):
+            # Input is already a UUID - verify it exists in Django users table
+            user_response = supabase.table('users_user').select('id').eq('id', user_id).execute()
+            if user_response.data:
+                print(f"Using provided UUID directly: {user_id}")
+                return user_id
+            else:
+                print(f"UUID {user_id} not found in users_user table")
+                return None
+
+        # Otherwise, treat as integer Django user ID
+        try:
+            django_user_id = int(user_id)
+        except ValueError:
+            print(f"Invalid user identifier: {user_id}. Must be UUID or integer.")
             return None
-        email = user_response.data[0]['email']
 
-        # 2. Get UUID from Supabase's auth.users table using the admin API
-        response = supabase.auth.admin.list_users()
+        # Get UUID from Django's users_user table
+        user_response = supabase.table('users_user').select('id').eq('id', django_user_id).execute()
 
-        # The response from list_users() can be an object with a 'users' attribute (v2+)
-        # or a list directly (older versions). This handles both cases.
-        users_list = response.users if hasattr(response, 'users') else response
+        if not user_response.data:
+            print(f"No user found in users_user with ID {django_user_id}")
+            return None
 
-        for user in users_list:
-            if user.email == email:
-                return user.id
-
-        print(f"No user found in Supabase auth with email {email}")
-        return None
+        uuid = user_response.data[0]['id']
+        print(f"Resolved Django user ID {django_user_id} to UUID: {uuid}")
+        return uuid
 
     except Exception as e:
         print(f"An error occurred while fetching user UUID: {e}")
@@ -87,35 +98,53 @@ def load_valid_tconsts(basics_path: Path) -> set[str]:
     return tconsts
 
 
-def get_movies_from_watchlist(watchlist_path: Path) -> list[str]:
-    """Reads the IMDb watchlist CSV and returns a list of tconsts."""
-    tconsts = []
+def get_movies_from_watchlist(watchlist_path: Path) -> dict[str, str]:
+    """Reads the IMDb watchlist CSV and returns a dict of tconst -> created_date."""
+    movies = {}
     try:
         with open(watchlist_path, mode='r', encoding='utf-8') as infile:
             reader = csv.DictReader(infile)
             for row in reader:
-                if 'Const' in row:
-                    tconsts.append(row['Const'])
+                if 'Const' in row and 'Created' in row:
+                    tconst = row['Const']
+                    created_date = row['Created']
+                    if created_date and created_date.strip():
+                        # Convert YYYY-MM-DD to ISO timestamp format
+                        try:
+                            # Parse the date and create a full timestamp
+                            from datetime import datetime
+                            date_obj = datetime.strptime(created_date.strip(), '%Y-%m-%d')
+                            # Create ISO format timestamp with midnight time and UTC timezone
+                            iso_timestamp = date_obj.strftime('%Y-%m-%dT00:00:00.000Z')
+                            movies[tconst] = iso_timestamp
+                        except ValueError:
+                            print(f"Warning: Invalid date format '{created_date}' for movie {tconst}, using current timestamp")
+                            movies[tconst] = None
+                    else:
+                        print(f"Warning: Empty created date for movie {tconst}, will use current timestamp")
+                        movies[tconst] = None
     except FileNotFoundError:
         print(f"Watchlist file not found at: {watchlist_path}")
-    return tconsts
+    return movies
 
 
-def filter_existing_movies(supabase: Client, tconsts: list[str]) -> list[str]:
+def filter_existing_movies(supabase: Client, movies_dict: dict[str, str]) -> dict[str, str]:
     """
-    Filters a list of tconsts, returning only those that exist in the 'movie' table.
+    Filters a dict of tconst -> created_date, returning only those that exist in the 'movie' table.
     """
-    if not tconsts:
-        return []
+    if not movies_dict:
+        return {}
 
+    tconsts = list(movies_dict.keys())
     try:
         response = supabase.table('movie').select('tconst').in_('tconst', tconsts).execute()
         if response.data:
-            return [row['tconst'] for row in response.data]
-        return []
+            existing_tconsts = {row['tconst'] for row in response.data}
+            return {tconst: created_date for tconst, created_date in movies_dict.items() if tconst in existing_tconsts}
+        return {}
     except Exception as e:
         print(f"An error occurred while filtering movies: {e}")
-        return []
+        return {}
 
 
 def main():
@@ -131,58 +160,59 @@ def main():
         print(f"Failed to initialize Supabase client: {e}")
         return
 
-    # Get Supabase UUID for the configured Django user ID
-    user_uuid = get_supabase_uuid(supabase, DJANGO_AUTH_USER_ID)
+    # Get user UUID for the configured Django user ID
+    user_uuid = get_user_uuid(supabase, DJANGO_USER_ID)
     if not user_uuid:
-        print(f"Could not resolve Supabase UUID for Django user ID {DJANGO_AUTH_USER_ID}. Aborting.")
+        print(f"Could not resolve user UUID for {DJANGO_USER_ID}. Aborting.")
         return
 
-    print(f"Successfully resolved Django user ID {DJANGO_AUTH_USER_ID} to Supabase UUID: {user_uuid}")
+    print(f"Successfully resolved user ID {DJANGO_USER_ID} to UUID: {user_uuid}")
 
-    # Read movie tconsts from the watchlist CSV
+    # Read movie tconsts and created dates from the watchlist CSV
     watchlist_path = IMDB_DATA_SET_LITE_DIR / WATCHLIST_FILENAME
-    watchlist_tconsts = get_movies_from_watchlist(watchlist_path)
-    if not watchlist_tconsts:
+    watchlist_movies = get_movies_from_watchlist(watchlist_path)
+    if not watchlist_movies:
         print("No movies found in the watchlist file. Aborting.")
         return
 
-    print(f"Found {len(watchlist_tconsts)} movies in '{WATCHLIST_FILENAME}'.")
+    print(f"Found {len(watchlist_movies)} movies in '{WATCHLIST_FILENAME}'.")
 
     # Filter tconsts to only those in title.basics.tsv
     basics_path = IMDB_DATA_SET_LITE_DIR / 'title.basics.tsv'
     valid_tconst_set = load_valid_tconsts(basics_path)
-    filtered_tconsts = [tconst for tconst in watchlist_tconsts if tconst in valid_tconst_set]
-    
-    if len(filtered_tconsts) < len(watchlist_tconsts):
-        skipped = len(watchlist_tconsts) - len(filtered_tconsts)
+    filtered_movies = {tconst: created_date for tconst, created_date in watchlist_movies.items() if tconst in valid_tconst_set}
+
+    if len(filtered_movies) < len(watchlist_movies):
+        skipped = len(watchlist_movies) - len(filtered_movies)
         print(f"Skipped {skipped} movies not in title.basics.tsv.")
 
-    if not filtered_tconsts:
+    if not filtered_movies:
         print("No valid movies found after filtering. Aborting.")
         return
 
     # Check which of these movies already exist in our 'movie' table
-    existing_tconsts = filter_existing_movies(supabase, filtered_tconsts)
-    
-    not_found_tconsts = set(filtered_tconsts) - set(existing_tconsts)
-    if not_found_tconsts:
-        print(f"Warning: {len(not_found_tconsts)} movies from the watchlist were not found in the 'movie' table and will be skipped.")
+    existing_movies = filter_existing_movies(supabase, filtered_movies)
 
-    if not existing_tconsts:
+    not_found_count = len(filtered_movies) - len(existing_movies)
+    if not_found_count > 0:
+        print(f"Warning: {not_found_count} movies from the watchlist were not found in the 'movie' table and will be skipped.")
+
+    if not existing_movies:
         print("None of the movies from the watchlist exist in the database. Nothing to import.")
         return
 
     # Prepare data for insertion
-    now = datetime.now(timezone.utc).isoformat()
-    movies_to_insert = [
-        {
+    movies_to_insert = []
+    for tconst, created_date in existing_movies.items():
+        # Use the actual created date if available, otherwise use current timestamp
+        watchlisted_at = created_date if created_date is not None else datetime.now(timezone.utc).isoformat()
+
+        movies_to_insert.append({
             "user_id": user_uuid,
             "tconst": tconst,
-            "watchlisted_at": now,
+            "watchlisted_at": watchlisted_at,
             "added_from_ai_suggestion": False,
-        }
-        for tconst in existing_tconsts
-    ]
+        })
 
     # Insert data into user_movie in batches
     batch_size = 500
@@ -195,12 +225,11 @@ def main():
                 supabase.table("user_movie")
                 .upsert(
                     batch,
-                    on_conflict="user_id,tconst",
-                    ignore_duplicates=True
+                    on_conflict="user_id,tconst"
                 )
                 .execute()
             )
-            # API response for upsert doesn't reliably tell us how many were inserted vs ignored.
+            # API response for upsert doesn't reliably tell us how many were inserted vs updated.
             # We just confirm the call was successful.
             if response.data:
                 total_upserted += len(response.data)
@@ -208,8 +237,8 @@ def main():
         except Exception as e:
             print(f"An error occurred during batch upsert: {e}")
 
-    print(f"Successfully processed {len(existing_tconsts)} movies for the user's watchlist.")
-    print("Note: Movies already on the user's watchlist were ignored.")
+    print(f"Successfully processed {len(existing_movies)} movies for the user's watchlist.")
+    print("Note: Movies already on the user's watchlist were updated with new timestamps.")
     print("Import process finished.")
 
 

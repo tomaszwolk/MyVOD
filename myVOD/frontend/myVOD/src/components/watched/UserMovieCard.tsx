@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { AvailabilityIcons } from "../watchlist/AvailabilityIcons";
 import { RestoreButton } from "./RestoreButton";
 import { TMDBPoster } from "@/components/TMDBPoster";
+import { MovieRating } from "./MovieRating";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +25,11 @@ type UserMovieCardProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
@@ -37,6 +43,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   isRestoring,
   onDelete,
   isDeleting,
+  onRate,
 }) {
   const hasGenres = item.genres && item.genres.length > 0;
   const displayGenres = hasGenres ? item.genres!.slice(0, 2).join(", ") : null;
@@ -48,6 +55,10 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
 
   const handleDelete = () => {
     onDelete(item.id);
+  };
+
+  const handleRate = () => {
+    onRate(item.id, item.title, item.userRating);
   };
 
   return (
@@ -90,38 +101,44 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              {/* Top Group */}
-              <div>
-                {/* Title */}
-                <h3
-                  id={`movie-title-${item.id}`}
-                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
-                >
-                  {item.title}
-                </h3>
-
-                {/* Year, Genres, Rating */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                  {item.year && <span>{item.year}</span>}
-                  {displayGenres && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate">{displayGenres}</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Rating */}
-                {item.avgRating && (
-                  <div className="text-sm font-medium text-foreground mb-2">
-                    {item.avgRating}/10
-                  </div>
-                )}
-              </div>
+              {/* Title */}
+              <h3
+                id={`movie-title-${item.id}`}
+                className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+              >
+                {item.title}
+              </h3>
             </TooltipTrigger>
-            <TooltipContent>
+
+            {/* Year, Genres, Rating */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+              {item.year && <span>{item.year}</span>}
+              {displayGenres && (
+                <>
+                  <span>•</span>
+                  <span className="truncate">{displayGenres}</span>
+                </>
+              )}
+            </div>
+
+            {/* Rating */}
+            <div className="mb-2">
+              <MovieRating
+                imdbRating={item.avgRating}
+                userRating={item.userRating}
+                onRateClick={handleRate}
+                tconst={item.tconst}
+              />
+            </div>
+            <TooltipContent side="bottom" align="start">
               <p className="font-bold">{item.title}</p>
               {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-sm">
+                  IMDB.com rating: {item.avgRating || "-"}
+                </p>
+                <p className="text-sm">User rating: {item.userRating || "-"}</p>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

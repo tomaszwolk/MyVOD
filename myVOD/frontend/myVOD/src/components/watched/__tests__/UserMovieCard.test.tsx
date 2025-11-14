@@ -11,6 +11,7 @@ vi.mock("lucide-react", () => ({
   RotateCcw: () => <div data-testid="rotate-ccw-icon" />,
   ImageIcon: () => <div data-testid="image-icon" />,
   Trash2: () => <div data-testid="trash2-icon" />,
+  Star: () => <div data-testid="star-icon" />,
 }));
 
 describe("UserMovieCard", () => {
@@ -49,7 +50,7 @@ describe("UserMovieCard", () => {
     expect(screen.getByText("The Shawshank Redemption")).toBeInTheDocument();
     expect(screen.getByText("1994")).toBeInTheDocument();
     expect(screen.getByText("Drama, Crime")).toBeInTheDocument();
-    expect(screen.getByText("9.3/10")).toBeInTheDocument();
+    expect(screen.getByText("9.3 / 10")).toBeInTheDocument();
   });
 
   it("should render poster image when available", () => {

@@ -2,7 +2,10 @@ import { WatchedGrid } from "./WatchedGrid";
 import { WatchedList } from "./WatchedList";
 import { WatchedEmptyState } from "./WatchedEmptyState";
 import { SkeletonList } from "../watchlist/SkeletonList";
-import type { WatchedViewMode, WatchedMovieItemVM } from "@/types/view/watched.types";
+import type {
+  WatchedViewMode,
+  WatchedMovieItemVM,
+} from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 
 /**
@@ -18,6 +21,11 @@ type WatchedContentProps = {
   isRestoring: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onRate: (
+    userMovieId: number,
+    movieTitle: string,
+    currentRating: number | null
+  ) => void;
 };
 
 /**
@@ -35,6 +43,7 @@ export function WatchedContent({
   isRestoring,
   onDelete,
   isDeleting,
+  onRate,
 }: WatchedContentProps) {
   // Show skeleton during loading
   if (isLoading) {
@@ -56,6 +65,7 @@ export function WatchedContent({
         isRestoring={isRestoring}
         onDelete={onDelete}
         isDeleting={isDeleting}
+        onRate={onRate}
       />
     );
   }
@@ -68,6 +78,7 @@ export function WatchedContent({
       isRestoring={isRestoring}
       onDelete={onDelete}
       isDeleting={isDeleting}
+      onRate={onRate}
     />
   );
 }

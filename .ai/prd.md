@@ -246,7 +246,7 @@ Funkcjonalności:
   - Informację o dostępności na platformach użytkownika
 
 Prompt dla AI:
-"Na podstawie obejrzanych filmów: [lista filmów z gatunkami] i obecnej watchlisty: [lista filmów], zasugeruj 5 filmów dostępnych na: [platformy użytkownika]. Dla każdego podaj tytuł, rok i 1-2 zdaniowe uzasadnienie."
+"Na podstawie obejrzanych filmów: [lista filmów z gatunkami i ocenami użytkownika] i obecnej watchlisty: [lista filmów], zasugeruj 5 filmów dostępnych na: [platformy użytkownika]. Dla każdego podaj tytuł, rok i 1-2 zdaniowe uzasadnienie."
 
 Przykład uzasadnienia:
 "Ponieważ podobał Ci się Inception i Interstellar, polecamy Tenet - sci-fi o manipulacji czasem od Christophera Nolana"
@@ -755,7 +755,7 @@ Kryteria akceptacji:
 - Operacja jest natychmiastowa (brak przeładowania strony)
 
 US-024: Przeglądanie zakładki Obejrzane
-Jako użytkownik chcę zobaczyć historię moich obejrzanych filmów, aby przypomnieć sobie co oglądałem.
+Jako użytkownik chcę zobaczyć historię moich obejrzanych filmów, aby przypomnieć sobie co oglądałem i dodać własną ocenę.
 
 Kryteria akceptacji:
 - Zakładka "Obejrzane" jest widoczna w głównej nawigacji
@@ -763,6 +763,9 @@ Kryteria akceptacji:
 - Domyślne sortowanie: data obejrzenia (najnowsze pierwsze)
 - Te same widoki dostępne: kafelkowy i listowy
 - Każdy film pokazuje datę obejrzenia
+- Obok oceny IMDb znajduje się miejsce na ocenę użytkownika (1-10) w postaci niebieskiej gwiazdki.
+- Kliknięcie w gwiazdkę otwiera modal, w którym można wybrać ocenę.
+- Po dodaniu oceny, jest ona widoczna na karcie filmu.
 - Brak limitu liczby filmów w zakładce "Obejrzane"
 - Filmy zachowują informacje o dostępności VOD
 
@@ -1232,10 +1235,19 @@ Sekcja 5: Growth
 
 7.1.13 Dodać polskie tytuły filmów # TODO
 
-## 8. Known issues.
+7.1.14 Dodanie reżyserów i głównych aktorów do bazy danych i na ich podstawie polepszyć sugerowanie filmów przez AI. # TODO
+
+7.1.15 Dodanie metadanych do filmów (krótki opis fabuły, etykiety - mroczny, śmieszny itd) - możliwy problem z wielkością kontektu, już on występuje i model się gubi # TODO
+
+7.1.16 Tytuł filmu jest linkiem do IMDB # TODO
+
+## 8. Known issues. # TODO
 
 8.1 Onboarding/add i onboarding/watched:
   - Jeśli istnieje na watchlist / watched więcej filmów niż 3, i użytkownik usunie pozycje, to zwróci błąd braku 3 pozycji, mimo że te 3 pozycje są na liście - poziom: niski, onboarding jest do wstępnego użycia, tam ten problem nie występuje, użytkownik musi intencjonalnie wrócić do tej strony (co również specjalnie nie jest blokowane)
+8.2 Długie ładowanie strony jeśli użytkownik ma dużo pozycji na listach oraz cache w przeglądarce został usunięty. Problem jest związany z pobieraniem plakatów.
+8.3 Długie wyszukiwanie, zaimplementowano testowo Redis. Wymaga dalszego poprawienia.
+8.4 Problem z sesją, jeśli użytkownik wraca po dłuższym czasie a się nie wylogował. Trzeba ręcznie usuwać sesję.
 ---
 Ostrzeżenia - to tylko warningi generatora dokumentacji OpenAPI, nie wpływają na działanie aplikacji. Jeśli chcesz je usunąć w przyszłości, możesz:
 - Dodać @extend_schema_field dla pól typu callable
