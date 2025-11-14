@@ -142,7 +142,7 @@ class GetOrGenerateSuggestionsTests(TestCase):
         # Mock Gemini API response
         mock_model = Mock()
         mock_response = Mock()
-        mock_response.text = '[]'  # Empty suggestions
+        mock_response.text = '{"Netflix": [{"tconst": "tt0133093", "justification": "A classic."}]}'
         mock_model.generate_content.return_value = mock_response
         mock_genai.GenerativeModel.return_value = mock_model
 
@@ -202,14 +202,16 @@ class GetOrGenerateSuggestionsTests(TestCase):
             datetime.combine(today, time(23, 59, 59))
         )
 
-        cached_suggestions = [
-            {
-                'tconst': 'tt0133093',
-                'primary_title': 'The Matrix',
-                'start_year': 1999,
-                'justification': 'Great sci-fi movie'
-            }
-        ]
+        cached_suggestions = {
+            self.platform.platform_name: [
+                {
+                    'tconst': 'tt0133093',
+                    'primary_title': 'The Matrix',
+                    'start_year': 1999,
+                    'justification': 'Great sci-fi movie'
+                }
+            ]
+        }
 
         batch = AiSuggestionBatch.objects.create(
             user_id=self.user.id,
@@ -260,14 +262,16 @@ class GetOrGenerateSuggestionsTests(TestCase):
             datetime.combine(today, time(23, 59, 59))
         )
 
-        cached_suggestions = [
-            {
-                'tconst': self.movie.tconst,
-                'primary_title': self.movie.primary_title,
-                'start_year': self.movie.start_year,
-                'justification': 'Great drama'
-            }
-        ]
+        cached_suggestions = {
+            self.platform.platform_name: [
+                {
+                    'tconst': self.movie.tconst,
+                    'primary_title': self.movie.primary_title,
+                    'start_year': self.movie.start_year,
+                    'justification': 'Great drama'
+                }
+            ]
+        }
 
         AiSuggestionBatch.objects.create(
             user_id=self.user.id,
@@ -295,7 +299,7 @@ class GetOrGenerateSuggestionsTests(TestCase):
         # Mock Gemini API response
         mock_model = Mock()
         mock_response = Mock()
-        mock_response.text = '[]'
+        mock_response.text = '{"Netflix": [{"tconst": "tt0133093", "justification": "A classic."}]}'
         mock_model.generate_content.return_value = mock_response
         mock_genai.GenerativeModel.return_value = mock_model
 
@@ -421,14 +425,16 @@ class FormatCachedSuggestionsTests(TestCase):
             source='test'
         )
 
-        cached_suggestions = [
-            {
-                'tconst': self.movie.tconst,
-                'primary_title': self.movie.primary_title,
-                'start_year': self.movie.start_year,
-                'justification': 'Classic crime drama'
-            }
-        ]
+        cached_suggestions = {
+            self.platform.platform_name: [
+                {
+                    'tconst': self.movie.tconst,
+                    'primary_title': self.movie.primary_title,
+                    'start_year': self.movie.start_year,
+                    'justification': 'Classic crime drama'
+                }
+            ]
+        }
 
         batch = AiSuggestionBatch.objects.create(
             user_id=self.user.id,
@@ -739,8 +745,8 @@ class AiSuggestionsServiceTests(TestCase):
         mock_response = MagicMock()
         # Mocking a valid JSON response from Gemini
         response_json = (
-            '[{"tconst": "tt0133093", '
-            '"justification": "Because it is a classic."}]'
+            '{"Netflix": [{"tconst": "tt0133093", '
+            '"justification": "Because it is a classic."}]}'
         )
         mock_response.text = response_json
         mock_model_instance.generate_content.return_value = mock_response
@@ -811,7 +817,7 @@ class AiSuggestionsServiceTests(TestCase):
             mock_model_instance = MockModel.return_value
             mock_response = MagicMock()
             mock_response.text = (
-                '[{"tconst": "tt0133093", "justification": "..."}]'
+                '{"Netflix": [{"tconst": "tt0133093", "justification": "..."}]}'
             )
             mock_model_instance.generate_content.return_value = mock_response
 

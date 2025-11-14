@@ -24,6 +24,39 @@ from movies.models import (
 )
 from collections import Counter
 
+# This set contains all unique movie genres identified in the database.
+# It is used to find genres the user has never explored.
+ALL_AVAILABLE_GENRES = {
+    "Action",
+    "Adult",
+    "Adventure",
+    "Animation",
+    "Biography",
+    "Comedy",
+    "Crime",
+    "Documentary",
+    "Drama",
+    "Family",
+    "Fantasy",
+    "Film-Noir",
+    "Game-Show",
+    "History",
+    "Horror",
+    "Music",
+    "Musical",
+    "Mystery",
+    "News",
+    "Reality-TV",
+    "Romance",
+    "Sci-Fi",
+    "Short",
+    "Sport",
+    "Talk-Show",
+    "Thriller",
+    "War",
+    "Western",
+}
+
 try:
     import google.generativeai as genai  # type: ignore
 
@@ -245,7 +278,21 @@ def _format_cached_suggestions(user, cached_batch):
             }
         )
 
-    return {"expires_at": cached_batch.expires_at, "suggestions": enriched_suggestions}
+    # Final deduplication step to ensure no movie is suggested more than once
+    final_suggestions = []
+    seen_tconsts = set()
+    for suggestion in enriched_suggestions:
+        if suggestion["tconst"] not in seen_tconsts:
+            final_suggestions.append(suggestion)
+            seen_tconsts.add(suggestion["tconst"])
+
+    if len(final_suggestions) < len(enriched_suggestions):
+        logger.warning(
+            f"Removed {len(enriched_suggestions) - len(final_suggestions)} duplicate suggestions "
+            f"for user {user.email} (batch {cached_batch.id})."
+        )
+
+    return {"expires_at": cached_batch.expires_at, "suggestions": final_suggestions}
 
 
 def _generate_new_suggestions(user, expires_at):
@@ -281,7 +328,7 @@ def _generate_new_suggestions(user, expires_at):
                     "watched_at",
                     "user_rating",  # Include user_rating
                 )
-            ).order_by('-watched_at', '-watchlisted_at')[:200]
+            ).order_by("-watched_at", "-watchlisted_at")[:200]
 
             # Get user's platforms
             user_platform_qs = UserPlatform.objects.filter(
@@ -333,9 +380,15 @@ def _generate_new_suggestions(user, expires_at):
 
                 # For MVP, return empty suggestions on AI failure
                 # This allows the endpoint to work even without AI integration
-                suggestions_data = []
+                suggestions_data = {}
 
-            # Cache the suggestions (even if empty)
+            if not suggestions_data:
+                logger.warning(
+                    f"AI generation resulted in empty suggestions for {user.email}. Not caching."
+                )
+                return {"expires_at": expires_at, "suggestions": []}
+
+            # Cache the suggestions (only if not empty)
             batch = AiSuggestionBatch.objects.create(
                 user_id=user.id,
                 expires_at=expires_at,
@@ -376,26 +429,52 @@ def _analyze_user_preferences(user_movies, user_platforms):
     """
     Analyze user's movie preferences for diversity.
 
-    Computes top 3 genres from watchlist + watched movies.
-    Suggests proportional platform distribution (max 2 per platform).
+    - Computes top 3 genres from watchlist + watched movies.
+    - Identifies rarely watched genres.
+    - Logs the full genre distribution for debugging.
+    - Suggests proportional platform distribution (max 2 per platform).
 
     Args:
         user_movies: List of user movie dicts
         user_platforms: List of UserPlatform instances
 
     Returns:
-        dict: {'top_genres': list[str], 'platform_distribution': dict[int, int]}
+        dict: {'top_genres': list[str], 'rare_genres': list[str], 'platform_distribution': dict[int, int]}
     """
     # Collect all genres from user's movies
-    all_genres = []
+    all_user_genres = []
     for movie in user_movies:
         genres = movie.get("tconst__genres", [])
         if genres:
-            all_genres.extend(genres)
+            all_user_genres.extend(genres)
 
-    # Top 3 genres
-    genre_counts = Counter(all_genres)
-    top_genres = [genre for genre, _ in genre_counts.most_common(3)]
+    # Calculate genre counts and log them
+    genre_counts = Counter(all_user_genres)
+    sorted_genres = genre_counts.most_common()
+    logger.info(f"User genre distribution: {sorted_genres}")
+
+    # Identify top and rare genres based on user's history
+    top_genres = [genre for genre, _ in sorted_genres[:3]]
+    rare_genres = [genre for genre, count in sorted_genres if count <= 2]
+
+    # --- NEW: Genre Gap Analysis ("Anti-Bubble") ---
+    user_genres_set = set(all_user_genres)
+    unexplored_genres = sorted(list(ALL_AVAILABLE_GENRES - user_genres_set))
+
+    # --- NEW: Decade Analysis ("Time Traveler") ---
+    all_decades = []
+    for movie in user_movies:
+        year = movie.get("tconst__start_year")
+        if year and isinstance(year, int):
+            decade = (year // 10) * 10
+            all_decades.append(decade)
+
+    decades_counts = Counter(all_decades)
+    golden_eras = [decade for decade, _ in decades_counts.most_common(2)]
+
+    RELEVANT_DECADES = {1960, 1970, 1980, 1990, 2000, 2010, 2020}
+    user_decades_set = set(all_decades)
+    unexplored_eras = sorted(list(RELEVANT_DECADES - user_decades_set))
 
     num_platforms = len(user_platforms)
     if num_platforms == 0:
@@ -410,10 +489,19 @@ def _analyze_user_preferences(user_movies, user_platforms):
             platform_dist[up.platform_id] = min(count, 2)  # Max 2 per platform
 
     logger.info(
-        f"User preferences: Top genres {top_genres}, Platform dist {platform_dist}"
+        f"User preferences: Top genres={top_genres}, Rare genres={rare_genres}, "
+        f"Unexplored genres={unexplored_genres[:5]}, Golden eras={golden_eras}, "
+        f"Unexplored eras={unexplored_eras}"
     )
 
-    return {"top_genres": top_genres, "platform_distribution": platform_dist}
+    return {
+        "top_genres": top_genres,
+        "rare_genres": rare_genres,
+        "unexplored_genres": unexplored_genres,
+        "golden_eras": golden_eras,
+        "unexplored_eras": unexplored_eras,
+        "platform_distribution": platform_dist,
+    }
 
 
 def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform_names):
@@ -464,16 +552,14 @@ def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform
         watched = [m for m in user_movies if m.get("watched_at")]
 
         # Get available movies on user's platforms from our local DB
-        available_movies = _get_available_movies_for_platforms(
-            user_platform_ids, user_movies
-        )
+        available_movies = _get_available_movies_for_platforms(user, user_platform_ids)
 
         if not available_movies:
             logger.warning(
                 f"No movies available in local DB for user {user.email}'s platforms - "
                 f"cannot generate suggestions"
             )
-            return []
+            return {}
 
         # Get user's platforms for analysis
         user_platform_qs = UserPlatform.objects.filter(user_id=user.id).select_related(
@@ -484,6 +570,15 @@ def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform
         # Analyze preferences for diversity
         preferences = _analyze_user_preferences(user_movies, user_platforms)
 
+        # Determine dynamic number of suggestions per platform
+        num_platforms = len(user_platform_names)
+        if num_platforms <= 2:
+            suggestions_per_platform = 6
+        elif num_platforms == 3:
+            suggestions_per_platform = 5
+        else:  # 4 or more
+            suggestions_per_platform = 4
+
         # Build prompt with user data, available movies, and preferences
         prompt = _build_gemini_prompt(
             watchlist,
@@ -491,7 +586,11 @@ def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform
             available_movies,
             user_platform_names,
             preferences["top_genres"],
-            preferences["platform_distribution"],
+            preferences["rare_genres"],
+            preferences["unexplored_genres"],
+            preferences["golden_eras"],
+            preferences["unexplored_eras"],
+            suggestions_per_platform,
         )
 
         logger.info(f"Prompt length: {len(prompt)} characters")
@@ -534,7 +633,7 @@ def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform
             logger.warning(
                 f"Gemini returned no valid suggestions for user {user.email}"
             )
-            return []
+            return {}
 
         # Validate tconst IDs against database
         valid_suggestions = _validate_suggestions(
@@ -568,37 +667,61 @@ def _generate_ai_suggestions(user, user_movies, user_platform_ids, user_platform
             },
             user_id=user.id,
         )
-        return []  # Return empty list on error
+        return {}  # Return empty dict on error
 
 
-def _get_available_movies_for_platforms(user_platform_ids, user_movies):
+def _get_available_movies_for_platforms(user, user_platform_ids):
     """
-    Get movies available on user's subscribed VOD platforms.
+    Get a balanced list of movies available on user's subscribed VOD platforms.
+
+    - Fetches a dynamically calculated number of top movies per platform.
+    - Excludes ALL movies the user has ever marked as watched.
     """
     if not user_platform_ids:
         logger.warning("No user_platform_ids provided")
         return []
 
-    # Get set of watched movie tconst IDs to exclude
-    watched_tconsts = set()
-    for movie in user_movies:
-        if movie.get("watched_at"):  # Only exclude actually watched movies
-            tconst = movie.get("tconst__tconst")
-            if tconst:
-                watched_tconsts.add(tconst)
-
+    # 1. Get ALL tconsts for movies the user has ever watched.
+    all_watched_tconsts = set(
+        UserMovie.objects.filter(user_id=user.id, watched_at__isnull=False).values_list(
+            "tconst_id", flat=True
+        )
+    )
     logger.info(
-        f"Excluding {len(watched_tconsts)} watched movies for platforms: {user_platform_ids}"
+        f"Excluding {len(all_watched_tconsts)} watched movies from suggestions pool."
     )
 
-    # Query movies available on user's platforms
-    available_movies = (
-        MovieAvailability.objects.filter(
-            platform_id__in=user_platform_ids, is_available=True
+    # 2. Determine the dynamic limit per platform.
+    num_platforms = len(user_platform_ids)
+    if num_platforms == 1:
+        limit_per_platform = 250
+    elif num_platforms == 2:
+        limit_per_platform = 125
+    elif num_platforms == 3:
+        limit_per_platform = 80
+    elif num_platforms == 4:
+        limit_per_platform = 62
+    else:
+        limit_per_platform = 50
+
+    logger.info(
+        f"Fetching top {limit_per_platform} movies for each of {num_platforms} platforms."
+    )
+
+    # 3. Fetch top movies for each platform individually.
+    all_movies_qs = MovieAvailability.objects.none()
+    for platform_id in user_platform_ids:
+        platform_movies_qs = (
+            MovieAvailability.objects.filter(platform_id=platform_id, is_available=True)
+            .exclude(tconst__in=all_watched_tconsts)
+            .select_related("tconst", "platform")
+            .order_by("-tconst__num_votes", "-tconst__avg_rating")[:limit_per_platform]
         )
-        .exclude(tconst__in=watched_tconsts)
-        .select_related("tconst", "platform")
-        .values(
+        all_movies_qs = all_movies_qs.union(platform_movies_qs)
+
+    # Execute the combined query
+    available_movies = list(
+        all_movies_qs.values(
             "tconst__tconst",
             "tconst__primary_title",
             "tconst__start_year",
@@ -607,15 +730,11 @@ def _get_available_movies_for_platforms(user_platform_ids, user_movies):
             "tconst__num_votes",
             "platform__platform_name",
         )
-        .order_by(
-            '-tconst__num_votes',  # Prioritize popular movies
-            '-tconst__avg_rating'
-        )[:250]  # Limit to top 250 to keep prompt size reasonable
     )
 
-    logger.info(f"Query returned {len(available_movies)} available movies")
+    logger.info(f"Query returned {len(available_movies)} total available movies.")
 
-    # Group by tconst and aggregate platform names
+    # 4. Group by tconst and aggregate platform names.
     movies_dict = {}
     for item in available_movies:
         tconst = item["tconst__tconst"]
@@ -642,7 +761,16 @@ def _get_available_movies_for_platforms(user_platform_ids, user_movies):
 
 
 def _build_gemini_prompt(
-    watchlist, watched, available_movies, user_platform_names, top_genres, platform_dist
+    watchlist,
+    watched,
+    available_movies,
+    user_platform_names,
+    top_genres,
+    rare_genres,
+    unexplored_genres,
+    golden_eras,
+    unexplored_eras,
+    suggestions_per_platform,
 ):
     """
     Build a detailed prompt for Gemini AI with user's movie context, available movies, and diversity principles for per-platform suggestions.
@@ -653,14 +781,18 @@ def _build_gemini_prompt(
         available_movies: List of available movies on user's platforms
         user_platform_names: List of user's subscribed platform names
         top_genres: List of top 3 user genres (used for context, not strict rules)
-        platform_dist: (No longer used, kept for signature compatibility for now)
+        rare_genres: List of genres the user rarely watches.
+        unexplored_genres: List of genres the user has never watched.
+        golden_eras: List of the user's most-watched decades.
+        unexplored_eras: List of decades the user has not explored.
+        suggestions_per_platform: The number of suggestions to generate for each platform.
     """
     logger.info(
-        f"Building per-platform diverse prompt for platforms: {user_platform_names}"
+        f"Building prompt for {len(user_platform_names)} platforms, requesting {suggestions_per_platform} suggestions each."
     )
 
     prompt_parts = [
-        "You are an expert movie recommendation system. Your task is to generate 5 diverse movie suggestions "
+        f"You are an expert movie recommendation system. Your task is to generate {suggestions_per_platform} diverse movie suggestions "
         "FOR EACH of the user's subscribed VOD platforms, based on their taste but designed to broaden their horizons.",
         "",
         "## User's Subscribed VOD Platforms:",
@@ -731,23 +863,47 @@ def _build_gemini_prompt(
         [
             "",
             "## Your Task & Diversity Principles:",
-            "For EACH platform, generate a list of 5 movie suggestions. Apply these principles to EACH list of 5:",
+            f"For EACH platform, generate a list of {suggestions_per_platform} movie suggestions. Apply these principles to EACH list:",
             "1. **Thematic Variety**: Avoid suggesting movies from the same franchise heavily present in the user's history.",
             "2. **Genre Exploration**: The 5 suggestions should cover at least 3 different genres. Actively look for genres outside the user's top 3.",
             "3. **Popularity Variety**: Include at least one 'Hidden Gem' (high rating > 7.5, lower popularity).",
-            "4. **Temporal Variety**: Include a mix of modern films (last 10 years) and at least one classic (pre-2000).",
+            "4. **Temporal Variety**: Include a mix of modern films and at least one classic (pre-2000).",
             "5. **Strict Selection**: You MUST choose suggestions ONLY from the 'Available Movies' list provided.",
+        ]
+    )
+
+    # Add dynamic diversity principles based on user analysis
+    if rare_genres:
+        prompt_parts.append(
+            f"6. **Explore Unwatched Genres**: To improve diversity, try to include a suggestion from genres the user rarely watches, such as: {', '.join(rare_genres)}."
+        )
+    if unexplored_genres:
+        prompt_parts.append(
+            f"7. **Discover New Genres**: The user has NEVER watched films from these genres: {', '.join(unexplored_genres)}. Suggesting a highly-rated, accessible film from one of these categories would be a great way to broaden their horizons."
+        )
+    if golden_eras:
+        prompt_parts.append(
+            f"8. **Acknowledge Favorites**: The user seems to love films from the {golden_eras}s. Keep this in mind when selecting classics."
+        )
+    if unexplored_eras:
+        prompt_parts.append(
+            f"9. **Explore New Eras**: The user has not explored films from the {unexplored_eras}s. A well-chosen suggestion from one of these decades could be a pleasant surprise."
+        )
+
+    prompt_parts.extend(
+        [
             "",
             "## Response Format:",
             "Return ONLY a valid JSON object (no markdown, no code blocks, no explanatory text) "
             "where keys are the platform names (EXACTLY as provided: "
             + ", ".join(f'"{name}"' for name in user_platform_names)
             + ") "
-            "and values are arrays of 5 suggestions.",
+            f"and values are arrays of {suggestions_per_platform} suggestions.",
+            "IMPORTANT: The 'justification' text MUST be in Polish.",
             "{",
             f'  "{user_platform_names[0]}": [',
-            '    { "tconst": "tt0468569", "justification": "Brief reason why this movie fits their taste (max 200 characters)." }',
-            "    // ... 4 more suggestions for this platform",
+            '    { "tconst": "tt0468569", "justification": "Krótkie uzasadnienie w języku polskim, dlaczego ten film pasuje do gustu użytkownika (max 200 znaków)." }',
+            f"    // ... {suggestions_per_platform - 1} more suggestions for this platform",
             "  ],",
             '  "Another Platform": [ ... ]',
             "}",
@@ -756,10 +912,10 @@ def _build_gemini_prompt(
             "1. **Choose ONLY from the 'Available Movies' list provided.** Do NOT suggest any movie whose `tconst` is not on that list.",
             "2. **The user has already seen the movies in the 'Movies User Has Watched' section. Do NOT suggest these movies again.**",
             "3. **Do NOT suggest the same movie (`tconst`) more than once** across ALL platforms. If a movie is on multiple platforms, pick ONE platform for it. All suggestions in the final JSON must be unique.",
-            "4. Ensure each platform has exactly 5 suggestions.",
+            f"4. Ensure each platform has exactly {suggestions_per_platform} suggestions.",
             "5. Return ONLY a single, valid JSON object.",
             "",
-            "Generate suggestions now:"
+            "Generate suggestions now:",
         ]
     )
 

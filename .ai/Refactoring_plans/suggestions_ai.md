@@ -249,3 +249,33 @@ After a thorough review of the latest test results, a final, multi-point plan wa
         -   3 platforms: 5 suggestions per platform
         -   4+ platforms: 4 suggestions per platform
 
+### 6. Upgrading the Prompt: "Anti-Bubble" & "Time Traveler"
+
+To further enhance the diversity and personalization of suggestions, two advanced analytical features were implemented directly into the prompt-building process.
+
+1.  **"Anti-Bubble" (Genre Gap Analysis)**:
+    -   **Problem**: The previous system could only identify genres the user rarely watched, but couldn't recognize genres they had *never* watched, leading to a potential "filter bubble."
+    -   **Solution**: A hardcoded, comprehensive `set` of all 28 available genres in the database was added to the service. The system now compares the user's watched genres against this master list to identify "unexplored genres."
+    -   **Prompt Impact**: A new instruction was added to the prompt, explicitly asking the AI to find a highly-rated, accessible film from one of the user's unexplored genres to encourage discovery.
+
+2.  **"Time Traveler" (Decade Analysis)**:
+    -   **Problem**: Recommendations lacked a temporal dimension, ignoring a user's potential affinity for films from specific eras.
+    -   **Solution**: The user's movie history is now analyzed to identify their most-watched decades ("golden eras") and decades they have largely ignored ("unexplored eras").
+    -   **Prompt Impact**: The prompt was enhanced with two new instructions: one that acknowledges the user's favorite decades (e.g., "The user seems to love films from the 1990s") and another that encourages suggesting a film from an unexplored era as a potential pleasant surprise.
+
+A helper script, `Helper_code/check_genres.py`, was also created to allow developers to easily compare the hardcoded genre set with the database to check for discrepancies as new movies are added.
+
+### 7. Future Improvements
+
+During the brainstorming phase, several advanced ideas for future iterations were proposed. These were postponed to keep the current implementation focused but offer exciting paths for further development.
+
+1.  **"The Film Professor" (Creator-Based Analysis)**:
+    -   **Concept**: Analyze the user's history for favorite directors and lead actors.
+    -   **Implementation**: The prompt could ask the AI to find other works by a favorite director, films by creators with a similar style, or movies featuring actors known for similar roles. This would mimic how cinephiles recommend films to each other.
+    -   **Prerequisite**: This would require adding actor and director data to the `Movie` model.
+
+2.  **"The Mood Ring" (Sentiment & Thematic Analysis)**:
+    -   **Concept**: Move beyond rigid genres and focus on the *feel* and *themes* of movies.
+    -   **Implementation**: Use an LLM in a preliminary step to analyze plot summaries of the user's favorite films and generate "mood tags" (e.g., `'dark psychological thriller'`, `'witty black comedy'`). These tags would then be used in the main prompt to find films with a similar vibe, regardless of their official genre.
+    -   **Prerequisite**: This would require adding plot summaries to the `Movie` model.
+

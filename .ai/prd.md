@@ -1235,10 +1235,19 @@ Sekcja 5: Growth
 
 7.1.13 Dodać polskie tytuły filmów # TODO
 
-## 8. Known issues.
+7.1.14 Dodanie reżyserów i głównych aktorów do bazy danych i na ich podstawie polepszyć sugerowanie filmów przez AI. # TODO
+
+7.1.15 Dodanie metadanych do filmów (krótki opis fabuły, etykiety - mroczny, śmieszny itd) - możliwy problem z wielkością kontektu, już on występuje i model się gubi # TODO
+
+7.1.16 Tytuł filmu jest linkiem do IMDB # TODO
+
+## 8. Known issues. # TODO
 
 8.1 Onboarding/add i onboarding/watched:
   - Jeśli istnieje na watchlist / watched więcej filmów niż 3, i użytkownik usunie pozycje, to zwróci błąd braku 3 pozycji, mimo że te 3 pozycje są na liście - poziom: niski, onboarding jest do wstępnego użycia, tam ten problem nie występuje, użytkownik musi intencjonalnie wrócić do tej strony (co również specjalnie nie jest blokowane)
+8.2 Długie ładowanie strony jeśli użytkownik ma dużo pozycji na listach oraz cache w przeglądarce został usunięty. Problem jest związany z pobieraniem plakatów.
+8.3 Długie wyszukiwanie, zaimplementowano testowo Redis. Wymaga dalszego poprawienia.
+8.4 Problem z sesją, jeśli użytkownik wraca po dłuższym czasie a się nie wylogował. Trzeba ręcznie usuwać sesję.
 ---
 Ostrzeżenia - to tylko warningi generatora dokumentacji OpenAPI, nie wpływają na działanie aplikacji. Jeśli chcesz je usunąć w przyszłości, możesz:
 - Dodać @extend_schema_field dla pól typu callable

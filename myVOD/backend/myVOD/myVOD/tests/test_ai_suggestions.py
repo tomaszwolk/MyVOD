@@ -256,14 +256,16 @@ class AISuggestionsGetAPITests(APITestCase):
             datetime.combine(today, time(23, 59, 59))
         )
 
-        cached_suggestions = [
-            {
-                'tconst': self.movie.tconst,
-                'primary_title': self.movie.primary_title,
-                'start_year': self.movie.start_year,
-                'justification': 'Excellent drama'
-            }
-        ]
+        cached_suggestions = {
+            self.platform.platform_name: [
+                {
+                    'tconst': self.movie.tconst,
+                    'primary_title': self.movie.primary_title,
+                    'start_year': self.movie.start_year,
+                    'justification': 'Excellent drama'
+                }
+            ]
+        }
 
         AiSuggestionBatch.objects.create(
             user_id=self.user.id,
@@ -310,14 +312,16 @@ class AISuggestionsGetAPITests(APITestCase):
             datetime.combine(today, time(23, 59, 59))
         )
 
-        cached_suggestions = [
-            {
-                'tconst': 'tt0068646',
-                'primary_title': 'The Godfather',
-                'start_year': 1972,
-                'justification': 'Classic crime drama'
-            }
-        ]
+        cached_suggestions = {
+            "Test Platform": [
+                {
+                    'tconst': 'tt0068646',
+                    'primary_title': 'The Godfather',
+                    'start_year': 1972,
+                    'justification': 'Classic crime drama'
+                }
+            ]
+        }
 
         AiSuggestionBatch.objects.create(
             user_id=self.user.id,
@@ -522,14 +526,16 @@ class AISuggestionsGetAPITests(APITestCase):
             datetime.combine(today, time(23, 59, 59))
         )
 
-        cached_suggestions = [
-            {
-                'tconst': self.movie.tconst,
-                'primary_title': self.movie.primary_title,
-                'start_year': self.movie.start_year,
-                'justification': 'Available on multiple platforms'
-            }
-        ]
+        cached_suggestions = {
+            self.platform.platform_name: [
+                {
+                    'tconst': self.movie.tconst,
+                    'primary_title': self.movie.primary_title,
+                    'start_year': self.movie.start_year,
+                    'justification': 'Available on multiple platforms'
+                }
+            ]
+        }
 
         AiSuggestionBatch.objects.create(
             user_id=self.user.id,
