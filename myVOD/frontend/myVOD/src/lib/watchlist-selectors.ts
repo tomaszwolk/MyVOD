@@ -88,7 +88,8 @@ export function processWatchlistData(
   data: UserMovieDto[] | undefined,
   userPlatforms: PlatformDto[],
   sortOption: SortOption,
-  filters: FiltersState
+  filters: FiltersState,
+  totalAvailableCount?: number
 ) {
   if (!data) {
     return {
@@ -107,9 +108,14 @@ export function processWatchlistData(
   // Apply sorting
   const sortedItems = sortWatchlistItems(filteredItems, sortOption);
 
+  const totalCount =
+    typeof totalAvailableCount === "number" && totalAvailableCount > 0
+      ? totalAvailableCount
+      : items.length;
+
   return {
     items: sortedItems,
-    totalCount: items.length,
+    totalCount,
     visibleCount: sortedItems.length,
   };
 }

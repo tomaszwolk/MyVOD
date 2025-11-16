@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { getMyProfile } from "@/lib/api/user";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -9,9 +10,10 @@ export const useVerifyUser = () => {
     queryKey: ["user", "me"],
     queryFn: getMyProfile,
     enabled: isAuthenticated, // Uruchom zapytanie tylko, jeśli tokeny istnieją
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Nie ponawiaj próby przy błędzie 401, bo to oznacza, że sesja jest nieważna
-      if (error?.response?.status === 401) {
+      const axiosError = error as AxiosError;
+      if (axiosError?.response?.status === 401) {
         return false;
       }
       // W przeciwnym razie, ponów próbę standardową ilość razy (domyślnie 3)

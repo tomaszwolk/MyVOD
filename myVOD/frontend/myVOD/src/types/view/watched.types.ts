@@ -4,7 +4,7 @@ import type { SortOption } from "./watchlist.types";
 
 export type WatchedViewMode = "grid" | "list";
 
-export type WatchedSortKey = SortOption;
+export type WatchedSortKey = SortOption | "watched_at_desc" | "user_rating_desc" | "imdb_rating_desc";
 
 export type WatchedMovieItemVM = {
   id: number;
@@ -12,11 +12,10 @@ export type WatchedMovieItemVM = {
   title: string;
   year: number | null;
   genres: string[] | null;
-  avgRating: string | null;
+  imdbRating: string | null;
   userRating: number | null;
-  posterPath: string | null;
-  watchedAt: string; // oryginalny ISO string z API
-  watchedAtLabel: string; // sformatowana data do UI
+  posterUrl: string | null;
+  watchedAt: string | null; // oryginalny ISO string z API
   availability: import("../api.types").MovieAvailabilityDto[];
   isAvailableOnAnyPlatform: boolean; // wyliczane z availability
 };

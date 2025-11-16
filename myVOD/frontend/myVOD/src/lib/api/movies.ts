@@ -1,5 +1,5 @@
 import { http } from "@/lib/http";
-import type { MovieSearchResultDto, UserMovieDto, AddUserMovieCommand, UpdateUserMovieCommand, AISuggestionsDto } from "@/types/api.types";
+import type { MovieSearchResultDto, UserMovieDto, AddUserMovieCommand, UpdateUserMovieCommand, AISuggestionsDto, PaginatedResponse } from "@/types/api.types";
 
 /**
  * API client for movie-related endpoints.
@@ -69,16 +69,59 @@ export async function deleteUserMovie(id: number): Promise<void> {
  * @param ordering - Optional ordering parameter
  * @returns Promise<UserMovieDto[]>
  */
-export async function listUserMovies(status?: 'watchlist' | 'watched', ordering?: string): Promise<UserMovieDto[]> {
-  const params: Record<string, string> = {};
+
+type ListUserMoviesParams = {
+    status?: 'watchlist' | 'watched';
+    ordering?: string;
+    page?: number;
+};
+
+export async function listUserMovies({
+  status,
+  ordering,
+  page = 1,
+}: ListUserMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
+  const params: Record<string, string | number> = { page };
   if (status) params.status = status;
   if (ordering) params.ordering = ordering;
 
-  const response = await http.get<UserMovieDto[]>("/user-movies/", {
-    params: Object.keys(params).length > 0 ? params : undefined,
+  const response = await http.get<PaginatedResponse<UserMovieDto>>("/user-movies/", {
+    params,
   });
   return response.data;
 }
+
+/**
+ * Fetches the first page of user movies and returns a simple array.
+ * To be used in places where pagination is not needed (e.g., onboarding checks).
+ * @param status - Filter by status ('watchlist' or 'watched')
+ * @returns Promise<UserMovieDto[]>
+ */
+export async function fetchUserMoviesSimpleList(status?: 'watchlist' | 'watched'): Promise<UserMovieDto[]> {
+    const response = await listUserMovies({ status, page: 1 });
+    return response.results;
+}
+
+/**
+ * Fetches all pages of user movies and returns a single flat array.
+ * @param status - Filter by status ('watchlist' or 'watched')
+ * @returns Promise<UserMovieDto[]>
+ */
+export async function fetchAllUserMovies(status?: 'watchlist' | 'watched'): Promise<UserMovieDto[]> {
+  let page = 1;
+  let allMovies: UserMovieDto[] = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const response = await listUserMovies({ status, page });
+    allMovies = allMovies.concat(response.results);
+    if (!response.next) {
+      break;
+    }
+    page += 1;
+  }
+  return allMovies;
+}
+
 
 /**
  * Restore a movie from watched back to watchlist.

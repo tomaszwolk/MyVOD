@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 // Hooks
 import { useWatchedPreferences } from "@/hooks/useWatchedPreferences";
-import { useUserMoviesWatched } from "@/hooks/useUserMoviesWatched";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import {
@@ -18,6 +17,9 @@ import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
+import { useWatchedSelectors } from "@/hooks/useWatchedSelectors";
+import { UserMovieDto } from "@/types/api.types";
+import { useAllUserMovies } from "@/hooks/useAllUserMovies";
 
 // Components
 import { WatchedToolbar } from "@/components/watched/WatchedToolbar";
@@ -73,13 +75,28 @@ export function WatchedPage() {
   const platformsQuery = usePlatforms(isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
 
-  // Watched movies data
-  const watchedQuery = useUserMoviesWatched({
-    sortKey: sort,
+  // Watched movies data - now using the paginated hook
+  const watchedQuery = useListUserMovies("watched", isAuthenticated);
+  const watchlistQuery = useAllUserMovies("watchlist", isAuthenticated);
+
+  const watchedTotalCount = watchedQuery.data?.pages?.[0]?.count;
+  const hasWatchedData =
+    watchedQuery.data?.pages?.some(
+      (page) => (page?.results?.length ?? 0) > 0
+    ) ?? false;
+  const {
+    items: allWatchedItems,
+    totalCount,
+    visibleCount,
+  } = useWatchedSelectors({
+    data:
+      watchedQuery.data?.pages?.flatMap((page) => page?.results ?? []) ??
+      undefined,
     userPlatforms: userProfileQuery.data?.platforms ?? [],
-    enabled: isAuthenticated,
+    sortKey: sort,
+    hideUnavailable,
+    totalAvailableCount: watchedTotalCount,
   });
-  const watchlistQuery = useListUserMovies("watchlist", isAuthenticated);
 
   // Actions
   const restoreMutation = useRestoreToWatchlist();
@@ -121,15 +138,15 @@ export function WatchedPage() {
   // Handlers
   const watchedEntriesByTconst = useMemo(() => {
     const map = new Map<string, { id: number; userRating: number | null }>();
-    (watchedQuery.items ?? []).forEach((entry) => {
+    allWatchedItems.forEach((entry) => {
       map.set(entry.tconst, { id: entry.id, userRating: entry.userRating });
     });
     return map;
-  }, [watchedQuery.items]);
+  }, [allWatchedItems]);
 
   const watchlistEntriesByTconst = useMemo(() => {
     const map = new Map<string, number>();
-    (watchlistQuery.data ?? []).forEach((entry) => {
+    (watchlistQuery.data ?? []).forEach((entry: UserMovieDto) => {
       map.set(entry.movie.tconst, entry.id);
     });
     return map;
@@ -148,16 +165,24 @@ export function WatchedPage() {
   const hasUserPlatforms = (userProfileQuery.data?.platforms?.length ?? 0) > 0;
 
   const filteredItems = useMemo(() => {
-    const items = watchedQuery.items ?? [];
     if (!hideUnavailable || !hasUserPlatforms) {
-      return items;
+      return allWatchedItems;
     }
-    return items.filter((item) => item.isAvailableOnAnyPlatform);
-  }, [hideUnavailable, hasUserPlatforms, watchedQuery.items]);
+    return allWatchedItems.filter((item) => {
+      return item.availability.some(
+        (a) =>
+          a.is_available &&
+          userProfileQuery.data?.platforms.some((p) => p.id === a.platform_id)
+      );
+    });
+  }, [
+    hideUnavailable,
+    hasUserPlatforms,
+    allWatchedItems,
+    userProfileQuery.data?.platforms,
+  ]);
 
-  const totalCount = watchedQuery.items?.length ?? 0;
-  const visibleCount = filteredItems.length;
-  const isFilteredEmpty = visibleCount === 0;
+  const isFilteredEmpty = filteredItems.length === 0;
 
   const handleViewModeChange = useCallback(
     (mode: typeof viewMode) => {
@@ -340,8 +365,11 @@ export function WatchedPage() {
   );
 
   // Loading states
+  const isWatchedInitialLoad =
+    !hasWatchedData &&
+    (watchedQuery.isFetching || watchedQuery.fetchStatus === "fetching");
   const isLoading =
-    watchedQuery.isLoading ||
+    isWatchedInitialLoad ||
     userProfileQuery.isLoading ||
     platformsQuery.isLoading ||
     watchlistQuery.isLoading;
@@ -450,6 +478,9 @@ export function WatchedPage() {
             onDelete={handleDelete}
             isDeleting={deleteFromWatchedMutation.isPending}
             onRate={handleRateClick}
+            hasNextPage={watchedQuery.hasNextPage}
+            isFetchingNextPage={watchedQuery.isFetchingNextPage}
+            fetchNextPage={watchedQuery.fetchNextPage}
           />
         </div>
       </MediaLibraryLayout>

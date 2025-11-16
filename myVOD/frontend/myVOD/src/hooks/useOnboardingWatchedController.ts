@@ -6,7 +6,7 @@ import {
   addUserMovie,
   patchUserMovie,
   deleteUserMovie,
-  listUserMovies,
+  fetchUserMoviesSimpleList,
 } from "@/lib/api/movies";
 import { useRateMovie } from "@/hooks/useRateMovie";
 import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
@@ -169,7 +169,7 @@ export function useOnboardingWatchedController() {
       } catch (error) {
         const apiError = error as ApiError;
         if (apiError?.status === 409) {
-          const watched: UserMovieDto[] = await listUserMovies("watched");
+          const watched: UserMovieDto[] = await fetchUserMoviesSimpleList("watched");
           const existingWatched = watched.find(
             (m) => m.movie.tconst === movie.tconst
           );

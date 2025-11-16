@@ -14,6 +14,12 @@ import {
 import { cn } from "@/lib/utils";
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
+import { formatDistanceToNow } from "date-fns";
+import { pl } from "date-fns/locale";
+import {
+  Star,
+  Trophy,
+} from "lucide-react";
 
 /**
  * Props for UserMovieRow component.
@@ -69,7 +75,7 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
       <div className="flex gap-4">
         {/* Poster */}
         <TMDBPoster
-          src={item.posterPath}
+          src={item.posterUrl}
           alt={item.title}
           width={64}
           height={96}
@@ -117,12 +123,32 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
                       </p>
                     )}
                     <div className="mt-2 pt-2 border-t border-border">
-                      <p className="text-sm">
-                        IMDB.com rating: {item.avgRating || "-"}
-                      </p>
-                      <p className="text-sm">
-                        User rating: {item.userRating || "-"}
-                      </p>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-yellow-400" />
+                          <span className="font-semibold text-sm">
+                            {item.imdbRating || "-"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Trophy className="h-4 w-4" />
+                          <span>
+                            Twoja ocena:{" "}
+                            <span className="font-semibold">
+                              {item.userRating ? `${item.userRating}/10` : "-"}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4" />
+                          <span>
+                            IMDB.com rating: {item.imdbRating || "-"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -140,7 +166,7 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <MovieRating
-                  imdbRating={item.avgRating}
+                  imdbRating={item.imdbRating}
                   userRating={item.userRating}
                   onRateClick={handleRate}
                   tconst={item.tconst}
@@ -157,7 +183,12 @@ export const UserMovieRow = memo<UserMovieRowProps>(function UserMovieRow({
 
               {/* Watched Date */}
               <div className="text-sm text-muted-foreground">
-                Obejrzany: {item.watchedAtLabel}
+                Obejrzany: {
+                  item.watchedAt ? formatDistanceToNow(new Date(item.watchedAt), {
+                    addSuffix: true,
+                    locale: pl,
+                  }) : "-"
+                }
               </div>
             </div>
 

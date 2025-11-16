@@ -3,28 +3,39 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { patchUserMovie, deleteUserMovie } from "@/lib/api/movies";
 import type { UserMovieDto } from "@/types/api.types";
+import {
+  findUserMovieById,
+  removeUserMovieById,
+  type UserMoviesInfiniteData,
+} from "@/lib/userMoviesInfiniteUtils";
 
 /**
  * Hook for marking movies as watched with optimistic updates.
  * Removes movie from watchlist immediately and shows toast on success/error.
  */
+type MutationContext = {
+  previousData?: UserMoviesInfiniteData;
+};
+
 export function useMarkAsWatched() {
   const queryClient = useQueryClient();
+  const queryKey = ["user-movies", "watchlist"] as const;
 
-  return useMutation({
+  return useMutation<UserMovieDto, unknown, number, MutationContext>({
     mutationFn: async (id: number) => {
       return patchUserMovie(id, { action: 'mark_as_watched' });
     },
     onMutate: async (id: number) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["user-movies", "watchlist"] });
+      await queryClient.cancelQueries({ queryKey });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData<UserMovieDto[]>(["user-movies", "watchlist"]);
+      const previousData =
+        queryClient.getQueryData<UserMoviesInfiniteData>(queryKey);
 
       // Optimistically remove the movie from watchlist
-      queryClient.setQueryData<UserMovieDto[]>(["user-movies", "watchlist"], (old) =>
-        old ? old.filter(movie => movie.id !== id) : []
+      queryClient.setQueryData<UserMoviesInfiniteData>(queryKey, (old) =>
+        removeUserMovieById(old, id)
       );
 
       // Return a context object with the snapshotted value
@@ -36,13 +47,13 @@ export function useMarkAsWatched() {
     onError: (_, __, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(["user-movies", "watchlist"], context.previousData);
+        queryClient.setQueryData(queryKey, context.previousData);
       }
       toast.error("Nie udało się oznaczyć filmu jako obejrzanego");
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ["user-movies", "watchlist"] });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -54,27 +65,37 @@ export function useMarkAsWatched() {
 export function useDeleteFromWatchlist() {
   const queryClient = useQueryClient();
   const [deletedMovies, setDeletedMovies] = useState<Map<number, UserMovieDto>>(new Map());
+  const queryKey = ["user-movies", "watchlist"] as const;
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutation<
+    void,
+    unknown,
+    number,
+    {
+      previousData?: UserMoviesInfiniteData;
+      movieToDelete?: UserMovieDto;
+    }
+  >({
     mutationFn: async (id: number) => {
       return deleteUserMovie(id);
     },
     onMutate: async (id: number) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["user-movies", "watchlist"] });
+      await queryClient.cancelQueries({ queryKey });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData<UserMovieDto[]>(["user-movies", "watchlist"]);
+      const previousData =
+        queryClient.getQueryData<UserMoviesInfiniteData>(queryKey);
 
       // Find the movie being deleted
-      const movieToDelete = previousData?.find(movie => movie.id === id);
+      const movieToDelete = findUserMovieById(previousData, id);
       if (movieToDelete) {
         setDeletedMovies(prev => new Map(prev.set(id, movieToDelete)));
       }
 
       // Optimistically remove the movie from watchlist
-      queryClient.setQueryData<UserMovieDto[]>(["user-movies", "watchlist"], (old) =>
-        old ? old.filter(movie => movie.id !== id) : []
+      queryClient.setQueryData<UserMoviesInfiniteData>(queryKey, (old) =>
+        removeUserMovieById(old, id)
       );
 
       // Return a context object with the snapshotted value
@@ -94,7 +115,7 @@ export function useDeleteFromWatchlist() {
     onError: (_, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(["user-movies", "watchlist"], context.previousData);
+        queryClient.setQueryData(queryKey, context.previousData);
       }
       setDeletedMovies(prev => {
         const newMap = new Map(prev);
@@ -102,6 +123,9 @@ export function useDeleteFromWatchlist() {
         return newMap;
       });
       toast.error("Nie udało się usunąć filmu z watchlisty");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 

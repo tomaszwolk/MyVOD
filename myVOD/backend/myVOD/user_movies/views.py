@@ -1,5 +1,6 @@
 import logging
 from rest_framework import viewsets, permissions, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.db import DatabaseError, IntegrityError
 from movies.models import UserMovie, Movie  # type: ignore
@@ -21,6 +22,11 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class UserMovieViewSet(viewsets.ModelViewSet):
     """
@@ -41,7 +47,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
     """
     serializer_class = UserMovieSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = None  # Disable pagination for this endpoint (MVP)
+    pagination_class = StandardResultsSetPagination  # Enable pagination
 
     # Enable GET, POST, PATCH, DELETE methods
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
@@ -78,7 +84,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
             # Use service layer for all queryset building
             queryset = build_user_movies_queryset(
                 user=request.user,
-                status_param=params.validated_data['status'],
+                status_param=params.validated_data.get('status'),
                 ordering_param=params.validated_data.get('ordering'),
                 is_available=params.validated_data.get('is_available'),
             )

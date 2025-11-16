@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useInView } from "@/hooks/useInView";
 import { MovieGrid } from "./MovieGrid";
 import { MovieList } from "./MovieList";
 import { EmptyState } from "./EmptyState";
@@ -19,6 +21,9 @@ type WatchlistContentProps = {
   onAddToWatched: (tconst: string) => Promise<void> | void;
   existingTconsts: string[];
   existingWatchedTconsts: string[];
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => void;
 };
 
 /**
@@ -37,13 +42,26 @@ export function WatchlistContent({
   onAddToWatched,
   existingTconsts,
   existingWatchedTconsts,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
 }: WatchlistContentProps) {
-  // Show skeleton during loading
-  if (isLoading) {
+  const { ref, inView } = useInView({
+    threshold: 0,
+    triggerOnce: false,
+  });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage && fetchNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+
+  if (isLoading && items.length === 0) {
     return <SkeletonList viewMode={viewMode} count={12} />;
   }
 
-  // Show empty state when no items
   if (items.length === 0) {
     return (
       <EmptyState
@@ -55,24 +73,29 @@ export function WatchlistContent({
     );
   }
 
-  // Render appropriate view mode
-  if (viewMode === "grid") {
-    return (
-      <MovieGrid
-        items={items}
-        platforms={platforms}
-        onMarkWatched={onMarkWatched}
-        onDelete={onDelete}
-      />
-    );
-  }
+  const isListView = viewMode === "list";
 
   return (
-    <MovieList
-      items={items}
-      platforms={platforms}
-      onMarkWatched={onMarkWatched}
-      onDelete={onDelete}
-    />
+    <>
+      {isListView ? (
+        <MovieList
+          items={items}
+          platforms={platforms}
+          onMarkWatched={onMarkWatched}
+          onDelete={onDelete}
+        />
+      ) : (
+        <MovieGrid
+          items={items}
+          platforms={platforms}
+          onMarkWatched={onMarkWatched}
+          onDelete={onDelete}
+        />
+      )}
+      <div ref={ref} className="h-10" />
+      {isFetchingNextPage && (
+        <SkeletonList viewMode={viewMode} count={isListView ? 1 : 3} />
+      )}
+    </>
   );
 }

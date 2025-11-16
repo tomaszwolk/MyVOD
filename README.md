@@ -137,7 +137,7 @@ uv run celery -A myvod beat -l info
 
 3) Frontend setup
 
-The frontend lives in `./frontend` (React + Vite). Once committed:
+The frontend lives in `./myVOD/frontend/myVOD` (React + Vite). Once committed:
 ```bash
 cd frontend
 npm install

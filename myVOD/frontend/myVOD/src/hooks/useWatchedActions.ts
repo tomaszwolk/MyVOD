@@ -2,6 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { restoreUserMovie, deleteUserMovie } from "@/lib/api/movies";
 import type { UserMovieDto } from "@/types/api.types";
+import {
+  removeUserMovieById,
+  findUserMovieById,
+  type UserMoviesInfiniteData,
+} from "@/lib/userMoviesInfiniteUtils";
 
 /**
  * Hook for restoring movies from watched back to watchlist.
@@ -9,21 +14,23 @@ import type { UserMovieDto } from "@/types/api.types";
  */
 export function useRestoreToWatchlist() {
   const queryClient = useQueryClient();
+  const watchedKey = ["user-movies", "watched"] as const;
 
-  return useMutation({
+  return useMutation<UserMovieDto, unknown, number, { previousData?: UserMoviesInfiniteData }>({
     mutationFn: async (id: number) => {
       return restoreUserMovie(id);
     },
     onMutate: async (id: number) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["user-movies", "watched"] });
+      await queryClient.cancelQueries({ queryKey: watchedKey });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData(["user-movies", "watched"]);
+      const previousData =
+        queryClient.getQueryData<UserMoviesInfiniteData>(watchedKey);
 
       // Optimistically remove the movie from watched list
-      queryClient.setQueryData(["user-movies", "watched"], (old: UserMovieDto[] | undefined) =>
-        old ? old.filter((movie: UserMovieDto) => movie.id !== id) : []
+      queryClient.setQueryData<UserMoviesInfiniteData>(watchedKey, (old) =>
+        removeUserMovieById(old, id)
       );
 
       // Return a context object with the snapshotted value
@@ -35,13 +42,13 @@ export function useRestoreToWatchlist() {
     onError: (_, __, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(["user-movies", "watched"], context.previousData);
+        queryClient.setQueryData(watchedKey, context.previousData);
       }
       toast.error("Nie udało się przywrócić filmu. Spróbuj ponownie.");
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ["user-movies", "watched"] });
+      queryClient.invalidateQueries({ queryKey: watchedKey });
       // Optionally invalidate watchlist too
       queryClient.invalidateQueries({ queryKey: ["user-movies", "watchlist"] });
     },
@@ -55,21 +62,31 @@ export function useRestoreToWatchlist() {
  */
 export function useDeleteFromWatched() {
   const queryClient = useQueryClient();
+  const watchedKey = ["user-movies", "watched"] as const;
 
-  return useMutation({
+  return useMutation<
+    void,
+    unknown,
+    number,
+    {
+      previousData?: UserMoviesInfiniteData;
+      movieToDelete?: UserMovieDto;
+    }
+  >({
     mutationFn: async (id: number) => {
       return deleteUserMovie(id);
     },
     onMutate: async (id: number) => {
-      await queryClient.cancelQueries({ queryKey: ["user-movies", "watched"] });
-      const previousData = queryClient.getQueryData<UserMovieDto[]>(["user-movies", "watched"]);
+      await queryClient.cancelQueries({ queryKey: watchedKey });
+      const previousData =
+        queryClient.getQueryData<UserMoviesInfiniteData>(watchedKey);
       
       // Find the movie being deleted for toast message
-      const movieToDelete = previousData?.find(movie => movie.id === id);
+      const movieToDelete = findUserMovieById(previousData, id);
       
       // Optimistically remove the movie from watched list
-      queryClient.setQueryData<UserMovieDto[]>(["user-movies", "watched"], (old) =>
-        old ? old.filter(movie => movie.id !== id) : []
+      queryClient.setQueryData<UserMoviesInfiniteData>(watchedKey, (old) =>
+        removeUserMovieById(old, id)
       );
       
       return { previousData, movieToDelete };
@@ -81,13 +98,13 @@ export function useDeleteFromWatched() {
     onError: (_, __, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(["user-movies", "watched"], context.previousData);
+        queryClient.setQueryData(watchedKey, context.previousData);
       }
       toast.error("Nie udało się usunąć filmu z historii obejrzanych");
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ["user-movies", "watched"] });
+      queryClient.invalidateQueries({ queryKey: watchedKey });
     },
   });
 }
