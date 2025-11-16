@@ -23,7 +23,7 @@ services:
       context: ./myVOD/frontend
       args:
         - VITE_API_URL=${VITE_API_URL}
-    image: tomaszwolk/10xmovies-frontend:latest
+    image: tomaszwolk/myvod
     container_name: myvod-frontend
     ports:
       - "8080:80"

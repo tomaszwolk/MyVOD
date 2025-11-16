@@ -9,7 +9,8 @@ from supabase import create_client, Client
 # --- CONFIGURATION ---
 # UUID or ID of the user in the Django `users_user` table to whom the watchlist will be assigned.
 # Can be either: UUID (direct) or integer Django user ID (will be resolved to UUID)
-DJANGO_USER_ID = "f37d6a22-6362-4a0d-808b-fde7e7faa1d7"
+DJANGO_USER_ID = "bfc2e697-8da8-42ae-9883-93ae4e34ac6c"
+# DJANGO_USER_ID = "f37d6a22-6362-4a0d-808b-fde7e7faa1d7"
 
 # Filename of the IMDb watchlist CSV export.
 # This file should be placed in the IMDB_DATA_SET_LITE_DIR directory.

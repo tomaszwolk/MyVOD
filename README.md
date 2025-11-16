@@ -19,6 +19,8 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
   - [Available scripts](#available-scripts)
   - [Project scope](#project-scope)
   - [Project status](#project-status)
+  - [Future Roadmap](#future-roadmap)
+  - [Known Issues](#known-issues)
   - [License](#license)
 
 ---
@@ -32,7 +34,7 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
   - API documentation with drf-spectacular
   - JWT auth with djangorestframework-simplejwt
 
-- Frontend (planned)
+- Frontend
   - React 18 + Vite 5+
   - Tailwind CSS + shadcn/ui
   - TanStack Query, React Router v6, Axios
@@ -44,13 +46,13 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
 
 - Tooling & DevOps
   - Python 3.12+ with [uv](https://github.com/astral-sh/uv)
-  - Linting/formatting with Ruff (planned)
+  - Linting/formatting with Ruff
   - Testing: 
     - Backend (Unit/Integration): pytest (+ pytest-django)
-    - Frontend (Unit/Component): Vitest, React Testing Library (planned)
-    - E2E: Playwright (planned)
-  - Containerization: Docker + Docker Compose (planned)
-  - CI/CD: GitHub Actions (planned)
+    - Frontend (Unit/Component): Vitest, React Testing Library
+    - E2E: Playwright
+  - Containerization: Docker + Docker Compose
+  - CI/CD: GitHub Actions
   - Hosting: Render.com (PaaS)
 
 See tech stack details: [./.ai/tech-stack.md](./.ai/tech-stack.md)
@@ -59,14 +61,16 @@ See tech stack details: [./.ai/tech-stack.md](./.ai/tech-stack.md)
 
 ### Hosting and Deployment
 
-The application is designed for a containerized multi-service architecture and will be hosted on [Render](https://render.com/), a unified cloud platform (PaaS).
+The application is designed for a containerized multi-service architecture and is hosted on [Render](https://render.com/), a unified cloud platform (PaaS).
+
+**Production URL**: [https://myvod.onrender.com](https://myvod.onrender.com)
 
 The key components of the production environment on Render include:
-- **Web Service**: Runs the Dockerized Django + Gunicorn application.
+- **Web Service**: Runs the Dockerized Django + Gunicorn application. ([DockerHub Repository](https://hub.docker.com/repository/docker/tomaszwolk/10xmovies-backend/general))
+- **Static Site**: Serves the compiled React frontend application, providing fast, global delivery via Render's CDN. ([DockerHub Repository](https://hub.docker.com/repository/docker/tomaszwolk/myvod/general))
 - **Background Worker**: Runs the Celery worker for asynchronous tasks.
 - **Managed PostgreSQL**: A dedicated, managed database instance.
 - **Managed Redis**: A managed instance for Celery's message broker and caching.
-- **Static Site**: Serves the compiled React frontend application, providing fast, global delivery via Render's CDN.
 
 This setup benefits from features like automated deployments from Git, infrastructure-as-code via a `render.yaml` file, and automatic Preview Environments for pull requests.
 
@@ -117,10 +121,13 @@ GEMINI_API_KEY=your-gemini-api-key
 
 Run the application (when the Django project scaffolding is present):
 ```bash
+# Apply migrations (run if you change models)
+uv run python manage.py makemigrations
+
 # Apply migrations
 uv run python manage.py migrate
 
-# Start the dev server
+# Start the dev server (API available at http://localhost:8000/api/)
 uv run python manage.py runserver 8000
 
 # In separate terminals, start Celery worker and beat
@@ -128,9 +135,9 @@ uv run celery -A myvod worker -l info
 uv run celery -A myvod beat -l info
 ```
 
-3) Frontend setup (planned)
+3) Frontend setup
 
-The frontend will live in `./frontend` (React + Vite). Once committed:
+The frontend lives in `./frontend` (React + Vite). Once committed:
 ```bash
 cd frontend
 npm install
@@ -162,18 +169,19 @@ Package references (see [myVOD/pyproject.toml](./myVOD/pyproject.toml)) include:
 In scope for MVP
 - IMDb-backed movie database (one-time TSV import)
 - Search with autocomplete (title, poster via TMDB)
-- Watchlist management (limit 10 movies)
+- Watchlist management
 - VOD availability via Watchmode for 5 platforms (Netflix, HBO Max, Disney+, Prime Video, Apple TV+)
-- Accounts (email + password), sessions, basic profile with platform preferences
+- Accounts (email + password), JWT-based authentication, basic profile with platform preferences
 - Mark as watched + history
 - AI suggestions (Gemini-flash-lite) with 24h cache and daily usage limit
 - Onboarding flow (3 steps)
 - Basic analytics and admin dashboard
 - GDPR-compliant data deletion
+- User and IMDB ratings
 
 Out of scope for MVP (planned later)
-- TV series; localized titles; email verification; forgotten password
-- Ratings/notes; edit watch date
+- TV series; localized titles; email verification
+- edit watch date
 - >5 platforms; more frequent availability updates
 - Advanced recommendations; automatic IMDb import; sharing watchlists
 - Mobile apps; IMDb imports; region selection; social integrations; trailers/reviews
@@ -185,10 +193,32 @@ For detailed acceptance criteria and user stories, see the PRD: [./.ai/prd.md](.
 
 ### Project status
 
-- Status: Work in progress (MVP planning and early backend setup)
-- Documents: PRD and tech stack finalized for MVP direction
-- Code: Backend dependencies declared; Django/DRF scaffolding and frontend app will be committed incrementally
-- CI/CD, Docker, and production deployment are planned but not yet committed
+- **Status**: MVP Completed.
+- **Live Application**: [https://myvod.onrender.com](https://myvod.onrender.com)
+- **Code**: Both the backend and frontend are feature-complete for the MVP scope.
+- **Deployment**: The application is containerized with Docker, has an active CI/CD pipeline using GitHub Actions, and is deployed to production on Render.
+  - **Backend Docker Image**: [tomaszwolk/10xmovies-backend](https://hub.docker.com/repository/docker/tomaszwolk/10xmovies-backend/general)
+  - **Frontend Docker Image**: [tomaszwolk/myvod](https://hub.docker.com/repository/docker/tomaszwolk/myvod/general)
+
+---
+
+### Future Roadmap
+
+The project is actively developed. Key features planned for future releases include:
+
+- **Advanced Filtering & Search**: Enhanced filtering by VOD platforms and significant improvements to search speed.
+- **IMDb Integration**: Automatic import of watchlist and rated movies directly from a user's public IMDb profile.
+- **Enriched Movie Data**: Addition of localized titles, director/actor information, and making movie titles direct links to their IMDb pages.
+- **Demo Mode**: A "login as demo user" option to quickly explore the app's features without registration.
+- **Initial Recommendations**: A carousel of popular movies for new users to get started.
+
+---
+
+### Known Issues
+
+- **Initial Page Load**: The first page load, especially with many movies on user lists, may be slower due to fetching posters.
+- **Search Performance**: The search functionality is undergoing optimization to provide faster results.
+- **Session Handling**: In rare cases, after a long period of inactivity, a manual re-login might be necessary.
 
 ---
 
