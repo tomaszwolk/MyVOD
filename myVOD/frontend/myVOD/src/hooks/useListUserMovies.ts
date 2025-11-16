@@ -22,11 +22,9 @@ export function useListUserMovies(
     refetchOnMount: enabled,
     refetchOnWindowFocus: enabled,
     refetchOnReconnect: enabled,
-    // Provide initial data with correct structure to prevent undefined.length errors
-    // This ensures TanStack Query always has a valid structure to work with from the start
-    initialData: { pages: [], pageParams: [] },
     // Provide placeholder data with correct structure to prevent undefined.length errors
-    // This ensures TanStack Query always has a valid structure to work with
+    // This ensures TanStack Query always has a valid structure to work with during loading
+    // Note: We use placeholderData instead of initialData to ensure isLoading is true during first fetch
     placeholderData: { pages: [], pageParams: [] },
     // Ensure data structure is always valid even when query is disabled
     // This prevents TanStack Query from checking undefined.length internally

@@ -42,8 +42,9 @@ Głównym celem było wyeliminowanie ładowania wszystkich filmów z listy użyt
 ### 5. Kolejne usprawnienia (listopad 2025)
 - **Nowy klient TMDB**: `services/tmdb_client.py` działa teraz na współdzielonej sesji `requests` z retry i cache (TMDB id oraz plakaty), dzięki czemu seryjne wywołania zadań `update_movie_poster` nie blokują ładowania strony.
 - **Zastąpienie `react-intersection-observer`**: dodano autorski hook `useInView`, aby infinite scroll był kompatybilny z React 19 i nie wywalał błędów `Cannot read properties of null (reading 'useState')`.
-- **Poprawione liczniki**: watchlist/watched pobierają `count` z paginacji backendu i pokazują realny stan „widoczne/łącznie”, a nie tylko sumę wczytanych stron.
+- **Poprawione liczniki**: watchlist/watched pobierają `count` z paginacji backendu i pokazują realny stan „widoczne/łącznie", a nie tylko sumę wczytanych stron.
 - **Lepsze stany ładowania**: komponenty rozróżniają pierwszy fetch od dalszych i trzymają skeleton tak długo, jak długo backend faktycznie pracuje nad pierwszą stroną.
+- **Naprawa inicjalizacji `useListUserMovies`**: usunięto `initialData: { pages: [], pageParams: [] }` z konfiguracji `useInfiniteQuery`, pozostawiając tylko `placeholderData`. Dzięki temu `isLoading` poprawnie wskazuje stan początkowego ładowania (jest `true` zamiast `false`), co eliminuje problem przejściowego wyświetlania się komunikatu "lista jest pusta" przed załadowaniem filmów.
 
 ## Sugestie (niezaimplementowane)
 
@@ -63,4 +64,4 @@ Poniżej znajdują się propozycje dalszych optymalizacji, które pojawiły się
 
 ## Aktualny status
 - Strona `/app/watched` reaguje zgodnie z założeniami (szkielet, poprawne liczniki, doładowywanie kolejnych stron).
-- Strona `/app/watchlist` wciąż potrafi na chwilę pokazać stan „Twoja lista jest pusta” po twardym odświeżeniu (problem z wyświetlaniem szkieletu w trakcie pierwszego requestu nadal występuje i wymaga dalszego śledztwa).
+- Strona `/app/watchlist` - **NAPRAWIONO** (listopad 2025): usunięto `initialData` z `useListUserMovies`, pozostawiono tylko `placeholderData`. Dzięki temu `isLoading` poprawnie pokazuje stan początkowego ładowania, a szkielet wyświetla się od razu bez przejściowego komunikatu "lista jest pusta".
