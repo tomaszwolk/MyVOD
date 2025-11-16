@@ -14,15 +14,27 @@ import { useAuth } from "@/contexts/AuthContext";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { UnauthorizedErrorPage } from "@/pages/UnauthorizedErrorPage";
 import { OfflineErrorPage } from "@/pages/OfflineErrorPage";
+import { useVerifyUser } from "./hooks/useVerifyUser";
+import { FullPageSpinner } from "./components/ui/FullPageSpinner";
 
 /**
- * Protected route component that requires JWT authentication.
- * Redirects to login page if user is not authenticated.
+ * Protected route component that requires an ACTIVE session.
+ * Verifies the session by fetching user data.
+ * Redirects to login page if user is not authenticated or session is invalid.
  */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const { isLoading, isError } = useVerifyUser();
 
-  if (!isAuthenticated) {
+  if (isLoading) {
+    // Pokaż spinner na całą stronę podczas weryfikacji sesji
+    return <FullPageSpinner />;
+  }
+
+  if (isError || !isAuthenticated) {
+    // Jeśli wystąpił błąd (np. 401) lub tokeny w ogóle nie istnieją,
+    // wyloguj (na wszelki wypadek, by wyczyścić stare tokeny) i przekieruj
+    logout();
     return <Navigate to="/auth/login" replace />;
   }
 
