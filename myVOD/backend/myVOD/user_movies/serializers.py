@@ -25,7 +25,7 @@ class MovieSerializer(serializers.ModelSerializer):
         Serialize the movie instance and trigger poster update if needed.
         """
         representation = super().to_representation(instance)
-        
+
         # Trigger poster update task if poster is missing or outdated
         needs_update = False
         if not instance.poster_path:
@@ -37,7 +37,7 @@ class MovieSerializer(serializers.ModelSerializer):
         
         if needs_update:
             update_movie_poster.delay(instance.tconst)
-            
+
         return representation
 
 
@@ -72,12 +72,61 @@ class UserMovieSerializer(serializers.ModelSerializer):
         return MovieAvailabilitySerializer(availability_data, many=True).data
 
 
+class OnVODMovieSerializer(serializers.Serializer):
+    """Serializer for movies returned by /api/on-vod-movies/ endpoint.
+
+    Returns the same structure as UserMovieSerializer but with:
+    - id: always null (no user-movie relationship)
+    - movie: full movie data
+    - availability: filtered availability data
+    - watchlisted_at, watched_at, user_rating: always null (no user context)
+    """
+
+    id = serializers.SerializerMethodField()
+    movie = MovieSerializer(source='*')
+    availability = serializers.SerializerMethodField()
+    watchlisted_at = serializers.SerializerMethodField()
+    watched_at = serializers.SerializerMethodField()
+    user_rating = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        """Always return null for on-vod movies."""
+        return None
+
+    def get_watchlisted_at(self, obj):
+        """Always return null for on-vod movies."""
+        return None
+
+    def get_watched_at(self, obj):
+        """Always return null for on-vod movies."""
+        return None
+
+    def get_user_rating(self, obj):
+        """Always return null for on-vod movies."""
+        return None
+
+    def get_availability(self, obj):
+        """Get availability data from prefetched attribute."""
+        # First try prefetched data
+        availability_data = getattr(obj, 'availability_filtered', [])
+
+        # If no prefetched data, try direct query as fallback
+        if not availability_data:
+            from movies.models import MovieAvailability
+            availability_data = list(MovieAvailability.objects.filter(
+                tconst=obj.tconst
+            ).select_related('platform'))
+
+        return MovieAvailabilitySerializer(availability_data, many=True).data
+
+
 class UserMovieQueryParamsSerializer(serializers.Serializer):
     """Validates query parameters for GET /api/user-movies/.
 
     - status: required, one of ['watchlist', 'watched']
     - ordering: optional, allow-listed fields
     - is_available: optional boolean (None if not provided)
+    - platform_ids: optional, comma-separated list of platform IDs to filter by
     """
 
     status = serializers.ChoiceField(choices=["watchlist", "watched"], required=False)
@@ -85,6 +134,82 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
         choices=["-watchlisted_at", "-tconst__avg_rating"], required=False
     )
     is_available = serializers.BooleanField(required=False, allow_null=True, default=None)
+    platform_ids = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_platform_ids(self, value):
+        """Validate and parse platform_ids parameter.
+
+        Expects a comma-separated list of platform IDs (integers).
+        Returns a list of integers, or None if empty.
+        """
+        if not value or value.strip() == "":
+            return None
+
+        try:
+            # Parse comma-separated values
+            platform_ids_str = [pid.strip() for pid in value.split(',') if pid.strip()]
+            platform_ids = [int(pid) for pid in platform_ids_str]
+
+            # Validate that all platform IDs exist
+            from movies.models import Platform
+            existing_ids = set(Platform.objects.values_list('id', flat=True))
+            invalid_ids = [pid for pid in platform_ids if pid not in existing_ids]
+
+            if invalid_ids:
+                valid_ids_str = ", ".join(str(id) for id in sorted(existing_ids))
+                raise serializers.ValidationError(
+                    f"Invalid platform IDs: {invalid_ids}. Valid platform IDs: [{valid_ids_str}]"
+                )
+
+            return platform_ids
+
+        except ValueError:
+            raise serializers.ValidationError(
+                f"Invalid platform_ids format. Expected comma-separated integers, got: {value}"
+            )
+
+
+class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
+    """Validates query parameters for GET /api/on-vod-movies/.
+
+    - page: optional, pagination page number
+    - platform_ids: optional, comma-separated list of platform IDs to filter by
+    """
+
+    page = serializers.IntegerField(min_value=1, required=False)
+    platform_ids = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_platform_ids(self, value):
+        """Validate and parse platform_ids parameter.
+
+        Expects a comma-separated list of platform IDs (integers).
+        Returns a list of integers, or None if empty.
+        """
+        if not value or value.strip() == "":
+            return None
+
+        try:
+            # Parse comma-separated values
+            platform_ids_str = [pid.strip() for pid in value.split(',') if pid.strip()]
+            platform_ids = [int(pid) for pid in platform_ids_str]
+
+            # Validate that all platform IDs exist
+            from movies.models import Platform
+            existing_ids = set(Platform.objects.values_list('id', flat=True))
+            invalid_ids = [pid for pid in platform_ids if pid not in existing_ids]
+
+            if invalid_ids:
+                valid_ids_str = ", ".join(str(id) for id in sorted(existing_ids))
+                raise serializers.ValidationError(
+                    f"Invalid platform IDs: {invalid_ids}. Valid platform IDs: [{valid_ids_str}]"
+                )
+
+            return platform_ids
+
+        except ValueError:
+            raise serializers.ValidationError(
+                f"Invalid platform_ids format. Expected comma-separated integers, got: {value}"
+            )
 
 
 class AddUserMovieCommandSerializer(serializers.Serializer):
@@ -121,10 +246,10 @@ class UpdateUserMovieCommandSerializer(serializers.Serializer):
     )
     rating = serializers.IntegerField(min_value=1, max_value=10, required=False)
 
-    def validate(self, data):
+    def validate(self, attrs):
         """
         Check that rating is provided when action is 'rate_movie'.
         """
-        if data.get('action') == 'rate_movie' and 'rating' not in data:
+        if attrs.get('action') == 'rate_movie' and 'rating' not in attrs:
             raise serializers.ValidationError({"rating": "Rating is required when action is 'rate_movie'."})
-        return data
+        return attrs

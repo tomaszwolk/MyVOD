@@ -1,5 +1,6 @@
 import logging
 from rest_framework import viewsets, permissions, status
+from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.db import DatabaseError, IntegrityError
@@ -7,11 +8,14 @@ from movies.models import UserMovie, Movie  # type: ignore
 from .serializers import (
     UserMovieSerializer,
     UserMovieQueryParamsSerializer,
+    OnVODMovieSerializer,
+    OnVODMoviesQueryParamsSerializer,
     AddUserMovieCommandSerializer,
     UpdateUserMovieCommandSerializer
 )
 from services.user_movies_service import (  # type: ignore
     build_user_movies_queryset,
+    build_on_vod_movies_queryset,
     add_movie_to_watchlist,
     add_movie_as_watched,
     update_user_movie,
@@ -87,6 +91,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
                 status_param=params.validated_data.get('status'),
                 ordering_param=params.validated_data.get('ordering'),
                 is_available=params.validated_data.get('is_available'),
+                platform_ids=params.validated_data.get('platform_ids'),
             )
 
             # Handle pagination
@@ -361,6 +366,86 @@ class UserMovieViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(
                 f"Unexpected error while deleting user-movie {pk} for user {request.user.id}: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"detail": "An unexpected error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class OnVODMoviesView(APIView):
+    """
+    API view for listing movies available on VOD platforms.
+
+    GET /api/on-vod-movies/ - retrieve paginated list of movies available on VOD
+
+    Query Parameters:
+        - page: optional, pagination page number (default: 1)
+        - platform_ids: optional, comma-separated list of platform IDs to filter by
+
+    Returns:
+        200: Paginated list of OnVODMovieDto
+        400: Invalid query parameters
+        401: Not authenticated
+        500: Internal server error
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get(self, request):
+        """
+        List movies available on VOD platforms with optional platform filtering.
+
+        Implements business logic:
+        - Returns unique movies available on at least one VOD platform
+        - Optional filtering by specific platforms
+        - Ordered by most recently added availability
+        - Includes availability data for user's platforms
+
+        Returns:
+            200: Paginated list of OnVODMovieDto
+            400: Invalid query parameters
+            401: Not authenticated
+            500: Internal server error
+        """
+        # Validate query parameters
+        params = OnVODMoviesQueryParamsSerializer(data=request.query_params)
+        if not params.is_valid():
+            logger.warning(
+                f"Invalid query parameters for on-vod-movies (user {request.user.id}): {params.errors}"
+            )
+            return Response(params.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Use service layer for queryset building
+            queryset = build_on_vod_movies_queryset(
+                platform_ids=params.validated_data.get('platform_ids')
+            )
+
+            # Handle pagination
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(queryset, request, view=self)
+            if page is not None:
+                serializer = OnVODMovieSerializer(page, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            # Serialize and return response
+            serializer = OnVODMovieSerializer(queryset, many=True)
+            return Response(serializer.data)
+
+        except DatabaseError as e:
+            logger.error(
+                f"Database error while fetching on-vod movies for user {request.user.id}: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"detail": "A database error occurred. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            logger.error(
+                f"Unexpected error while fetching on-vod movies for user {request.user.id}: {str(e)}",
                 exc_info=True
             )
             return Response(

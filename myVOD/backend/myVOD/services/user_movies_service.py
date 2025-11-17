@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch
+from django.db.models import Exists, OuterRef, Prefetch, Max
 from django.utils import timezone
 
 from movies.models import Movie, MovieAvailability, UserMovie, UserPlatform  # type: ignore
@@ -33,6 +33,7 @@ def build_user_movies_queryset(
     status_param: str,
     ordering_param: str | None = None,
     is_available: bool | None = None,
+    platform_ids: list[int] | None = None,
 ):
     """Builds the queryset for listing user's movies with optional filters.
 
@@ -41,15 +42,18 @@ def build_user_movies_queryset(
         status_param: 'watchlist' or 'watched'. Required.
         ordering_param: Optional ordering field ('-watchlisted_at' or '-tconst__avg_rating').
         is_available: Optional boolean to filter by availability across user's platforms.
+        platform_ids: Optional list of platform IDs to filter availability by. If None, uses user's platforms.
     """
 
     # Resolve canonical user UUID (custom user model has UUID id)
     supabase_user_uuid = _resolve_user_uuid(user)
-    platform_ids = _get_user_platform_ids(supabase_user_uuid)
+
+    # Use provided platform_ids or fall back to user's platforms
+    filter_platform_ids = platform_ids if platform_ids is not None else _get_user_platform_ids(supabase_user_uuid)
 
     availability_prefetch = Prefetch(
         'tconst__availability_entries',
-        queryset=MovieAvailability.objects.filter(platform_id__in=platform_ids).select_related('platform'),
+        queryset=MovieAvailability.objects.filter(platform_id__in=filter_platform_ids).select_related('platform'),
         to_attr='availability_filtered'
     )
 
@@ -85,7 +89,7 @@ def build_user_movies_queryset(
         # Use EXISTS subquery for better performance (no materialized list)
         available_subquery = MovieAvailability.objects.filter(
             tconst=OuterRef('tconst'),
-            platform_id__in=platform_ids,
+            platform_id__in=filter_platform_ids,
             is_available=True,
         )
         queryset = queryset.filter(Exists(available_subquery))
@@ -93,12 +97,12 @@ def build_user_movies_queryset(
         # Movies with at least one FALSE and NO TRUE entries on user's platforms
         has_true = MovieAvailability.objects.filter(
             tconst=OuterRef('tconst'),
-            platform_id__in=platform_ids,
+            platform_id__in=filter_platform_ids,
             is_available=True,
         )
         has_false = MovieAvailability.objects.filter(
             tconst=OuterRef('tconst'),
-            platform_id__in=platform_ids,
+            platform_id__in=filter_platform_ids,
             is_available=False,
         )
         queryset = queryset.filter(Exists(has_false)).exclude(Exists(has_true))
@@ -425,3 +429,66 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
 
     # No response body needed for DELETE 204 in view → avoid extra re-fetch
     return user_movie
+
+
+def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None):
+    """Builds the queryset for listing movies available on VOD platforms.
+
+    Returns unique movies that are available on at least one VOD platform,
+    optionally filtered by specific platform IDs.
+
+    Args:
+        platform_ids: Optional list of platform IDs to filter by. If None, includes all platforms.
+
+    Returns:
+        QuerySet of Movie objects with prefetched availability data, ordered by latest availability.
+    """
+    # Base queryset: movies that have at least one availability record
+    filter_platforms = platform_ids if platform_ids is not None else None
+
+    if filter_platforms:
+        # Filter by specific platforms
+        availability_filter = MovieAvailability.objects.filter(
+            tconst=OuterRef('tconst'),
+            platform_id__in=filter_platforms,
+            is_available=True
+        )
+    else:
+        # Include all platforms - any movie with any availability
+        availability_filter = MovieAvailability.objects.filter(
+            tconst=OuterRef('tconst'),
+            is_available=True
+        )
+
+    # Get movies that have availability on selected platforms
+    queryset = Movie.objects.filter(Exists(availability_filter))
+
+    # Prefetch availability data for the selected platforms
+    if filter_platforms:
+        availability_prefetch = Prefetch(
+            'availability_entries',
+            queryset=MovieAvailability.objects.filter(
+                platform_id__in=filter_platforms,
+                is_available=True
+            ).select_related('platform'),
+            to_attr='availability_filtered'
+        )
+    else:
+        availability_prefetch = Prefetch(
+            'availability_entries',
+            queryset=MovieAvailability.objects.filter(
+                is_available=True
+            ).select_related('platform'),
+            to_attr='availability_filtered'
+        )
+
+    # Apply prefetch and ordering
+    queryset = queryset.prefetch_related(availability_prefetch)
+
+    # Order by the maximum availability id (most recently added availability first)
+    # This ensures consistent pagination and shows newest available movies first
+    queryset = queryset.annotate(
+        latest_availability_id=Max('availability_entries__id')
+    ).order_by('-latest_availability_id')
+
+    return queryset

@@ -111,3 +111,42 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
     1.  **Usunięcie starych filtrów**: Logika i przycisk "Ukryj niedostępne" zostaną usunięte z komponentów `FiltersBar` i `WatchedFiltersBar`. Te komponenty mogą zostać całkowicie usunięte lub zrefaktoryzowane, jeśli zawierają inną logikę (np. sortowanie), która ma pozostać.
     2.  **Integracja z globalnym stanem**: Hooki `useQuery`/`useInfiniteQuery` w tych stronach zostaną zmodyfikowane tak, aby pobierały `selectedPlatformIds` ze store'a Zustand i przekazywały je jako parametr `platform_ids` do endpointu `/api/user-movies/`.
     3.  **Aktualizacja UI**: Upewnienie się, że po usunięciu starych filtrów layout wygląda poprawnie, a nowy, globalny pasek jest poprawnie wyświetlany.
+
+## Dodatkowe uwagi do planu
+
+### Brakujące szczegóły implementacyjne:
+
+1. **Integracja z istniejącymi preferencjami sesji**: Globalne filtry platform powinny współistnieć z istniejącymi `useSessionPreferences` (view mode, sort, lokalne filtry). Stan globalny platform będzie niezależny od preferencji sesyjnych użytkownika.
+
+2. **Migracje bazy danych**: Plan zakłada, że struktura bazy danych (tabele `platform`, `movie_availability`, `user_movie`) jest już gotowa zgodnie z `db-plan.md`. Jeśli nie, będą potrzebne migracje Supabase.
+
+3. **Zachowanie starych komponentów filtrów**: Przy usunięciu `FiltersBar` i `WatchedFiltersBar`, sprawdzić czy zawierają inną logikę (np. liczniki widocznych elementów) która powinna zostać przeniesiona do nowego `PlatformFiltersToolbar`.
+
+4. **Obsługa pustych filtrów platform**: Jeśli użytkownik nie ma wybranych platform (`selectedPlatformIds` jest pusty), endpointy powinny zwracać wszystkie filmy (bez filtrowania po platformach).
+
+5. **Domyślny stan filtrów**: Wszystkie platformy powinny być domyślnie zaznaczone przy inicjalizacji store'a Zustand, aby zapewnić wsteczną kompatybilność.
+
+6. **Performance**: Przy dużej liczbie filmów, filtrowanie po wielu platformach może być kosztowne - upewnić się, że indeksy w bazie danych są optymalne (GIN indexes na `genres`, partial indexes na availability).
+
+## Stan implementacji
+
+### ✅ Zakończone (Faza 2 - Backend):
+
+1. **Rozszerzony endpoint `/api/user-movies/`** ✅
+   - Dodano parametr `platform_ids` do query params
+   - Walidacja formatu i istnienia platform w bazie danych
+   - Integracja z istniejącą logiką filtrowania (is_available, ordering, status)
+   - Test potwierdzony: `GET /api/user-movies/?status=watchlist&platform_ids=1,2` działa
+
+2. **Nowy endpoint `/api/on-vod-movies/`** ✅
+   - Serializer `OnVODMoviesQueryParamsSerializer` dla parametrów page, platform_ids
+   - Serializer `OnVODMovieSerializer` zwracający identyczną strukturę co UserMovieSerializer z id=null
+   - Service function `build_on_vod_movies_queryset()` z filtrowaniem i sortowaniem
+   - View `OnVODMoviesView` z paginacją i obsługą błędów
+   - URL path dodany: `path("api/on-vod-movies/", OnVODMoviesView.as_view(), name="on-vod-movies")`
+   - Test potwierdzony: `GET /api/on-vod-movies/` działa
+
+### 🔄 Następne kroki:
+- Rozpocząć Faza 3: Frontend - globalny stan filtrów platform (Zustand)
+- Stworzyć komponent `PlatformFiltersToolbar`
+- Modyfikować `MediaLibraryLayout` dla globalnych filtrów

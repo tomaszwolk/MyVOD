@@ -32,6 +32,7 @@ from .views import (
     PasswordResetValidateView,
     PasswordResetConfirmView,
 )
+from user_movies.views import OnVODMoviesView
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
@@ -57,6 +58,9 @@ urlpatterns = [
 
     # User Movies (Watchlist & Watched History)
     path("api/user-movies/", include("user_movies.urls")),
+
+    # On VOD Movies (Available on streaming platforms)
+    path("api/on-vod-movies/", OnVODMoviesView.as_view(), name="on-vod-movies"),
 
     # Movie Search (Public)
     path("api/movies/", include("movies.urls")),
