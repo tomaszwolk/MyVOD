@@ -12,6 +12,7 @@ vi.mock("lucide-react", () => ({
   ImageIcon: () => <div data-testid="image-icon" />,
   Trash2: () => <div data-testid="trash2-icon" />,
   Star: () => <div data-testid="star-icon" />,
+  Trophy: () => <div data-testid="trophy-icon" />,
 }));
 
 describe("UserMovieCard", () => {
@@ -26,8 +27,11 @@ describe("UserMovieCard", () => {
     title: "The Shawshank Redemption",
     year: 1994,
     genres: ["Drama", "Crime"],
-    avgRating: "9.3",
-    posterPath: "/shawshank.jpg",
+    imdbRating: "9.3",
+    avgRating: "9.3", // alias
+    userRating: null,
+    posterUrl: "/shawshank.jpg",
+    posterPath: "/shawshank.jpg", // alias
     watchedAt: "2024-01-01T00:00:00Z",
     watchedAtLabel: "1 stycznia 2024",
     availability: [
@@ -64,6 +68,7 @@ describe("UserMovieCard", () => {
   it("should render placeholder when poster is not available", () => {
     const itemWithoutPoster = {
       ...mockItem,
+      posterUrl: null,
       posterPath: null,
     };
 

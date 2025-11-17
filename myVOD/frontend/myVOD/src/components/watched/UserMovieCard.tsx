@@ -14,6 +14,7 @@ import {
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 import { cn } from "@/lib/utils";
+import { Star, Trophy } from "lucide-react";
 
 /**
  * Props for UserMovieCard component.
@@ -69,13 +70,13 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       data-testid={`watched-movie-card-${item.tconst}`}
     >
       {/* Poster */}
-      <div className="aspect-[2/3] bg-muted relative">
+      <div className="relative aspect-[2/3] w-full">
         <TMDBPoster
-          src={item.posterPath}
+          src={item.posterUrl}
           alt={item.title}
           width={200}
           height={300}
-          className="w-full h-full object-cover"
+          className="rounded-md object-cover"
         >
           {({ isPlaceholder, imgProps }) => (
             <div
@@ -97,51 +98,72 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-grow">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {/* Title */}
-              <h3
-                id={`movie-title-${item.id}`}
-                className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
-              >
-                {item.title}
-              </h3>
-            </TooltipTrigger>
+      <div className="flex-1 space-y-2 px-1">
+        <div className="space-y-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* Title */}
+                <h3
+                  id={`movie-title-${item.id}`}
+                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+                >
+                  {item.title}
+                </h3>
+              </TooltipTrigger>
 
-            {/* Year, Genres, Rating */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-              {item.year && <span>{item.year}</span>}
-              {displayGenres && (
-                <>
-                  <span>•</span>
-                  <span className="truncate">{displayGenres}</span>
-                </>
-              )}
-            </div>
-
-            {/* Rating */}
-            <div className="mb-2">
-              <MovieRating
-                imdbRating={item.avgRating}
-                userRating={item.userRating}
-                onRateClick={handleRate}
-                tconst={item.tconst}
-              />
-            </div>
-            <TooltipContent side="bottom" align="start">
-              <p className="font-bold">{item.title}</p>
-              {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
-              <div className="mt-2 pt-2 border-t border-border">
-                <p className="text-sm">
-                  IMDB.com rating: {item.avgRating || "-"}
-                </p>
-                <p className="text-sm">User rating: {item.userRating || "-"}</p>
+              {/* Year, Genres, Rating */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                {item.year && <span>{item.year}</span>}
+                {displayGenres && (
+                  <>
+                    <span>•</span>
+                    <span className="truncate">{displayGenres}</span>
+                  </>
+                )}
               </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+
+              {/* Rating */}
+              <div className="mb-2">
+                <MovieRating
+                  imdbRating={item.imdbRating}
+                  userRating={item.userRating}
+                  onRateClick={handleRate}
+                  tconst={item.tconst}
+                />
+              </div>
+              <TooltipContent side="bottom" align="start">
+                <p className="font-bold">{item.title}</p>
+                {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
+                <div className="mt-2 pt-2 border-t border-border">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span className="font-semibold text-sm">
+                      {item.imdbRating || "-"}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Trophy className="h-4 w-4" />
+                      <span>
+                        Twoja ocena:{" "}
+                        <span className="font-semibold">
+                          {item.userRating ? `${item.userRating}/10` : "-"}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4" />
+                      <span>
+                        IMDB.com rating: {item.imdbRating || "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
         {/* Bottom Group */}
         <div className="mt-auto pt-2">

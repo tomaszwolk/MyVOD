@@ -3,6 +3,8 @@
 #
 # IMPORTANT: Before running any docker-compose commands,
 # ensure that Docker Desktop is running on your machine.
+# run 'docker compose build' to build the images
+# run 'docker compose build --no-cache' to build the images without cache
 
 services:
   backend:
@@ -23,6 +25,8 @@ services:
       context: ./myVOD/frontend
       args:
         - VITE_API_URL=${VITE_API_URL}
+    environment:
+      - NGINX_PROXY_PASS_URL=${NGINX_PROXY_PASS_URL:-http://localhost:8000}
     image: tomaszwolk/myvod
     container_name: myvod-frontend
     ports:

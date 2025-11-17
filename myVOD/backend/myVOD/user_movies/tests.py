@@ -28,15 +28,16 @@ def resolve_test_user_uuid() -> uuid.UUID:
 
 class UserMovieAPITests(APITestCase):
     def setUp(self):
-        self.test_user_id = resolve_test_user_uuid()
+        # Create unique test data for each test run to avoid interference
+        self.test_user_id = uuid.uuid4()
         from django.contrib.auth import get_user_model
 
         User = get_user_model()
         self.user1, _ = User.objects.get_or_create(
             id=self.test_user_id,
             defaults={
-                'email': 'apitestrunner@example.com',
-                'username': 'apitestrunner',
+                'email': f'testuser_{self.test_user_id}@example.com',
+                'username': f'testuser_{self.test_user_id}',
                 'is_active': True,
             },
         )
@@ -44,20 +45,22 @@ class UserMovieAPITests(APITestCase):
         self.user2, _ = User.objects.get_or_create(
             id=uuid.uuid4(),
             defaults={
-                'email': 'apitestrunner2@example.com',
-                'username': 'apitestrunner2',
+                'email': f'testuser2_{uuid.uuid4()}@example.com',
+                'username': f'testuser2_{uuid.uuid4()}',
                 'is_active': True,
             },
         )
 
+        # Create unique movies for this test run
+        test_suffix = str(uuid.uuid4())[:8]
         self.movie1, _ = Movie.objects.get_or_create(
-            tconst="tt0000001", defaults={"primary_title": "Movie 1", "avg_rating": 8.5}
+            tconst=f"tt0000001_{test_suffix}", defaults={"primary_title": "Movie 1", "avg_rating": 8.5}
         )
         self.movie2, _ = Movie.objects.get_or_create(
-            tconst="tt0000002", defaults={"primary_title": "Movie 2", "avg_rating": 9.0}
+            tconst=f"tt0000002_{test_suffix}", defaults={"primary_title": "Movie 2", "avg_rating": 9.0}
         )
         self.movie3, _ = Movie.objects.get_or_create(
-            tconst="tt0000003", defaults={"primary_title": "Movie 3", "avg_rating": 7.0}
+            tconst=f"tt0000003_{test_suffix}", defaults={"primary_title": "Movie 3", "avg_rating": 7.0}
         )
 
         self.platform1, _ = Platform.objects.get_or_create(
@@ -99,35 +102,36 @@ class UserMovieAPITests(APITestCase):
             },
         )
 
-        UserMovie.objects.update_or_create(
+        # Create fresh UserMovie records
+        UserMovie.objects.create(
             user_id=self.user1.id,
             tconst=self.movie1,
-            defaults={
-                "watchlisted_at": "2023-10-01T10:00:00Z",
-                "watchlist_deleted_at": None,
-                "watched_at": None,
-            },
+            watchlisted_at="2023-10-01T10:00:00Z",
+            watchlist_deleted_at=None,
+            watched_at=None,
         )
-        UserMovie.objects.update_or_create(
+        UserMovie.objects.create(
             user_id=self.user1.id,
             tconst=self.movie2,
-            defaults={
-                "watched_at": "2023-10-02T10:00:00Z",
-                "watchlisted_at": None,
-                "watchlist_deleted_at": None,
-            },
+            watched_at="2023-10-02T10:00:00Z",
+            watchlisted_at=None,
+            watchlist_deleted_at=None,
         )
-        UserMovie.objects.update_or_create(
+        UserMovie.objects.create(
             user_id=self.user1.id,
             tconst=self.movie3,
-            defaults={
-                "watchlisted_at": "2023-10-03T10:00:00Z",
-                "watchlist_deleted_at": None,
-                "watched_at": None,
-            },
+            watchlisted_at="2023-10-03T10:00:00Z",
+            watchlist_deleted_at=None,
+            watched_at=None,
         )
 
         self.url = reverse("usermovie-list")
+
+    def tearDown(self):
+        # Clean up test data to ensure test isolation
+        UserMovie.objects.filter(user_id__in=[self.user1.id, self.user2.id]).delete()
+        UserPlatform.objects.filter(user_id__in=[self.user1.id, self.user2.id]).delete()
+        MovieAvailability.objects.filter(tconst__in=[self.movie1, self.movie2, self.movie3]).delete()
 
     def test_authentication_required(self):
         response = self.client.get(self.url)
@@ -137,15 +141,18 @@ class UserMovieAPITests(APITestCase):
         self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.url, {"status": "watchlist"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[0]["movie"]["tconst"], self.movie1.tconst)
+        self.assertEqual(len(response.data["results"]), 2)
+        # Check that both expected movies are in the results
+        tconsts = [item["movie"]["tconst"] for item in response.data["results"]]
+        self.assertIn(self.movie1.tconst, tconsts)
+        self.assertIn(self.movie3.tconst, tconsts)
 
     def test_get_watched_list(self):
         self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.url, {"status": "watched"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["movie"]["tconst"], self.movie2.tconst)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["movie"]["tconst"], self.movie2.tconst)
 
     def test_filter_by_is_available(self):
         self.client.force_authenticate(user=self.user1)
@@ -153,8 +160,8 @@ class UserMovieAPITests(APITestCase):
             self.url, {"status": "watchlist", "is_available": "true"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["movie"]["tconst"], self.movie1.tconst)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["movie"]["tconst"], self.movie1.tconst)
 
     def test_ordering_by_rating(self):
         self.client.force_authenticate(user=self.user1)
@@ -162,8 +169,8 @@ class UserMovieAPITests(APITestCase):
             self.url, {"status": "watchlist", "ordering": "-tconst__avg_rating"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]["movie"]["avg_rating"], "8.5")
-        self.assertEqual(response.data[1]["movie"]["avg_rating"], "7.0")
+        self.assertEqual(response.data["results"][0]["movie"]["avg_rating"], "8.5")
+        self.assertEqual(response.data["results"][1]["movie"]["avg_rating"], "7.0")
 
     def test_invalid_status_parameter(self):
         self.client.force_authenticate(user=self.user1)
@@ -174,7 +181,7 @@ class UserMovieAPITests(APITestCase):
         self.client.force_authenticate(user=self.user2)
         response = self.client.get(self.url, {"status": "watchlist"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data["results"]), 0)
 
     def test_invalid_ordering_parameter_returns_400(self):
         self.client.force_authenticate(user=self.user1)
@@ -196,8 +203,8 @@ class UserMovieAPITests(APITestCase):
             self.url, {"status": "watched", "is_available": "false"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["movie"]["tconst"], self.movie2.tconst)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["movie"]["tconst"], self.movie2.tconst)
 
     def test_is_available_false_for_watchlist_returns_empty(self):
         self.client.force_authenticate(user=self.user1)
@@ -205,7 +212,7 @@ class UserMovieAPITests(APITestCase):
             self.url, {"status": "watchlist", "is_available": "false"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data["results"]), 0)
 
 
 class UserMoviePostAPITests(APITestCase):

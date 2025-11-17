@@ -164,40 +164,41 @@ describe('listUserMovies', () => {
   it('should call GET /api/user-movies without params', async () => {
     mock.onGet('/user-movies/').reply(200, mockUserMovies);
 
-    await listUserMovies();
+    await listUserMovies({});
 
     expect(mock.history.get).toHaveLength(1);
     expect(mock.history.get[0].url).toBe('/user-movies/');
-    expect(mock.history.get[0].params).toBeUndefined();
+    expect(mock.history.get[0].params).toEqual({ page: 1 });
   });
 
   it('should call GET /api/user-movies?status=watchlist', async () => {
     mock.onGet('/user-movies/').reply(200, mockUserMovies);
 
-    await listUserMovies('watchlist');
+    await listUserMovies({ status: 'watchlist' });
 
     expect(mock.history.get).toHaveLength(1);
-    expect(mock.history.get[0].params).toEqual({ status: 'watchlist' });
+    expect(mock.history.get[0].params).toEqual({ status: 'watchlist', page: 1 });
   });
 
   it('should call GET /api/user-movies?status=watched', async () => {
     mock.onGet('/user-movies/').reply(200, mockUserMovies);
 
-    await listUserMovies('watched');
+    await listUserMovies({ status: 'watched' });
 
     expect(mock.history.get).toHaveLength(1);
-    expect(mock.history.get[0].params).toEqual({ status: 'watched' });
+    expect(mock.history.get[0].params).toEqual({ status: 'watched', page: 1 });
   });
 
   it('should return UserMovieDto[]', async () => {
-    mock.onGet('/user-movies/').reply(200, mockUserMovies);
+    const paginatedResponse = { results: mockUserMovies, count: mockUserMovies.length, next: null };
+    mock.onGet('/user-movies/').reply(200, paginatedResponse);
 
-    const result = await listUserMovies();
+    const result = await listUserMovies({});
 
-    expect(result).toEqual(mockUserMovies);
-    expect(result).toHaveLength(2);
-    expect(result[0].id).toBe(123);
-    expect(result[1].id).toBe(456);
+    expect(result.results).toEqual(mockUserMovies);
+    expect(result.results).toHaveLength(2);
+    expect(result.results[0].id).toBe(123);
+    expect(result.results[1].id).toBe(456);
   });
 
   it('should handle errors', async () => {

@@ -8,6 +8,7 @@ import {
   patchUserMovie,
   deleteUserMovie,
   listUserMovies,
+  fetchUserMoviesSimpleList,
 } from "@/lib/api/movies";
 import {
   getNextOnboardingPath,
@@ -32,6 +33,7 @@ vi.mock("@/lib/api/movies", () => ({
   patchUserMovie: vi.fn(),
   deleteUserMovie: vi.fn(),
   listUserMovies: vi.fn(),
+  fetchUserMoviesSimpleList: vi.fn(),
 }));
 
 vi.mock("@/hooks/useOnboardingStatus", () => ({
@@ -51,6 +53,7 @@ const mockAddUserMovie = vi.mocked(addUserMovie);
 const mockPatchUserMovie = vi.mocked(patchUserMovie);
 const mockDeleteUserMovie = vi.mocked(deleteUserMovie);
 const mockListUserMovies = vi.mocked(listUserMovies);
+const mockFetchUserMoviesSimpleList = vi.mocked(fetchUserMoviesSimpleList);
 const mockUseOnboardingStatus = vi.mocked(useOnboardingStatus);
 const mockGetNextOnboardingPath = vi.mocked(getNextOnboardingPath);
 const mockToast = vi.mocked(toast);
@@ -345,8 +348,8 @@ describe("useOnboardingWatchedController", () => {
       const conflictError = { status: 409 };
       mockAddUserMovie.mockRejectedValue(conflictError);
 
-      // listUserMovies returns existing movie
-      mockListUserMovies.mockResolvedValue([
+      // fetchUserMoviesSimpleList returns existing movie
+      mockFetchUserMoviesSimpleList.mockResolvedValue([
         {
           ...mockUserMovieDto,
           watchlisted_at: "2025-01-01T10:00:00Z",
@@ -364,7 +367,7 @@ describe("useOnboardingWatchedController", () => {
         await result.current.pick(mockMovie);
       });
 
-      expect(mockListUserMovies).toHaveBeenCalledWith("watched");
+      expect(mockFetchUserMoviesSimpleList).toHaveBeenCalledWith("watched");
       expect(result.current.viewModel.selected[0]).toMatchObject({
         tconst: "tt0111161",
         source: "preexisting_watched",
@@ -381,8 +384,8 @@ describe("useOnboardingWatchedController", () => {
       const conflictError = { status: 409 };
       mockAddUserMovie.mockRejectedValue(conflictError);
 
-      // listUserMovies returns empty array (movie not found)
-      mockListUserMovies.mockResolvedValue([]);
+      // fetchUserMoviesSimpleList returns empty array (movie not found)
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { Wrapper } = createWrapper();
 

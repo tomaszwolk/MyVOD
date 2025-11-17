@@ -8,7 +8,7 @@ import { useUpdateUserPlatforms } from "@/hooks/useUpdateUserPlatforms";
 import { useDeleteAccount } from "@/hooks/useDeleteAccount";
 import { useChangePassword } from "@/hooks/useChangePassword";
 import { useAddMovie } from "@/hooks/useAddMovie";
-import { useListUserMovies } from "@/hooks/useListUserMovies";
+import { useAllUserMovies } from "@/hooks/useAllUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { UserMovieDto } from "@/types/api.types";
 
 type MovieMutationErrorResponse = {
   detail?: string;
@@ -56,8 +57,8 @@ export function ProfilePage() {
   // Data fetching
   const userProfileQuery = useUserProfile(isAuthenticated);
   const platformsQuery = usePlatforms(isAuthenticated);
-  const watchlistQuery = useListUserMovies('watchlist', isAuthenticated);
-  const watchedQuery = useListUserMovies('watched', isAuthenticated);
+  const watchlistQuery = useAllUserMovies('watchlist', isAuthenticated);
+  const watchedQuery = useAllUserMovies('watched', isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
 
   // Mutations
@@ -167,7 +168,7 @@ export function ProfilePage() {
   const handleAddToWatchlist = useCallback(async (tconst: string) => {
     const watchedEntries = watchedQuery.data ?? [];
     const watchedEntriesByTconst = new Map<string, number>();
-    watchedEntries.forEach(entry => {
+    watchedEntries.forEach((entry: UserMovieDto) => {
       watchedEntriesByTconst.set(entry.movie.tconst, entry.id);
     });
     const watchedEntryId = watchedEntriesByTconst.get(tconst);
@@ -235,11 +236,11 @@ export function ProfilePage() {
     [watchedQuery.data]
   );
   const existingTconsts = useMemo(
-    () => watchlistEntries.map(entry => entry.movie.tconst),
+    () => watchlistEntries.map((entry: UserMovieDto) => entry.movie.tconst),
     [watchlistEntries]
   );
   const existingWatchedTconsts = useMemo(
-    () => watchedEntries.map(entry => entry.movie.tconst),
+    () => watchedEntries.map((entry: UserMovieDto) => entry.movie.tconst),
     [watchedEntries]
   );
 

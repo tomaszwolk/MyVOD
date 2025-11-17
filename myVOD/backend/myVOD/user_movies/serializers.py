@@ -80,7 +80,7 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
     - is_available: optional boolean (None if not provided)
     """
 
-    status = serializers.ChoiceField(choices=["watchlist", "watched"], required=True)
+    status = serializers.ChoiceField(choices=["watchlist", "watched"], required=False)
     ordering = serializers.ChoiceField(
         choices=["-watchlisted_at", "-tconst__avg_rating"], required=False
     )

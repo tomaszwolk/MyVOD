@@ -11,6 +11,7 @@ type UseWatchlistSelectorsProps = {
   userPlatforms: PlatformDto[];
   sortOption: SortOption;
   filters: FiltersState;
+  totalAvailableCount?: number;
 };
 
 /**
@@ -25,8 +26,15 @@ export function useWatchlistSelectors({
   userPlatforms,
   sortOption,
   filters,
+  totalAvailableCount,
 }: UseWatchlistSelectorsProps) {
   return useMemo(() => {
-    return processWatchlistData(data, userPlatforms, sortOption, filters);
-  }, [data, userPlatforms, sortOption, filters]);
+    return processWatchlistData(
+      data,
+      userPlatforms,
+      sortOption,
+      filters,
+      totalAvailableCount
+    );
+  }, [data, userPlatforms, sortOption, filters, totalAvailableCount]);
 }

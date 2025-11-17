@@ -4,7 +4,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useOnboardingStatus, getNextOnboardingPath, type OnboardingProgress } from '../useOnboardingStatus';
 import { getUserProfile } from '@/lib/api/auth';
-import { listUserMovies } from '@/lib/api/movies';
+import { fetchUserMoviesSimpleList } from '@/lib/api/movies';
 import type { UserProfileDto, UserMovieDto } from '@/types/api.types';
 
 // Mock API functions
@@ -13,11 +13,11 @@ vi.mock('@/lib/api/auth', () => ({
 }));
 
 vi.mock('@/lib/api/movies', () => ({
-  listUserMovies: vi.fn(),
+  fetchUserMoviesSimpleList: vi.fn(),
 }));
 
 const mockGetUserProfile = vi.mocked(getUserProfile);
-const mockListUserMovies = vi.mocked(listUserMovies);
+const mockFetchUserMoviesSimpleList = vi.mocked(fetchUserMoviesSimpleList);
 
 describe('useOnboardingStatus', () => {
   let queryClient: QueryClient;
@@ -31,7 +31,7 @@ describe('useOnboardingStatus', () => {
     });
 
     mockGetUserProfile.mockReset();
-    mockListUserMovies.mockReset();
+    mockFetchUserMoviesSimpleList.mockReset();
   });
 
   const createWrapper = () => {
@@ -66,7 +66,7 @@ describe('useOnboardingStatus', () => {
   describe('Basic Functionality', () => {
     it('should return loading state initially', () => {
       mockGetUserProfile.mockReturnValue(new Promise(() => {})); // Never resolves
-      mockListUserMovies.mockReturnValue(new Promise(() => {}));
+      mockFetchUserMoviesSimpleList.mockReturnValue(new Promise(() => {}));
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -79,7 +79,7 @@ describe('useOnboardingStatus', () => {
 
     it('should return complete onboarding when all requirements met', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : mockWatchedMovies)
       );
 
@@ -103,7 +103,7 @@ describe('useOnboardingStatus', () => {
     it('should return platforms step when no platforms selected', async () => {
       const profileWithoutPlatforms = { ...mockUserProfile, platforms: [] };
       mockGetUserProfile.mockResolvedValue(profileWithoutPlatforms);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -120,7 +120,7 @@ describe('useOnboardingStatus', () => {
 
     it('should return add step when platforms selected but no watchlist movies', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? [] : [])
       );
 
@@ -143,7 +143,7 @@ describe('useOnboardingStatus', () => {
 
     it('should return watched step when platforms and watchlist complete but no watched movies', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : [])
       );
 
@@ -170,7 +170,7 @@ describe('useOnboardingStatus', () => {
   describe('Edge Cases & Error Handling', () => {
     it('should handle profile loading error gracefully', async () => {
       mockGetUserProfile.mockRejectedValue(new Error('Network error'));
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -187,7 +187,7 @@ describe('useOnboardingStatus', () => {
 
     it('should handle watchlist loading error gracefully', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) => {
+      mockFetchUserMoviesSimpleList.mockImplementation((status) => {
         if (status === 'watchlist') {
           return Promise.reject(new Error('Watchlist error'));
         }
@@ -209,7 +209,7 @@ describe('useOnboardingStatus', () => {
 
     it('should handle watched loading error gracefully', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) => {
+      mockFetchUserMoviesSimpleList.mockImplementation((status) => {
         if (status === 'watched') {
           return Promise.reject(new Error('Watched error'));
         }
@@ -231,7 +231,7 @@ describe('useOnboardingStatus', () => {
 
     it('should handle null/undefined profile gracefully', async () => {
       mockGetUserProfile.mockResolvedValue(null);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -248,7 +248,7 @@ describe('useOnboardingStatus', () => {
     it('should handle profile with null platforms array', async () => {
       const profileWithNullPlatforms = { ...mockUserProfile, platforms: null };
       mockGetUserProfile.mockResolvedValue(profileWithNullPlatforms);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -263,7 +263,7 @@ describe('useOnboardingStatus', () => {
 
     it('should handle exactly 3 watchlist movies', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : [])
       );
 
@@ -280,7 +280,7 @@ describe('useOnboardingStatus', () => {
 
     it('should handle exactly 3 watched movies', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : mockWatchedMovies)
       );
 
@@ -299,7 +299,7 @@ describe('useOnboardingStatus', () => {
     it('should handle less than 3 watchlist movies', async () => {
       const insufficientWatchlist = mockWatchlistMovies.slice(0, 2); // Only 2 movies
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? insufficientWatchlist : [])
       );
 
@@ -318,7 +318,7 @@ describe('useOnboardingStatus', () => {
     it('should handle less than 3 watched movies', async () => {
       const insufficientWatched = mockWatchedMovies.slice(0, 1); // Only 1 movie
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies :
                        status === 'watched' ? insufficientWatched : [])
       );
@@ -342,7 +342,7 @@ describe('useOnboardingStatus', () => {
       ];
 
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockImplementation((status) =>
+      mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? extraMovies : mockWatchedMovies)
       );
 
@@ -455,7 +455,7 @@ describe('useOnboardingStatus', () => {
       });
 
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { result } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -475,7 +475,7 @@ describe('useOnboardingStatus', () => {
       });
 
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       // Should not crash
       expect(() => {
@@ -490,7 +490,7 @@ describe('useOnboardingStatus', () => {
 
     it('should sync state across multiple hook instances', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue(mockWatchlistMovies);
+      mockFetchUserMoviesSimpleList.mockResolvedValue(mockWatchlistMovies);
 
       // First hook instance
       const { result: result1 } = renderHook(() => useOnboardingStatus(), {
@@ -518,7 +518,7 @@ describe('useOnboardingStatus', () => {
   describe('Performance & Optimization', () => {
     it('should not make unnecessary API calls when data is cached', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue(mockWatchlistMovies);
+      mockFetchUserMoviesSimpleList.mockResolvedValue(mockWatchlistMovies);
 
       // First render
       const { rerender: rerender1 } = renderHook(() => useOnboardingStatus(), {
@@ -527,7 +527,7 @@ describe('useOnboardingStatus', () => {
 
       await waitFor(() => {
         expect(mockGetUserProfile).toHaveBeenCalledTimes(1);
-        expect(mockListUserMovies).toHaveBeenCalledTimes(2); // watchlist + watched
+        expect(mockFetchUserMoviesSimpleList).toHaveBeenCalledTimes(2); // watchlist + watched
       });
 
       // Re-render with same data - should use cache
@@ -535,12 +535,12 @@ describe('useOnboardingStatus', () => {
 
       // API calls should not increase
       expect(mockGetUserProfile).toHaveBeenCalledTimes(1);
-      expect(mockListUserMovies).toHaveBeenCalledTimes(2);
+      expect(mockFetchUserMoviesSimpleList).toHaveBeenCalledTimes(2);
     });
 
     it('should handle rapid re-renders without issues', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue([]);
+      mockFetchUserMoviesSimpleList.mockResolvedValue([]);
 
       const { rerender } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),
@@ -561,7 +561,7 @@ describe('useOnboardingStatus', () => {
 
     it('should provide stable references for progress object', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
-      mockListUserMovies.mockResolvedValue(mockWatchlistMovies);
+      mockFetchUserMoviesSimpleList.mockResolvedValue(mockWatchlistMovies);
 
       const { result, rerender } = renderHook(() => useOnboardingStatus(), {
         wrapper: createWrapper(),

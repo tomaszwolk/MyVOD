@@ -88,6 +88,14 @@ vi.mock("@/hooks/useListUserMovies", () => ({
   useListUserMovies: vi.fn(),
 }));
 
+vi.mock("@/hooks/useWatchedSelectors", () => ({
+  useWatchedSelectors: vi.fn(),
+}));
+
+vi.mock("@/hooks/useAllUserMovies", () => ({
+  useAllUserMovies: vi.fn(),
+}));
+
 vi.mock("@/hooks/usePatchUserMovie", () => ({
   usePatchUserMovie: () => ({ mutateAsync: vi.fn() }),
 }));
@@ -108,12 +116,16 @@ import { useUserMoviesWatched } from "@/hooks/useUserMoviesWatched";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
+import { useWatchedSelectors } from "@/hooks/useWatchedSelectors";
+import { useAllUserMovies } from "@/hooks/useAllUserMovies";
 
 const mockUseWatchedPreferences = vi.mocked(useWatchedPreferences);
 const mockUseUserMoviesWatched = vi.mocked(useUserMoviesWatched);
 const mockUseUserProfile = vi.mocked(useUserProfile);
 const mockUsePlatforms = vi.mocked(usePlatforms);
 const mockUseListUserMovies = vi.mocked(useListUserMovies);
+const mockUseWatchedSelectors = vi.mocked(useWatchedSelectors);
+const mockUseAllUserMovies = vi.mocked(useAllUserMovies);
 
 describe("WatchedPage filtering", () => {
   beforeEach(() => {
@@ -123,7 +135,21 @@ describe("WatchedPage filtering", () => {
     setHideUnavailableMock.mockClear();
 
     mockUsePlatforms.mockReturnValue({ data: [], isLoading: false });
-    mockUseListUserMovies.mockReturnValue({ data: [] });
+    mockUseListUserMovies.mockReturnValue({
+      data: { pages: [{ results: [], count: 0, next: null }], pageParams: [1] },
+      isLoading: false,
+      error: null,
+    });
+    mockUseWatchedSelectors.mockReturnValue({
+      items: [],
+      totalCount: 0,
+      visibleCount: 0,
+    });
+    mockUseAllUserMovies.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+    });
   });
 
   const availableItem = {
@@ -136,7 +162,13 @@ describe("WatchedPage filtering", () => {
     posterPath: null,
     watchedAt: "2024-01-01",
     watchedAtLabel: "1 stycznia 2024",
-    availability: [],
+    availability: [
+      {
+        platform_id: 1,
+        platform_name: "Netflix",
+        is_available: true,
+      },
+    ],
     isAvailableOnAnyPlatform: true,
   };
 
@@ -168,10 +200,10 @@ describe("WatchedPage filtering", () => {
       data: { platforms: [{ id: 1 }] },
       isLoading: false,
     });
-    mockUseUserMoviesWatched.mockReturnValue({
-      items: [availableItem, unavailableItem],
-      isLoading: false,
-      isEmpty: false,
+    mockUseWatchedSelectors.mockReturnValue({
+      items: [availableItem],
+      totalCount: 2,
+      visibleCount: 1,
     });
 
     render(<WatchedPage />);
@@ -198,10 +230,10 @@ describe("WatchedPage filtering", () => {
       data: { platforms: [] },
       isLoading: false,
     });
-    mockUseUserMoviesWatched.mockReturnValue({
+    mockUseWatchedSelectors.mockReturnValue({
       items: [availableItem, unavailableItem],
-      isLoading: false,
-      isEmpty: false,
+      totalCount: 2,
+      visibleCount: 2,
     });
 
     render(<WatchedPage />);
@@ -222,10 +254,10 @@ describe("WatchedPage filtering", () => {
       data: { platforms: [{ id: 1 }] },
       isLoading: false,
     });
-    mockUseUserMoviesWatched.mockReturnValue({
-      items: [unavailableItem],
-      isLoading: false,
-      isEmpty: false,
+    mockUseWatchedSelectors.mockReturnValue({
+      items: [],
+      totalCount: 1,
+      visibleCount: 0,
     });
 
     render(<WatchedPage />);

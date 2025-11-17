@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getUserProfile } from "@/lib/api/auth";
-import { listUserMovies } from "@/lib/api/movies";
+import { fetchUserMoviesSimpleList } from "@/lib/api/movies";
 import type { UserMovieDto, UserProfileDto } from "@/types/api.types";
 
 type OnboardingStepKey = "platforms" | "add" | "watched";
@@ -73,8 +73,8 @@ export function useOnboardingStatus() {
     data: watchlistMovies = [],
     isLoading: isLoadingWatchlist,
   } = useQuery<UserMovieDto[]>({
-    queryKey: ["user-movies", "watchlist"],
-    queryFn: () => listUserMovies("watchlist"),
+    queryKey: ["user-movies", "watchlist", "simple"],
+    queryFn: () => fetchUserMoviesSimpleList("watchlist"),
     retry: false,
   });
 
@@ -83,8 +83,8 @@ export function useOnboardingStatus() {
     data: watchedMovies = [],
     isLoading: isLoadingWatched,
   } = useQuery<UserMovieDto[]>({
-    queryKey: ["user-movies", "watched"],
-    queryFn: () => listUserMovies("watched"),
+    queryKey: ["user-movies", "watched", "simple"],
+    queryFn: () => fetchUserMoviesSimpleList("watched"),
     retry: false,
   });
 

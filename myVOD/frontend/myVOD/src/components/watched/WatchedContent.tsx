@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useInView } from "@/hooks/useInView";
 import { WatchedGrid } from "./WatchedGrid";
 import { WatchedList } from "./WatchedList";
 import { WatchedEmptyState } from "./WatchedEmptyState";
@@ -26,6 +28,9 @@ type WatchedContentProps = {
     movieTitle: string,
     currentRating: number | null
   ) => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => void;
 };
 
 /**
@@ -44,41 +49,58 @@ export function WatchedContent({
   onDelete,
   isDeleting,
   onRate,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
 }: WatchedContentProps) {
-  // Show skeleton during loading
-  if (isLoading) {
+  const { ref, inView } = useInView({
+    threshold: 0,
+    triggerOnce: false,
+  });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage && fetchNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  if (isLoading && items.length === 0) {
     return <SkeletonList viewMode={viewMode} count={12} />;
   }
 
-  // Show empty state when no items
   if (isEmpty) {
     return <WatchedEmptyState />;
   }
 
-  // Render appropriate view mode
-  if (viewMode === "grid") {
-    return (
-      <WatchedGrid
-        items={items}
-        platforms={platforms}
-        onRestore={onRestore}
-        isRestoring={isRestoring}
-        onDelete={onDelete}
-        isDeleting={isDeleting}
-        onRate={onRate}
-      />
-    );
-  }
+  const isListView = viewMode === "list";
 
   return (
-    <WatchedList
-      items={items}
-      platforms={platforms}
-      onRestore={onRestore}
-      isRestoring={isRestoring}
-      onDelete={onDelete}
-      isDeleting={isDeleting}
-      onRate={onRate}
-    />
+    <>
+      {isListView ? (
+        <WatchedList
+          items={items}
+          platforms={platforms}
+          onRestore={onRestore}
+          isRestoring={isRestoring}
+          onDelete={onDelete}
+          isDeleting={isDeleting}
+          onRate={onRate}
+        />
+      ) : (
+        <WatchedGrid
+          items={items}
+          platforms={platforms}
+          onRestore={onRestore}
+          isRestoring={isRestoring}
+          onDelete={onDelete}
+          isDeleting={isDeleting}
+          onRate={onRate}
+        />
+      )}
+      <div ref={ref} className="h-10" />
+      {isFetchingNextPage && (
+        <SkeletonList viewMode={viewMode} count={isListView ? 1 : 3} />
+      )}
+    </>
   );
 }

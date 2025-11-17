@@ -13,8 +13,10 @@ import { useWatchlistSelectors } from "@/hooks/useWatchlistSelectors";
 import { useMarkAsWatched, useDeleteFromWatchlist } from "@/hooks/useWatchlistActions";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
 import { useAddMovie } from "@/hooks/useAddMovie";
-import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
+import { UserMovieDto } from "@/types/api.types";
+import { useAllUserMovies } from "@/hooks/useAllUserMovies";
+
 
 // Components
 import { WatchlistControlsBar } from "@/components/watchlist/WatchlistControlsBar";
@@ -25,6 +27,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
+import { WatchlistItemVM } from "@/types/view/watchlist.types";
+
 
 type MovieMutationErrorResponse = {
   detail?: string;
@@ -66,17 +70,25 @@ export function WatchlistPage() {
 
   // Data fetching
   const watchlistQuery = useWatchlistQuery(isAuthenticated);
-  const watchedQuery = useListUserMovies('watched', isAuthenticated);
+  const watchedQuery = useAllUserMovies('watched', isAuthenticated);
   const userProfileQuery = useUserProfile(isAuthenticated);
   const platformsQuery = usePlatforms(isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
 
   // Process and filter data
+  const watchlistTotalCount = watchlistQuery.data?.pages?.[0]?.count;
+  const hasWatchlistData =
+    watchlistQuery.data?.pages?.some(
+      (page) => (page?.results?.length ?? 0) > 0
+    ) ?? false;
   const { items, totalCount, visibleCount } = useWatchlistSelectors({
-    data: watchlistQuery.data,
+    data:
+      watchlistQuery.data?.pages?.flatMap((page) => page?.results ?? []) ??
+      undefined,
     userPlatforms: userProfileQuery.data?.platforms || [],
     sortOption,
     filters,
+    totalAvailableCount: watchlistTotalCount,
   });
 
   // Action handlers with optimistic updates
@@ -107,7 +119,7 @@ export function WatchlistPage() {
 
   // Derived data
   const existingTconsts = useMemo(
-    () => items.map(item => item.movie.tconst),
+    () => items.map((item: WatchlistItemVM) => item.movie.tconst),
     [items]
   );
   const watchedEntries = useMemo(
@@ -116,7 +128,7 @@ export function WatchlistPage() {
   );
   const watchedEntriesByTconst = useMemo(() => {
     const map = new Map<string, number>();
-    watchedEntries.forEach(entry => {
+    watchedEntries.forEach((entry: UserMovieDto) => {
       map.set(entry.movie.tconst, entry.id);
     });
     return map;
@@ -132,7 +144,13 @@ export function WatchlistPage() {
   }, [existingTconsts]);
 
   // Loading states
-  const isLoading = watchlistQuery.isLoading || userProfileQuery.isLoading || platformsQuery.isLoading;
+  const isWatchlistInitialLoad =
+    !hasWatchlistData &&
+    (watchlistQuery.isFetching || watchlistQuery.fetchStatus === "fetching");
+  const isLoading =
+    isWatchlistInitialLoad ||
+    userProfileQuery.isLoading ||
+    platformsQuery.isLoading;
 
   // Check if user has selected platforms for availability filtering
   const hasUserPlatforms = (userProfileQuery.data?.platforms?.length || 0) > 0;
@@ -347,6 +365,9 @@ export function WatchlistPage() {
             onAddToWatched={handleAddToWatched}
             existingTconsts={existingTconsts}
             existingWatchedTconsts={existingWatchedTconsts}
+            hasNextPage={watchlistQuery.hasNextPage}
+            isFetchingNextPage={watchlistQuery.isFetchingNextPage}
+            fetchNextPage={watchlistQuery.fetchNextPage}
           />
         </div>
       </MediaLibraryLayout>
