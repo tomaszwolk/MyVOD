@@ -107,6 +107,16 @@ def build_user_movies_queryset(
         )
         queryset = queryset.filter(Exists(has_false)).exclude(Exists(has_true))
 
+        # If platform_ids is specified but is_available is not, filter by availability on selected platforms
+    if platform_ids is not None and len(platform_ids) > 0:
+        # Filter to movies available on at least one of the selected platforms
+        available_on_selected = MovieAvailability.objects.filter(
+            tconst=OuterRef('tconst'),
+            platform_id__in=filter_platform_ids,
+            is_available=True,
+        )
+        queryset = queryset.filter(Exists(available_on_selected))
+
     if ordering_param in ['-watchlisted_at', '-tconst__avg_rating']:
         queryset = queryset.order_by(ordering_param)
     else:

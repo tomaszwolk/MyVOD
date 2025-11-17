@@ -278,6 +278,12 @@ export function ProfilePage() {
   // Prepare tabs for navigation (similar to watchlist/watched)
   const tabs = [
     {
+      id: "onvod",
+      label: "onVOD",
+      isActive: false,
+      onSelect: () => navigate("/app/onvod"),
+    },
+    {
       id: "watchlist",
       label: "Watchlista",
       isActive: false,

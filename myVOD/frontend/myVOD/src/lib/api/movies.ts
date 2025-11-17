@@ -92,16 +92,21 @@ type ListUserMoviesParams = {
   status?: "watchlist" | "watched";
   ordering?: string;
   page?: number;
+  platformIds?: number[];
 };
 
 export async function listUserMovies({
   status,
   ordering,
   page = 1,
+  platformIds,
 }: ListUserMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
   const params: Record<string, string | number> = { page };
   if (status) params.status = status;
   if (ordering) params.ordering = ordering;
+  if (platformIds && platformIds.length > 0) {
+    params.platform_ids = platformIds.join(",");
+  }
 
   const response = await http.get<PaginatedResponse<UserMovieDto>>(
     "/user-movies/",
@@ -159,16 +164,6 @@ export async function restoreUserMovie(id: number): Promise<UserMovieDto> {
   });
   return response.data;
 }
-
-/**
- * Get AI-powered movie suggestions for the user.
- * Corresponds to GET /api/suggestions/
- * @param options - Optional parameters including debug flag
- * @returns Promise<AISuggestionsDto>
- */
-type GetAISuggestionsOptions = {
-  debug?: boolean;
-};
 
 /**
  * List movies available on VOD platforms with optional platform filtering.

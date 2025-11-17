@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -47,8 +48,10 @@ export function PlatformFiltersToolbar({
   const handleToggleAll = () => {
     if (allSelected) {
       deselectAll();
+      console.log("PlatformFiltersToolbar - deselected all platforms");
     } else {
       selectAll();
+      console.log("PlatformFiltersToolbar - selected all platforms");
     }
   };
 
@@ -86,7 +89,13 @@ export function PlatformFiltersToolbar({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    onClick={() => togglePlatform(platform.id)}
+                    onClick={() => {
+                      togglePlatform(platform.id);
+                      console.log(
+                        "PlatformFiltersToolbar - toggled platform:",
+                        platform.id
+                      );
+                    }}
                     className={`
                       relative p-2 rounded-md transition-all duration-200 border
                       ${
@@ -151,17 +160,14 @@ export function PlatformFiltersToolbar({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleToggleAll}
-                  disabled={noneSelected && allSelected} // Should never happen, but safety check
-                  className="text-sm"
-                >
-                  {allSelected ? "Ukryj wszystkie" : "Pokaż wszystkie"}
-                </Button>
-              </div>
+              <button
+                type="button"
+                onClick={handleToggleAll}
+                disabled={noneSelected && allSelected} // Should never happen, but safety check
+                className="ml-2 p-2 rounded-md transition-all duration-200 border border-border hover:border-primary/50 hover:bg-accent focus:outline-none"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </TooltipTrigger>
             <TooltipContent>
               <p>

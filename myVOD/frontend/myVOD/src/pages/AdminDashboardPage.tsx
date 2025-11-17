@@ -60,6 +60,12 @@ export function AdminDashboardPage() {
 
   const tabs = [
     {
+      id: "onvod",
+      label: "onVOD",
+      isActive: false,
+      onSelect: () => navigate("/app/onvod"),
+    },
+    {
       id: "watchlist",
       label: "Watchlista",
       isActive: false,

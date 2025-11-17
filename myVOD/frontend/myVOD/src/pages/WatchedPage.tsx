@@ -29,6 +29,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
+import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersToolbar";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 import { RatingModal } from "@/components/watched/RatingModal";
 
@@ -404,6 +405,12 @@ export function WatchedPage() {
 
   const tabs = [
     {
+      id: "onvod",
+      label: "onVOD",
+      isActive: false,
+      onSelect: () => navigate("/app/onvod"),
+    },
+    {
       id: "watchlist",
       label: "Watchlista",
       isActive: false,
@@ -445,6 +452,7 @@ export function WatchedPage() {
         subtitle="Historia filmów, które już obejrzałeś"
         tabs={tabs}
         headerActions={headerActions}
+        globalFilters={<PlatformFiltersToolbar hideUnavailableButton={true} />}
         toolbar={
           <WatchedToolbar
             viewMode={viewMode}

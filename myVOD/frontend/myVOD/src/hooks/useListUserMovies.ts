@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { listUserMovies } from "@/lib/api/movies";
+import { usePlatformFilterStore } from "@/stores/platformFilterStore";
 
 /**
  * Custom hook for fetching user movies with optional status filter.
@@ -13,11 +14,22 @@ export function useListUserMovies(
   status?: "watchlist" | "watched",
   enabled: boolean = true
 ) {
+  const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
+
+  // Debug: log platform changes
+  console.log('useListUserMovies - selectedPlatformIds:', selectedPlatformIds);
+
   return useInfiniteQuery({
-    queryKey: ["user-movies", status ?? "all"],
-    queryFn: ({ pageParam = 1 }) => listUserMovies({ status, page: pageParam }),
+    queryKey: ["user-movies", status ?? "all", selectedPlatformIds],
+    queryFn: ({ pageParam = 1 }) =>
+      listUserMovies({
+        status,
+        page: pageParam,
+        platformIds: selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined
+      }),
     enabled,
-    staleTime: 30_000, // Consider data fresh for 30 seconds
+    staleTime: 0, // Don't cache data when platform filters change
+    gcTime: 0, // Don't keep data in cache
     // Prevent refetching when query is disabled to avoid internal checks on undefined data
     refetchOnMount: enabled,
     refetchOnWindowFocus: enabled,

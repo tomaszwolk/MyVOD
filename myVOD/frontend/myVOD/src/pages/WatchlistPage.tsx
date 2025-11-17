@@ -27,6 +27,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
+import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersToolbar";
 import { WatchlistItemVM } from "@/types/view/watchlist.types";
 
 
@@ -295,6 +296,12 @@ export function WatchlistPage() {
 
   const tabs = [
     {
+      id: "onvod",
+      label: "onVOD",
+      isActive: false,
+      onSelect: () => navigate("/app/onvod"),
+    },
+    {
       id: "watchlist",
       label: "Watchlista",
       isActive: true,
@@ -332,6 +339,7 @@ export function WatchlistPage() {
         subtitle="Zarządzaj swoimi filmami do obejrzenia"
         tabs={tabs}
         headerActions={headerActions}
+        globalFilters={<PlatformFiltersToolbar hideUnavailableButton={true} />}
         toolbar={
           <WatchlistControlsBar
             viewMode={viewMode}
