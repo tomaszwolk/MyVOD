@@ -37,14 +37,14 @@ export function OnVODPage() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Session preferences (view mode, sort)
+  const { viewMode, setViewMode, sort, setSort } = useSessionPreferences();
+
   // Data fetching
-  const onVODQuery = useOnVODMoviesQuery(isAuthenticated);
+  const onVODQuery = useOnVODMoviesQuery(sort, isAuthenticated);
   const userProfileQuery = useUserProfile(isAuthenticated);
   const platformsQuery = usePlatforms(isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
-
-  // Session preferences (view mode, sort)
-  const { viewMode, setViewMode, sort, setSort } = useSessionPreferences();
 
   // AI suggestions query for checking rate limit status
   const suggestionsQuery = useAISuggestions({

@@ -420,7 +420,8 @@ class OnVODMoviesView(APIView):
         try:
             # Use service layer for queryset building
             queryset = build_on_vod_movies_queryset(
-                platform_ids=params.validated_data.get('platform_ids')
+                platform_ids=params.validated_data.get('platform_ids'),
+                ordering=params.validated_data.get('ordering', 'added_desc')
             )
 
             # Handle pagination

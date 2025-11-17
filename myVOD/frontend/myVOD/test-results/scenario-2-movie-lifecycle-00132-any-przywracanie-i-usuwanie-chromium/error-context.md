@@ -1,0 +1,328 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img "myVOD Logo" [ref=e8]
+          - generic [ref=e9]:
+            - heading "Filmy na platformach VOD" [level=1] [ref=e10]
+            - paragraph [ref=e11]: Odkryj wszystkie dostępne filmy
+        - generic [ref=e13]:
+          - button "Przełącz na tryb jasny" [ref=e14] [cursor=pointer]:
+            - img
+            - generic [ref=e15]: Przełącz na tryb jasny
+          - button "Wyloguj się" [ref=e16] [cursor=pointer]:
+            - img
+            - text: Wyloguj się
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - button "onVOD" [ref=e19] [cursor=pointer]
+          - button "Watchlista" [ref=e20] [cursor=pointer]
+          - button "Obejrzane" [ref=e21] [cursor=pointer]
+          - button "Profil" [ref=e22] [cursor=pointer]
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: "Platformy:"
+            - button "Przełącz filtr Netflix" [ref=e27] [cursor=pointer]:
+              - img "Netflix" [ref=e28]
+            - button "Przełącz filtr HBO Max" [ref=e30] [cursor=pointer]:
+              - img "HBO Max" [ref=e31]
+            - button "Przełącz filtr Disney+" [ref=e33] [cursor=pointer]:
+              - img "Disney+" [ref=e34]
+            - button "Przełącz filtr Amazon Prime Video" [ref=e36] [cursor=pointer]:
+              - img "Amazon Prime Video" [ref=e37]
+            - button "Przełącz filtr Apple TV+" [ref=e39] [cursor=pointer]:
+              - img "Apple TV+" [ref=e40]
+          - button [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e53]:
+          - img [ref=e54]
+          - combobox "Wyszukaj film" [ref=e57]
+        - button "Zasugeruj filmy" [ref=e59] [cursor=pointer]:
+          - img
+          - text: Zasugeruj filmy
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - button "Widok kafelkowy" [pressed] [ref=e63] [cursor=pointer]:
+              - img
+            - button "Widok listy" [ref=e64] [cursor=pointer]:
+              - img
+          - button "Najnowsze" [ref=e65] [cursor=pointer]:
+            - text: Najnowsze
+            - img
+        - generic [ref=e66]: "Wyświetlane: 20/448"
+    - generic [ref=e70]:
+      - article "Insurgent" [ref=e71]:
+        - img "Insurgent" [ref=e74]
+        - generic [ref=e75]:
+          - heading "Insurgent" [level=3] [ref=e76]
+          - generic [ref=e77]:
+            - generic [ref=e78]: "2015"
+            - generic [ref=e79]: •
+            - generic [ref=e80]: Action, Adventure
+          - generic [ref=e82]:
+            - img [ref=e83]
+            - generic [ref=e85]: "6.2"
+          - 'img "Apple TV+: Dostępny" [ref=e88]':
+            - img "Apple TV+" [ref=e89]
+      - article "Killers of the Flower Moon" [ref=e90]:
+        - img "Killers of the Flower Moon" [ref=e93]
+        - generic [ref=e94]:
+          - heading "Killers of the Flower Moon" [level=3] [ref=e95]
+          - generic [ref=e96]:
+            - generic [ref=e97]: "2023"
+            - generic [ref=e98]: •
+            - generic [ref=e99]: Crime, Drama
+          - generic [ref=e101]:
+            - img [ref=e102]
+            - generic [ref=e104]: "7.5"
+          - 'img "Apple TV+: Dostępny" [ref=e107]':
+            - img "Apple TV+" [ref=e108]
+      - article "Modern Times" [ref=e109]:
+        - img "Modern Times" [ref=e112]
+        - generic [ref=e113]:
+          - heading "Modern Times" [level=3] [ref=e114]
+          - generic [ref=e115]:
+            - generic [ref=e116]: "1936"
+            - generic [ref=e117]: •
+            - generic [ref=e118]: Comedy, Drama
+          - generic [ref=e120]:
+            - img [ref=e121]
+            - generic [ref=e123]: "8.5"
+          - generic [ref=e125]:
+            - 'img "HBO Max: Dostępny" [ref=e126]':
+              - img "HBO Max" [ref=e127]
+            - 'img "Amazon Prime Video: Dostępny" [ref=e128]':
+              - img "Amazon Prime Video" [ref=e129]
+      - article "Some Like It Hot" [ref=e130]:
+        - img "Some Like It Hot" [ref=e133]
+        - generic [ref=e134]:
+          - heading "Some Like It Hot" [level=3] [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]: "1959"
+            - generic [ref=e138]: •
+            - generic [ref=e139]: Comedy, Music
+          - generic [ref=e141]:
+            - img [ref=e142]
+            - generic [ref=e144]: "8.2"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e147]':
+            - img "Amazon Prime Video" [ref=e148]
+      - article "The Great Escape" [ref=e149]:
+        - img "The Great Escape" [ref=e152]
+        - generic [ref=e153]:
+          - heading "The Great Escape" [level=3] [ref=e154]
+          - generic [ref=e155]:
+            - generic [ref=e156]: "1963"
+            - generic [ref=e157]: •
+            - generic [ref=e158]: Adventure, Drama
+          - generic [ref=e160]:
+            - img [ref=e161]
+            - generic [ref=e163]: "8.2"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e166]':
+            - img "Amazon Prime Video" [ref=e167]
+      - article "Monty Python's Life of Brian" [ref=e168]:
+        - img "Monty Python's Life of Brian" [ref=e171]
+        - generic [ref=e172]:
+          - heading "Monty Python's Life of Brian" [level=3] [ref=e173]
+          - generic [ref=e174]:
+            - generic [ref=e175]: "1979"
+            - generic [ref=e176]: •
+            - generic [ref=e177]: Comedy
+          - generic [ref=e179]:
+            - img [ref=e180]
+            - generic [ref=e182]: "8.0"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e185]':
+            - img "Amazon Prime Video" [ref=e186]
+      - article "Once Upon a Time in America" [ref=e187]:
+        - img "Once Upon a Time in America" [ref=e190]
+        - generic [ref=e191]:
+          - heading "Once Upon a Time in America" [level=3] [ref=e192]
+          - generic [ref=e193]:
+            - generic [ref=e194]: "1984"
+            - generic [ref=e195]: •
+            - generic [ref=e196]: Crime, Drama
+          - generic [ref=e198]:
+            - img [ref=e199]
+            - generic [ref=e201]: "8.3"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e204]':
+            - img "Amazon Prime Video" [ref=e205]
+      - article "Once Upon a Time in the West" [ref=e206]:
+        - img "Once Upon a Time in the West" [ref=e209]
+        - generic [ref=e210]:
+          - heading "Once Upon a Time in the West" [level=3] [ref=e211]
+          - generic [ref=e212]:
+            - generic [ref=e213]: "1968"
+            - generic [ref=e214]: •
+            - generic [ref=e215]: Drama, Western
+          - generic [ref=e217]:
+            - img [ref=e218]
+            - generic [ref=e220]: "8.5"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e223]':
+            - img "Amazon Prime Video" [ref=e224]
+      - article "Raging Bull" [ref=e225]:
+        - img "Raging Bull" [ref=e228]
+        - generic [ref=e229]:
+          - heading "Raging Bull" [level=3] [ref=e230]
+          - generic [ref=e231]:
+            - generic [ref=e232]: "1980"
+            - generic [ref=e233]: •
+            - generic [ref=e234]: Biography, Drama
+          - generic [ref=e236]:
+            - img [ref=e237]
+            - generic [ref=e239]: "8.1"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e242]':
+            - img "Amazon Prime Video" [ref=e243]
+      - article "The Breakfast Club" [ref=e244]:
+        - img "The Breakfast Club" [ref=e247]
+        - generic [ref=e248]:
+          - heading "The Breakfast Club" [level=3] [ref=e249]
+          - generic [ref=e250]:
+            - generic [ref=e251]: "1985"
+            - generic [ref=e252]: •
+            - generic [ref=e253]: Comedy, Drama
+          - generic [ref=e255]:
+            - img [ref=e256]
+            - generic [ref=e258]: "7.8"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e261]':
+            - img "Amazon Prime Video" [ref=e262]
+      - article "Total Recall" [ref=e263]:
+        - img "Total Recall" [ref=e266]
+        - generic [ref=e267]:
+          - heading "Total Recall" [level=3] [ref=e268]
+          - generic [ref=e269]:
+            - generic [ref=e270]: "1990"
+            - generic [ref=e271]: •
+            - generic [ref=e272]: Action, Adventure
+          - generic [ref=e274]:
+            - img [ref=e275]
+            - generic [ref=e277]: "7.5"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e280]':
+            - img "Amazon Prime Video" [ref=e281]
+      - article "The Untouchables" [ref=e282]:
+        - img "The Untouchables" [ref=e285]
+        - generic [ref=e286]:
+          - heading "The Untouchables" [level=3] [ref=e287]
+          - generic [ref=e288]:
+            - generic [ref=e289]: "1987"
+            - generic [ref=e290]: •
+            - generic [ref=e291]: Crime, Drama
+          - generic [ref=e293]:
+            - img [ref=e294]
+            - generic [ref=e296]: "7.8"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e299]':
+            - img "Amazon Prime Video" [ref=e300]
+      - article "Indiana Jones and the Last Crusade" [ref=e301]:
+        - img "Indiana Jones and the Last Crusade" [ref=e304]
+        - generic [ref=e305]:
+          - heading "Indiana Jones and the Last Crusade" [level=3] [ref=e306]
+          - generic [ref=e307]:
+            - generic [ref=e308]: "1989"
+            - generic [ref=e309]: •
+            - generic [ref=e310]: Action, Adventure
+          - generic [ref=e312]:
+            - img [ref=e313]
+            - generic [ref=e315]: "8.2"
+          - generic [ref=e317]:
+            - 'img "Disney+: Dostępny" [ref=e318]':
+              - img "Disney+" [ref=e319]
+            - 'img "Amazon Prime Video: Dostępny" [ref=e320]':
+              - img "Amazon Prime Video" [ref=e321]
+      - article "Indiana Jones and the Temple of Doom" [ref=e322]:
+        - img "Indiana Jones and the Temple of Doom" [ref=e325]
+        - generic [ref=e326]:
+          - heading "Indiana Jones and the Temple of Doom" [level=3] [ref=e327]
+          - generic [ref=e328]:
+            - generic [ref=e329]: "1984"
+            - generic [ref=e330]: •
+            - generic [ref=e331]: Action, Adventure
+          - generic [ref=e333]:
+            - img [ref=e334]
+            - generic [ref=e336]: "7.5"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e339]':
+            - img "Amazon Prime Video" [ref=e340]
+      - article "Monty Python and the Holy Grail" [ref=e341]:
+        - img "Monty Python and the Holy Grail" [ref=e344]
+        - generic [ref=e345]:
+          - heading "Monty Python and the Holy Grail" [level=3] [ref=e346]
+          - generic [ref=e347]:
+            - generic [ref=e348]: "1975"
+            - generic [ref=e349]: •
+            - generic [ref=e350]: Adventure, Comedy
+          - generic [ref=e352]:
+            - img [ref=e353]
+            - generic [ref=e355]: "8.2"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e358]':
+            - img "Amazon Prime Video" [ref=e359]
+      - article "It's a Wonderful Life" [ref=e360]:
+        - img "It's a Wonderful Life" [ref=e363]
+        - generic [ref=e364]:
+          - heading "It's a Wonderful Life" [level=3] [ref=e365]
+          - generic [ref=e366]:
+            - generic [ref=e367]: "1946"
+            - generic [ref=e368]: •
+            - generic [ref=e369]: Drama, Family
+          - generic [ref=e371]:
+            - img [ref=e372]
+            - generic [ref=e374]: "8.6"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e377]':
+            - img "Amazon Prime Video" [ref=e378]
+      - article "Rain Man" [ref=e379]:
+        - img "Rain Man" [ref=e382]
+        - generic [ref=e383]:
+          - heading "Rain Man" [level=3] [ref=e384]
+          - generic [ref=e385]:
+            - generic [ref=e386]: "1988"
+            - generic [ref=e387]: •
+            - generic [ref=e388]: Drama
+          - generic [ref=e390]:
+            - img [ref=e391]
+            - generic [ref=e393]: "8.0"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e396]':
+            - img "Amazon Prime Video" [ref=e397]
+      - article "Die Hard" [ref=e398]:
+        - img "Die Hard" [ref=e401]
+        - generic [ref=e402]:
+          - heading "Die Hard" [level=3] [ref=e403]
+          - generic [ref=e404]:
+            - generic [ref=e405]: "1988"
+            - generic [ref=e406]: •
+            - generic [ref=e407]: Action, Thriller
+          - generic [ref=e409]:
+            - img [ref=e410]
+            - generic [ref=e412]: "8.2"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e415]':
+            - img "Amazon Prime Video" [ref=e416]
+      - article "Raiders of the Lost Ark" [ref=e417]:
+        - img "Raiders of the Lost Ark" [ref=e420]
+        - generic [ref=e421]:
+          - heading "Raiders of the Lost Ark" [level=3] [ref=e422]
+          - generic [ref=e423]:
+            - generic [ref=e424]: "1981"
+            - generic [ref=e425]: •
+            - generic [ref=e426]: Action, Adventure
+          - generic [ref=e428]:
+            - img [ref=e429]
+            - generic [ref=e431]: "8.4"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e434]':
+            - img "Amazon Prime Video" [ref=e435]
+      - article "The Boondock Saints" [ref=e436]:
+        - img "The Boondock Saints" [ref=e439]
+        - generic [ref=e440]:
+          - heading "The Boondock Saints" [level=3] [ref=e441]
+          - generic [ref=e442]:
+            - generic [ref=e443]: "1999"
+            - generic [ref=e444]: •
+            - generic [ref=e445]: Action, Crime
+          - generic [ref=e447]:
+            - img [ref=e448]
+            - generic [ref=e450]: "7.6"
+          - 'img "Amazon Prime Video: Dostępny" [ref=e453]':
+            - img "Amazon Prime Video" [ref=e454]
+  - region "Notifications alt+T"
+```

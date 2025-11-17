@@ -12,7 +12,8 @@ import { usePlatformFilterStore } from "@/stores/platformFilterStore";
  */
 export function useListUserMovies(
   status?: "watchlist" | "watched",
-  enabled: boolean = true
+  enabled: boolean = true,
+  ordering?: string
 ) {
   const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
 
@@ -20,11 +21,12 @@ export function useListUserMovies(
   console.log('useListUserMovies - selectedPlatformIds:', selectedPlatformIds);
 
   return useInfiniteQuery({
-    queryKey: ["user-movies", status ?? "all", selectedPlatformIds],
+    queryKey: ["user-movies", status ?? "all", ordering, selectedPlatformIds],
     queryFn: ({ pageParam = 1 }) =>
       listUserMovies({
         status,
         page: pageParam,
+        ordering,
         platformIds: selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined
       }),
     enabled,

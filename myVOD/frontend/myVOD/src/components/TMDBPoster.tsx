@@ -1,6 +1,5 @@
 import { useState } from "react";
 // import { ImageIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { logTMDBImageError } from "@/utils/error-logger";
 import PlaceholderPoster from "@/assets/poster-myVOD.png";
 

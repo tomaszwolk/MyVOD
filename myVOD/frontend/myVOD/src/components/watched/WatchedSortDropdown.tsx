@@ -17,10 +17,10 @@ const SORT_OPTIONS: Record<WatchedSortKey, { label: string; description: string 
   watched_at_desc: { label: "Ostatnio obejrzane", description: "Najpierw najnowsze" },
   user_rating_desc: { label: "Twoja ocena", description: "Najwyżej ocenione przez Ciebie" },
   imdb_rating_desc: { label: "Ocena IMDb", description: "Najwyższa ocena IMDb" },
+  added_desc: { label: "Data dodania", description: "Najpierw ostatnio dodane" },
+  imdb_desc: { label: "Ocena IMDb (alternatywna)", description: "Najwyższa ocena IMDb" },
   year_desc: { label: "Rok produkcji (od najnowszych)", description: "Najpierw najnowsze" },
   year_asc: { label: "Rok produkcji (od najstarszych)", description: "Najpierw najstarsze" },
-  added_desc: { label: "Data dodania", description: "Najpierw ostatnio dodane" },
-  imdb_desc: { label: "Ocena IMDb", description: "Najwyższa ocena IMDb" },
 };
 
 

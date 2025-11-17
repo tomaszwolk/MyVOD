@@ -7,18 +7,20 @@ import { usePlatformFilterStore } from "@/stores/platformFilterStore";
  * Uses TanStack Query for caching and state management with infinite scrolling.
  * Automatically subscribes to platform filter changes.
  *
+ * @param ordering - Sort order for movies
  * @param enabled - Whether the query should run (default: true)
  * @returns Query object with data, isLoading, error, etc.
  */
-export function useOnVODMoviesQuery(enabled: boolean = true) {
+export function useOnVODMoviesQuery(ordering: string = "added_desc", enabled: boolean = true) {
   const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
 
   return useInfiniteQuery({
-    queryKey: ["on-vod-movies", selectedPlatformIds],
+    queryKey: ["on-vod-movies", selectedPlatformIds, ordering],
     queryFn: ({ pageParam = 1 }) =>
       listOnVODMovies({
         platformIds: selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined,
-        page: pageParam
+        page: pageParam,
+        ordering,
       }),
     enabled,
     staleTime: 30_000, // Consider data fresh for 30 seconds

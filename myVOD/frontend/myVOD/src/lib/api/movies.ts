@@ -175,15 +175,20 @@ export async function restoreUserMovie(id: number): Promise<UserMovieDto> {
 type ListOnVODMoviesParams = {
   platformIds?: number[];
   page?: number;
+  ordering?: string;
 };
 
 export async function listOnVODMovies({
   platformIds,
   page = 1,
+  ordering,
 }: ListOnVODMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
   const params: Record<string, string | number> = { page };
   if (platformIds && platformIds.length > 0) {
     params.platform_ids = platformIds.join(",");
+  }
+  if (ordering) {
+    params.ordering = ordering;
   }
 
   const response = await http.get<PaginatedResponse<UserMovieDto>>(

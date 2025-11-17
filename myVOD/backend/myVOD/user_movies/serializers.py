@@ -131,7 +131,16 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
 
     status = serializers.ChoiceField(choices=["watchlist", "watched"], required=False)
     ordering = serializers.ChoiceField(
-        choices=["-watchlisted_at", "-tconst__avg_rating"], required=False
+        choices=[
+            "-watchlisted_at",
+            "-tconst__avg_rating",
+            "-watched_at",
+            "-user_rating",
+            "-tconst__avg_rating",  # imdb_rating_desc / imdb_desc
+            "-tconst__start_year",  # year_desc
+            "tconst__start_year"    # year_asc
+        ],
+        required=False
     )
     is_available = serializers.BooleanField(required=False, allow_null=True, default=None)
     platform_ids = serializers.CharField(required=False, allow_blank=True)
@@ -174,10 +183,16 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
 
     - page: optional, pagination page number
     - platform_ids: optional, comma-separated list of platform IDs to filter by
+    - ordering: optional, sort order for movies
     """
 
     page = serializers.IntegerField(min_value=1, required=False)
     platform_ids = serializers.CharField(required=False, allow_blank=True)
+    ordering = serializers.ChoiceField(
+        choices=["added_desc", "imdb_desc", "year_desc", "year_asc"],
+        required=False,
+        default="added_desc"
+    )
 
     def validate_platform_ids(self, value):
         """Validate and parse platform_ids parameter.

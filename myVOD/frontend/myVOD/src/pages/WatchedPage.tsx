@@ -76,8 +76,29 @@ export function WatchedPage() {
   const platformsQuery = usePlatforms(isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
 
-  // Watched movies data - now using the paginated hook
-  const watchedQuery = useListUserMovies("watched", isAuthenticated);
+  // Map WatchedSortKey to backend ordering values
+  const getBackendOrdering = (sortKey: typeof sort): string => {
+    switch (sortKey) {
+      case "watched_at_desc":
+        return "-watched_at";
+      case "user_rating_desc":
+        return "-user_rating";
+      case "imdb_rating_desc":
+      case "imdb_desc":
+        return "-tconst__avg_rating";
+      case "added_desc":
+        return "-watchlisted_at";
+      case "year_desc":
+        return "-tconst__start_year";
+      case "year_asc":
+        return "tconst__start_year";
+      default:
+        return "-watched_at";
+    }
+  };
+
+  // Watched movies data - now using the paginated hook with sorting
+  const watchedQuery = useListUserMovies("watched", isAuthenticated, getBackendOrdering(sort));
   const watchlistQuery = useAllUserMovies("watchlist", isAuthenticated);
 
   const watchedTotalCount = watchedQuery.data?.pages?.[0]?.count;

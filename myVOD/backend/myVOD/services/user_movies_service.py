@@ -3,6 +3,7 @@ import uuid
 
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Prefetch, Max
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from movies.models import Movie, MovieAvailability, UserMovie, UserPlatform  # type: ignore
@@ -42,14 +43,18 @@ def build_user_movies_queryset(
         status_param: 'watchlist' or 'watched'. Required.
         ordering_param: Optional ordering field ('-watchlisted_at' or '-tconst__avg_rating').
         is_available: Optional boolean to filter by availability across user's platforms.
-        platform_ids: Optional list of platform IDs to filter availability by. If None, uses user's platforms.
+        platform_ids: Optional list of platform IDs to filter availability by.
+            If None, uses user's platforms.
     """
 
     # Resolve canonical user UUID (custom user model has UUID id)
     supabase_user_uuid = _resolve_user_uuid(user)
 
     # Use provided platform_ids or fall back to user's platforms
-    filter_platform_ids = platform_ids if platform_ids is not None else _get_user_platform_ids(supabase_user_uuid)
+    filter_platform_ids = (
+        platform_ids if platform_ids is not None
+        else _get_user_platform_ids(supabase_user_uuid)
+    )
 
     availability_prefetch = Prefetch(
         'tconst__availability_entries',
@@ -117,8 +122,13 @@ def build_user_movies_queryset(
         )
         queryset = queryset.filter(Exists(available_on_selected))
 
-    if ordering_param in ['-watchlisted_at', '-tconst__avg_rating']:
-        queryset = queryset.order_by(ordering_param)
+    # Handle ordering parameter
+    if ordering_param:
+        # Handle user rating sorting with NULL handling
+        if ordering_param == '-user_rating':
+            queryset = queryset.order_by(Coalesce('user_rating', -1).desc())
+        else:
+            queryset = queryset.order_by(ordering_param)
     else:
         # Default ordering to ensure consistent pagination results
         if status_param == 'watchlist':
@@ -441,7 +451,7 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
     return user_movie
 
 
-def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None):
+def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None, ordering: str = "added_desc"):
     """Builds the queryset for listing movies available on VOD platforms.
 
     Returns unique movies that are available on at least one VOD platform,
@@ -449,9 +459,10 @@ def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None):
 
     Args:
         platform_ids: Optional list of platform IDs to filter by. If None, includes all platforms.
+        ordering: Sort order for movies. Defaults to "added_desc".
 
     Returns:
-        QuerySet of Movie objects with prefetched availability data, ordered by latest availability.
+        QuerySet of Movie objects with prefetched availability data, ordered by specified criteria.
     """
     # Base queryset: movies that have at least one availability record
     filter_platforms = platform_ids if platform_ids is not None else None
@@ -495,10 +506,17 @@ def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None):
     # Apply prefetch and ordering
     queryset = queryset.prefetch_related(availability_prefetch)
 
-    # Order by the maximum availability id (most recently added availability first)
-    # This ensures consistent pagination and shows newest available movies first
-    queryset = queryset.annotate(
-        latest_availability_id=Max('availability_entries__id')
-    ).order_by('-latest_availability_id')
+    # Apply ordering based on parameter
+    if ordering == "added_desc":
+        # Order by the maximum availability id (most recently added availability first)
+        queryset = queryset.annotate(
+            latest_availability_id=Max('availability_entries__id')
+        ).order_by('-latest_availability_id')
+    elif ordering == "imdb_desc":
+        queryset = queryset.order_by(Coalesce('avg_rating', -1).desc())
+    elif ordering == "year_desc":
+        queryset = queryset.order_by(Coalesce('start_year', 0).desc())
+    elif ordering == "year_asc":
+        queryset = queryset.order_by(Coalesce('start_year', 9999))
 
     return queryset

@@ -104,13 +104,33 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
     -   ✅ Pełny toolbar z: SearchCombobox, SuggestAIButton, ViewToggle, SortDropdown, liczniki filmów.
     -   ✅ Integracja z `PlatformFiltersToolbar` w globalnych filtrach.
 
-### 3.5. Krok 5: Adaptacja Istniejących Stron (`WatchlistPage`, `WatchedPage`)
+### 3.5. Krok 5: Adaptacja Istniejących Stron (`WatchlistPage`, `WatchedPage`) ✅
 
 -   **Cel**: Zintegrowanie istniejących widoków z nowym, globalnym systemem filtrów.
 -   **Zmiany w `WatchlistPage.tsx` i `WatchedPage.tsx`**:
-    1.  **Zachowanie istniejących filtrów**: Przycisk "Ukryj niedostępne" pozostaje w komponentach `FiltersBar` i `WatchedFiltersBar` w toolbar każdej strony. Komponenty te mogą zostać zrefaktoryzowane jeśli zawierają inną logikę, która ma pozostać.
-    2.  **Integracja z globalnym stanem**: Hooki `useQuery`/`useInfiniteQuery` w tych stronach zostaną zmodyfikowane tak, aby pobierały `selectedPlatformIds` ze store'a Zustand i przekazywały je jako parametr `platform_ids` do endpointu `/api/user-movies/`.
-    3.  **Aktualizacja UI**: Upewnienie się, że po usunięciu starych filtrów layout wygląda poprawnie, a nowy, globalny pasek jest poprawnie wyświetlany.
+    1.  ✅ **Zachowanie istniejących filtrów**: Przycisk "Ukryj niedostępne" pozostaje w komponentach `FiltersBar` i `WatchedFiltersBar` w toolbar każdej strony.
+    2.  ✅ **Integracja z globalnym stanem**: Hooki `useListUserMovies` zostały zmodyfikowane tak, aby pobierały `selectedPlatformIds` ze store'a Zustand i przekazywały je jako parametr `platform_ids` do endpointu `/api/user-movies/`.
+    3.  ✅ **Aktualizacja UI**: Dodano globalne filtry platform do obu stron poprzez `PlatformFiltersToolbar` w MediaLibraryLayout.
+    4.  ✅ **Ukrycie przycisku "Ukryj niedostępne"**: Przycisk został ukryty w globalnych filtrach platform na stronach WatchlistPage i WatchedPage (pozostaje tylko w toolbar).
+    5.  ✅ **Nawigacja onVOD**: Dodano zakładkę "onVOD" jako pierwszą w nawigacji na wszystkich stronach (WatchlistPage, WatchedPage, ProfilePage, AdminDashboardPage).
+
+### 3.6. Krok 6: Poprawki Sortowania ✅
+
+-   **Cel**: Naprawa i ujednolicenie systemu sortowania na wszystkich stronach.
+-   **Zmiany**:
+    1.  ✅ **OnVODPage**: Dodano pełne sortowanie po stronie backendu (added_desc, imdb_desc, year_desc, year_asc) z obsługą NULL wartości.
+    2.  ✅ **WatchedPage**: Dodano sortowanie po stronie backendu dla wszystkich opcji WatchedSortKey (watched_at_desc, user_rating_desc, imdb_rating_desc, added_desc, year_desc, year_asc).
+    3.  ✅ **Backend**: Rozszerzono serializer i service funkcje o obsługę wszystkich opcji sortowania z prawidłową obsługą NULL wartości (filmy bez ocen trafiają na koniec).
+    4.  ✅ **UI**: Poprawiono duplikaty w WatchedSortDropdown i znormalizowano wygląd przycisków platform.
+
+### 3.7. Krok 7: Refaktoryzacja Sortowania 🔄
+
+-   **Cel**: Przejrzeć dostępne opcje sortowania i zoptymalizować ich zestaw.
+-   **Zadania do wykonania**:
+    1.  🔄 **Przejrzeć duplikaty**: Sprawdzić czy opcje `imdb_rating_desc` i `imdb_desc` są potrzebne (obie sortują po ocenie IMDb).
+    2.  🔄 **Sprawdzić konsystencję**: Upewnić się, że wszystkie strony mają spójny zestaw opcji sortowania.
+    3.  🔄 **Przetestować funkcjonalność**: Sprawdzić czy wszystkie opcje sortowania działają poprawnie i czy kolejność filmów jest prawidłowa.
+    4.  🔄 **Optymalizować UI**: Rozważyć czy niektóre opcje nie powinny być usunięte lub dodane dla lepszego UX.
 
 ## Dodatkowe uwagi do planu
 
@@ -155,13 +175,13 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
 2. **PlatformFiltersToolbar** ✅
    - Utworzony komponent w `src/components/library/PlatformFiltersToolbar.tsx`
    - Przełączniki platform z ikonami i tooltipami
-   - Przyciski "Pokaż wszystkie"/"Ukryj wszystkie"
+   - Przycisk "Pokaż wszystkie"/"Ukryj wszystkie" (kwadratowy z ikoną X)
    - Loading states i accessibility
    - Możliwość ukrycia przycisku "Ukryj niedostępne" poprzez prop `hideUnavailableButton`
 
 3. **MediaLibraryLayout** ✅
    - Dodany slot `globalFilters` między headerem a toolbar
-   - Dodana nawigacja "onVOD" jako pierwszy link
+   - Dodana nawigacja "onVOD" jako pierwszy link na wszystkich stronach
    - Przyciski nawigacji i filtry platform są w tej samej linii (nawigacja po lewej, filtry po prawej)
 
 4. **OnVODPage** ✅
@@ -170,17 +190,22 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
    - Dedykowane komponenty `OnVODMovieCard`/`OnVODMovieRow` dla UserMovieDto
    - Pełny toolbar z SearchCombobox, SuggestAIButton, ViewToggle, SortDropdown
    - Liczniki wyświetlanych filmów ("Wyświetlane: X/Y")
-   - Sortowanie takie jak na innych stronach (added_desc, imdb_desc, year_desc, year_asc)
+   - Sortowanie po stronie backendu (added_desc, imdb_desc, year_desc, year_asc)
    - AISuggestionsDialog z obsługą modalu i rate limiting
    - onVOD jako domyślna strona aplikacji (pierwsze logowanie przekierowuje do `/app/onvod`)
    - Responsywny grid layout dla widoku kafelkowego (2-6 kolumn w zależności od ekranu)
    - Poprawione skalowanie placeholderów (object-cover dla spójności z prawdziwymi plakatami)
    - Przycisk "Ukryj niedostępne" ukryty (nieużyteczny na stronie OnVOD)
 
+5. **Adaptacja istniejących stron** ✅
+   - **WatchlistPage**: Zintegrowane globalne filtry platform, ukryty przycisk "Ukryj niedostępne" w filtrach
+   - **WatchedPage**: Zintegrowane globalne filtry platform, ukryty przycisk "Ukryj niedostępne" w filtrach, sortowanie po stronie backendu
+   - **ProfilePage & AdminDashboardPage**: Dodana nawigacja do onVOD
+
 ### 🔄 Następne kroki:
-- Adaptacja istniejących stron (`WatchlistPage`, `WatchedPage`) - zintegrować z globalnymi filtrami platform
-- Zaktualizować endpoint `/api/user-movies/` żeby obsługiwał platform_ids
-- Przetestować pełną funkcjonalność filtrowania platform na wszystkich stronach
+- **Refaktoryzacja sortowania**: Przejrzeć dostępne opcje sortowania, usunąć duplikaty, sprawdzić konsystencję i poprawność działania na wszystkich stronach
+- **Aktualizacja README**
+
 
 ## Przyszłe usprawnienia (Future Enhancements)
 
