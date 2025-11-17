@@ -64,7 +64,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
 
   return (
     <article
-      className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+      className="bg-card rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full"
       aria-labelledby={`movie-title-${item.id}`}
       role="article"
       data-testid={`watched-movie-card-${item.tconst}`}
@@ -98,7 +98,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       </div>
 
       {/* Content */}
-      <div className="flex-1 space-y-2 px-1">
+      <div className="flex flex-col flex-1 justify-between gap-2 p-4">
         <div className="space-y-1">
           <TooltipProvider>
             <Tooltip>
@@ -154,9 +154,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4" />
-                      <span>
-                        IMDB.com rating: {item.imdbRating || "-"}
-                      </span>
+                      <span>IMDB.com rating: {item.imdbRating || "-"}</span>
                     </div>
                   </div>
                 </div>
@@ -166,7 +164,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
         </div>
 
         {/* Bottom Group */}
-        <div className="mt-auto pt-2">
+        <div>
           {/* Availability Icons */}
           <div className="mb-3">
             <AvailabilityIcons

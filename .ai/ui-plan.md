@@ -75,7 +75,7 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 
 8) Widok: Sugestie AI (modal)
 - Ścieżka widoku: modal otwierany przez URL param `?suggestions=true` z `/app/watchlist`, `/app/watched` lub `/app/profile`
-- Główny cel: Wyświetlenie do 5 sugestii (tytuł, rok, uzasadnienie, dostępność) i dodanie wybranych do watchlisty.
+- Główny cel: Wyświetlenie spersonalizowanych sugestii filmowych (tytuł, rok, uzasadnienie, dostępność) i dodanie wybranych do watchlisty.
 - Kluczowe informacje do wyświetlenia: lista kart sugestii, licznik/czas do resetu dziennego, komunikaty o limicie/404.
 - Kluczowe komponenty widoku: `AISuggestionsDialog` (modal z focus trap), `SuggestionList`, `SuggestionCard` (plakat, tytuł, uzasadnienie, ikony VOD), Button „Dodaj do watchlisty” (z blokadą po dodaniu), `RateLimitBadge` z odliczaniem do resetu, `AISuggestionsEmptyState`, Toastery.
 - UX, dostępność i względy bezpieczeństwa: brak nadmiarowych informacji przy błędzie 429, jasny czas do kolejnej próby, nie duplikować filmów już na liście, obsługa klawiatury w modalnym wariancie (Esc do zamknięcia, Tab navigation), routing przez URL params pozwala na bezpośrednie linkowanie.
