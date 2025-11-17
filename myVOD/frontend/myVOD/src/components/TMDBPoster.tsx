@@ -51,11 +51,9 @@ export function TMDBPoster({
   const isPlaceholder = !src || hasError;
   const imageSrc = isPlaceholder ? PlaceholderPoster : src;
 
-  // For placeholders, we replace 'object-cover' with 'object-contain'
-  // to ensure the whole image is visible without being cropped.
-  const imageClassName = isPlaceholder
-    ? cn(className.replace("object-cover", ""), "object-contain")
-    : className;
+  // Use the same className for both placeholders and real images
+  // to ensure consistent sizing within aspect-[2/3] containers
+  const imageClassName = className;
 
   return children({
     isPlaceholder,

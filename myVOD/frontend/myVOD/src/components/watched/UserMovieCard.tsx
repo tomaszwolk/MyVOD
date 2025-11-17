@@ -70,13 +70,13 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
       data-testid={`watched-movie-card-${item.tconst}`}
     >
       {/* Poster */}
-      <div className="relative aspect-[2/3] w-full">
+      <div className="aspect-[2/3] bg-muted relative">
         <TMDBPoster
           src={item.posterUrl}
           alt={item.title}
           width={200}
           height={300}
-          className="rounded-md object-cover"
+          className="w-full h-full object-cover"
         >
           {({ isPlaceholder, imgProps }) => (
             <div

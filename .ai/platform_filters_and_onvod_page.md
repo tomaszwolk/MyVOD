@@ -157,10 +157,12 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
    - Przełączniki platform z ikonami i tooltipami
    - Przyciski "Pokaż wszystkie"/"Ukryj wszystkie"
    - Loading states i accessibility
+   - Możliwość ukrycia przycisku "Ukryj niedostępne" poprzez prop `hideUnavailableButton`
 
 3. **MediaLibraryLayout** ✅
    - Dodany slot `globalFilters` między headerem a toolbar
    - Dodana nawigacja "onVOD" jako pierwszy link
+   - Przyciski nawigacji i filtry platform są w tej samej linii (nawigacja po lewej, filtry po prawej)
 
 4. **OnVODPage** ✅
    - Utworzona strona `/app/onvod` z pełnym routingiem
@@ -171,8 +173,44 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
    - Sortowanie takie jak na innych stronach (added_desc, imdb_desc, year_desc, year_asc)
    - AISuggestionsDialog z obsługą modalu i rate limiting
    - onVOD jako domyślna strona aplikacji (pierwsze logowanie przekierowuje do `/app/onvod`)
+   - Responsywny grid layout dla widoku kafelkowego (2-6 kolumn w zależności od ekranu)
+   - Poprawione skalowanie placeholderów (object-cover dla spójności z prawdziwymi plakatami)
+   - Przycisk "Ukryj niedostępne" ukryty (nieużyteczny na stronie OnVOD)
 
 ### 🔄 Następne kroki:
 - Adaptacja istniejących stron (`WatchlistPage`, `WatchedPage`) - zintegrować z globalnymi filtrami platform
 - Zaktualizować endpoint `/api/user-movies/` żeby obsługiwał platform_ids
 - Przetestować pełną funkcjonalność filtrowania platform na wszystkich stronach
+
+## Przyszłe usprawnienia (Future Enhancements)
+
+### User Rating na stronie OnVOD
+- **Opis**: Dodanie funkcjonalności oceniania filmów bezpośrednio z strony `/app/onvod`
+- **Szczegóły**:
+  - Niebieska gwiazdka obok oceny IMDB (tak jak na `/app/watched`)
+  - Kliknięcie automatycznie dodaje film do watchlisty (jeśli nie jest już dodany)
+  - Otwiera modal ratingu do oceny filmu (1-10 gwiazdek)
+  - Zapisuje ocenę w bazie danych
+- **Powód odłożenia**: Wymaga zmian w logice biznesowej (dodawanie filmów do watchlisty) i współdzielenia komponentów między stronami
+- **Priorytet**: Niski - funkcjonalność dostępna już na stronie Watched
+
+### Przycisk "Ukryj obejrzane" na stronach Watchlist i Watched
+- **Opis**: Dodanie przycisku filtrującego w miejscu przycisku "Ukryj niedostępne"
+- **Szczegóły**:
+  - Przycisk będzie się przełączał między "Ukryj obejrzane" / "Pokaż obejrzane"
+  - W watchliście: ukrywa filmy które są już oznaczone jako watched
+  - Na stronie watched: ukrywa filmy które nie mają ratingu użytkownika
+  - Stan przycisku będzie zapamiętywany w preferencjach użytkownika
+- **Powód odłożenia**: Wymaga rozszerzenia systemu filtrów i dodania nowej logiki filtrowania
+- **Priorytet**: Średni - użyteczna funkcjonalność dla zarządzania watchlistą
+
+### Filtrowanie po gatunkach
+- **Opis**: Dodanie możliwości filtrowania filmów po gatunkach filmowych
+- **Szczegóły**:
+  - Dropdown lub tagi z dostępnymi gatunkami (Action, Comedy, Drama, etc.)
+  - Możliwość wyboru wielu gatunków jednocześnie
+  - Filtr będzie dostępny na wszystkich stronach (onVOD, Watchlist, Watched)
+  - Integracja z istniejącym systemem filtrów platform
+  - Stan filtrów gatunków będzie zapamiętywany w preferencjach użytkownika
+- **Powód odłożenia**: Wymaga rozszerzenia API o filtrowanie po gatunkach i dodania UI dla wyboru gatunków
+- **Priorytet**: Wysoki - znacząco poprawi UX przy wyszukiwaniu filmów

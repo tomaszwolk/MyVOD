@@ -41,13 +41,13 @@ export const OnVODMovieCard = memo<OnVODMovieCardProps>(
         data-testid={`onvod-movie-card-${movie.movie.tconst}`}
       >
         {/* Poster */}
-        <div className="relative aspect-[2/3] w-full">
+        <div className="aspect-[2/3] bg-muted relative">
           <TMDBPoster
             src={movie.movie.poster_path}
             alt={movie.movie.primary_title}
             width={200}
             height={300}
-            className="rounded-md object-cover"
+            className="w-full h-full object-cover"
           >
             {({ isPlaceholder, imgProps }) => (
               <div
