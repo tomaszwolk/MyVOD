@@ -25,7 +25,7 @@ export function AppRoot() {
     }
 
     if (hasCompletedInitialCheck) {
-      navigate('/app/watchlist', { replace: true });
+      navigate('/app/onvod', { replace: true });
       return;
     }
 
@@ -34,13 +34,13 @@ export function AppRoot() {
       return;
     }
 
-    // Navigate to first incomplete step or watchlist if onboarding done
+    // Navigate to first incomplete step or onVOD if onboarding done
     if (requiredStep) {
       navigate(requiredStep, { replace: true });
       return;
     }
 
-    navigate('/app/watchlist', { replace: true });
+    navigate('/app/onvod', { replace: true });
   }, [isAuthenticated, hasCompletedInitialCheck, isLoading, requiredStep, navigate]);
 
   // While redirecting, show a loading state

@@ -13,6 +13,7 @@ type MediaLibraryLayoutProps = {
   subtitle?: string;
   tabs?: MediaLibraryTabItem[];
   headerActions?: ReactNode;
+  globalFilters?: ReactNode;
   toolbar?: ReactNode;
   children: ReactNode;
 };
@@ -26,6 +27,7 @@ export function MediaLibraryLayout({
   subtitle,
   tabs,
   headerActions,
+  globalFilters,
   toolbar,
   children,
 }: MediaLibraryLayoutProps) {
@@ -80,6 +82,8 @@ export function MediaLibraryLayout({
             </div>
           ) : null}
         </header>
+
+        {globalFilters ? <div className="mb-4">{globalFilters}</div> : null}
 
         {toolbar ? <div className="mb-6">{toolbar}</div> : null}
 

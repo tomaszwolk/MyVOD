@@ -5,6 +5,7 @@ import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { WatchlistPage } from "@/pages/WatchlistPage";
 import { WatchedPage } from "@/pages/WatchedPage";
+import { OnVODPage } from "@/pages/OnVODPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { AdminDashboardPage } from "@/pages/AdminDashboardPage";
 import { OnboardingPlatformsPage, OnboardingFirstMoviesPage, OnboardingAddPage, OnboardingWatchedPage } from "@/pages/onboarding";
@@ -89,6 +90,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <AppRoot />,
+      },
+      {
+        path: "app/onvod",
+        element: <OnVODPage />,
       },
       {
         path: "app/watchlist",
