@@ -21,6 +21,7 @@ For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.m
   - [Project status](#project-status)
   - [Future Roadmap](#future-roadmap)
   - [Known Issues](#known-issues)
+  - [Fixed Issues.](#fixed-issues)
   - [License](#license)
 
 ---
@@ -216,9 +217,11 @@ The project is actively developed. Key features planned for future releases incl
 
 ### Known Issues
 
-- **Initial Page Load**: The first page load, especially with many movies on user lists, may be slower due to fetching posters.
 - **Search Performance**: The search functionality is undergoing optimization to provide faster results.
-- **Session Handling**: In rare cases, after a long period of inactivity, a manual re-login might be necessary.
+
+### Fixed Issues.
+- **Initial Page Load**: The first page load, especially with many movies on user lists, may be slower due to fetching posters. - Fixed, now it's render only 20 movies at once, added lazy.
+- **Session Handling**: In rare cases, after a long period of inactivity, a manual re-login might be necessary. - Fixed, deleted old check when frontend passed user with invalid token but backend didn't.
 
 ---
 
