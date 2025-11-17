@@ -11,10 +11,19 @@ import { usePlatforms } from "@/hooks/usePlatforms";
 import { getPlatformIcon } from "@/components/onboarding/platformIcons";
 
 /**
+ * Props for PlatformFiltersToolbar component.
+ */
+type PlatformFiltersToolbarProps = {
+  hideUnavailableButton?: boolean;
+};
+
+/**
  * Global platform filters toolbar.
  * Provides platform selection toggles and global filter actions.
  */
-export function PlatformFiltersToolbar() {
+export function PlatformFiltersToolbar({
+  hideUnavailableButton = false,
+}: PlatformFiltersToolbarProps = {}) {
   const {
     platforms: storePlatforms,
     selectedPlatformIds,
@@ -114,28 +123,30 @@ export function PlatformFiltersToolbar() {
 
       {/* Global actions */}
       <div className="flex items-center gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // TODO: Implement global "Ukryj niedostępne" functionality
-                    console.log("Global 'Ukryj niedostępne' clicked");
-                  }}
-                  className="text-sm"
-                >
-                  Ukryj niedostępne
-                </Button>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Ukryj filmy niedostępne na wybranych platformach</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {!hideUnavailableButton && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // TODO: Implement global "Ukryj niedostępne" functionality
+                      console.log("Global 'Ukryj niedostępne' clicked");
+                    }}
+                    className="text-sm"
+                  >
+                    Ukryj niedostępne
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ukryj filmy niedostępne na wybranych platformach</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
 
         <TooltipProvider>
           <Tooltip>

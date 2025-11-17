@@ -56,9 +56,10 @@ export function MediaLibraryLayout({
             ) : null}
           </div>
 
-          {shouldRenderTabs ? (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {tabs.map((tab) => {
+          {/* Navigation tabs and global filters in same row */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex flex-wrap gap-2">
+              {shouldRenderTabs ? tabs.map((tab) => {
                 const isActive = tab.isActive;
                 const baseClasses =
                   "px-4 py-2 rounded-lg font-medium transition-colors shadow-sm";
@@ -78,12 +79,16 @@ export function MediaLibraryLayout({
                     {tab.label}
                   </button>
                 );
-              })}
+              }) : null}
             </div>
-          ) : null}
-        </header>
 
-        {globalFilters ? <div className="mb-4">{globalFilters}</div> : null}
+            {globalFilters ? (
+              <div className="flex-shrink-0">
+                {globalFilters}
+              </div>
+            ) : null}
+          </div>
+        </header>
 
         {toolbar ? <div className="mb-6">{toolbar}</div> : null}
 

@@ -165,7 +165,7 @@ export function OnVODPage() {
         subtitle="Odkryj wszystkie dostępne filmy"
         tabs={tabs}
         headerActions={headerActions}
-        globalFilters={<PlatformFiltersToolbar />}
+        globalFilters={<PlatformFiltersToolbar hideUnavailableButton={true} />}
         toolbar={
           <OnVODToolbar
             viewMode={viewMode}
