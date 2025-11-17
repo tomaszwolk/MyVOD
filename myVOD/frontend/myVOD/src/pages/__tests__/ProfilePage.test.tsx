@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import "@testing-library/jest-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { ProfilePage } from "../ProfilePage";
 
@@ -158,6 +159,23 @@ const defaultPlatforms = () => [
 let profileRefetch: ReturnType<typeof vi.fn>;
 let platformsRefetch: ReturnType<typeof vi.fn>;
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+
+  return Wrapper;
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 
@@ -238,13 +256,13 @@ describe("ProfilePage", () => {
   it("redirects unauthenticated users to login", () => {
     mockUseAuth.mockReturnValueOnce({ isAuthenticated: false, logout: mockLogout });
 
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     expect(mockNavigate).toHaveBeenCalledWith("/auth/login", { replace: true });
   });
 
   it("renders user information and platform preferences", () => {
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     expect(screen.getByRole("heading", { name: "Profil" })).toBeInTheDocument();
     expect(screen.getByText("test@example.com")).toBeInTheDocument();
@@ -255,7 +273,7 @@ describe("ProfilePage", () => {
 
   it("navigates to other tabs when clicked", async () => {
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     await user.click(screen.getByText("Watchlista"));
     expect(mockNavigate).toHaveBeenCalledWith("/app/watchlist");
@@ -266,7 +284,7 @@ describe("ProfilePage", () => {
 
   it("saves platform preference changes after toggling a platform", async () => {
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     const targetPlatform = screen.getByRole("checkbox", { name: /hbo max/i });
     await user.click(targetPlatform);
@@ -279,7 +297,7 @@ describe("ProfilePage", () => {
 
   it("submits change password form with provided credentials", async () => {
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     await user.type(screen.getByLabelText(/Obecne hasło/i), "oldpass123");
     await user.type(screen.getByLabelText(/^Nowe hasło$/i), "newpass123");
@@ -304,7 +322,7 @@ describe("ProfilePage", () => {
       refetch: profileRefetch,
     });
 
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     expect(screen.getByTestId("skeleton-heading")).toBeInTheDocument();
     expect(screen.getByTestId("skeleton-content")).toBeInTheDocument();
@@ -331,7 +349,7 @@ describe("ProfilePage", () => {
     });
 
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     expect(screen.getByText(/Nie udało się załadować profilu/i)).toBeInTheDocument();
 
@@ -344,7 +362,7 @@ describe("ProfilePage", () => {
 
   it("updates search params when AI suggestions button is pressed", async () => {
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(<ProfilePage />, { wrapper: createWrapper() });
 
     await user.click(screen.getByTestId("suggest-ai-button"));
 

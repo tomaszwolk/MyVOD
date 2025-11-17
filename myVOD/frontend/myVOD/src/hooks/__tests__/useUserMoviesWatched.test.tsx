@@ -39,7 +39,7 @@ describe('useUserMoviesWatched', () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   it('should return empty items when no data', () => {
-    mockListUserMovies.mockResolvedValue([]);
+    mockListUserMovies.mockResolvedValue({ results: [], count: 0, next: null });
 
     const { result } = renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),
@@ -71,7 +71,7 @@ describe('useUserMoviesWatched', () => {
       },
     ];
 
-    mockListUserMovies.mockResolvedValue(mockData);
+    mockListUserMovies.mockResolvedValue({ results: mockData, count: mockData.length, next: null });
 
     const { result } = renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),
@@ -97,25 +97,32 @@ describe('useUserMoviesWatched', () => {
   });
 
   it('should call API with correct parameters for watched_at_desc sort', () => {
-    mockListUserMovies.mockResolvedValue([]);
+    mockListUserMovies.mockResolvedValue({ results: [], count: 0, next: null });
 
     renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),
       { wrapper }
     );
 
-    expect(mockListUserMovies).toHaveBeenCalledWith('watched', undefined);
+    expect(mockListUserMovies).toHaveBeenCalledWith({
+      status: 'watched',
+      page: 1
+    });
   });
 
   it('should call API with ordering parameter for rating_desc sort', () => {
-    mockListUserMovies.mockResolvedValue([]);
+    mockListUserMovies.mockResolvedValue({ results: [], count: 0, next: null });
 
     renderHook(
-      () => useUserMoviesWatched({ sortKey: 'imdb_desc', userPlatforms: mockPlatforms }),
+      () => useUserMoviesWatched({ sortKey: 'imdb_rating_desc', userPlatforms: mockPlatforms }),
       { wrapper }
     );
 
-    expect(mockListUserMovies).toHaveBeenCalledWith('watched', '-tconst__avg_rating');
+    expect(mockListUserMovies).toHaveBeenCalledWith({
+      status: 'watched',
+      ordering: '-tconst__avg_rating',
+      page: 1
+    });
   });
 
   it('should sort by watched date descending when sortKey is watched_at_desc', async () => {
@@ -150,7 +157,7 @@ describe('useUserMoviesWatched', () => {
       },
     ];
 
-    mockListUserMovies.mockResolvedValue(mockData);
+    mockListUserMovies.mockResolvedValue({ results: mockData, count: mockData.length, next: null });
 
     const { result } = renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),
@@ -197,7 +204,7 @@ describe('useUserMoviesWatched', () => {
       },
     ];
 
-    mockListUserMovies.mockResolvedValue(mockData);
+    mockListUserMovies.mockResolvedValue({ results: mockData, count: mockData.length, next: null });
 
     const { result } = renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),
@@ -248,7 +255,7 @@ describe('useUserMoviesWatched', () => {
       },
     ];
 
-    mockListUserMovies.mockResolvedValue(mockData);
+    mockListUserMovies.mockResolvedValue({ results: mockData, count: mockData.length, next: null });
 
     const { result } = renderHook(
       () => useUserMoviesWatched({ sortKey: 'added_desc', userPlatforms: mockPlatforms }),

@@ -3,6 +3,7 @@ import type {
   WatchedMovieItemVM,
   WatchedSortKey,
 } from "@/types/view/watched.types";
+import { formatLastCheckedDate } from "@/utils/date-utils";
 
 /**
  * Maps UserMovieDto to WatchedMovieItemVM with availability summary.
@@ -24,9 +25,12 @@ function mapToWatchedMovieItemVM(
     year: dto.movie.start_year,
     genres: dto.movie.genres,
     imdbRating: dto.movie.avg_rating,
+    avgRating: dto.movie.avg_rating, // alias for backward compatibility
     userRating: dto.user_rating,
     posterUrl: dto.movie.poster_path,
+    posterPath: dto.movie.poster_path, // alias for backward compatibility
     watchedAt: dto.watched_at,
+    watchedAtLabel: dto.watched_at ? formatLastCheckedDate(dto.watched_at) : null,
     availability: dto.availability,
     isAvailableOnAnyPlatform: availablePlatforms.length > 0,
   };

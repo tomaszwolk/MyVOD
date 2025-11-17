@@ -79,7 +79,10 @@ describe('useListUserMovies', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockListUserMovies).toHaveBeenCalledWith('watchlist');
+    expect(mockListUserMovies).toHaveBeenCalledWith({
+      status: 'watchlist',
+      page: 1
+    });
   });
 
   it('should invalidate queries on success', async () => {
@@ -91,7 +94,10 @@ describe('useListUserMovies', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockListUserMovies).toHaveBeenCalledWith('watched');
+    expect(mockListUserMovies).toHaveBeenCalledWith({
+      status: 'watched',
+      page: 1
+    });
   });
 
   it('should handle errors', async () => {
@@ -119,7 +125,7 @@ describe('useListUserMovies', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual(mockUserMovies);
+    expect(result.current.data?.pages?.[0]).toEqual(mockUserMovies);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isError).toBe(false);
   });

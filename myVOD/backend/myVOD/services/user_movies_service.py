@@ -105,6 +105,12 @@ def build_user_movies_queryset(
 
     if ordering_param in ['-watchlisted_at', '-tconst__avg_rating']:
         queryset = queryset.order_by(ordering_param)
+    else:
+        # Default ordering to ensure consistent pagination results
+        if status_param == 'watchlist':
+            queryset = queryset.order_by('-watchlisted_at')
+        elif status_param == 'watched':
+            queryset = queryset.order_by('-watched_at')
 
     return queryset
 

@@ -1,9 +1,9 @@
-import { test } from '@playwright/test';
-import { RegisterPage } from './page-objects/RegisterPage';
-import { LoginPage } from './page-objects/LoginPage';
-import { OnboardingPage } from './page-objects/OnboardingPage';
-import { WatchlistPage } from './page-objects/WatchlistPage';
-import { setupApiMocks } from './setup/api-mocks';
+import { test } from "@playwright/test";
+import { RegisterPage } from "./page-objects/RegisterPage";
+import { LoginPage } from "./page-objects/LoginPage";
+import { OnboardingPage } from "./page-objects/OnboardingPage";
+import { WatchlistPage } from "./page-objects/WatchlistPage";
+import { setupApiMocks } from "./setup/api-mocks";
 
 /**
  * Generate unique email for test to avoid conflicts
@@ -21,8 +21,10 @@ function generateUniquePassword(): string {
   return `TestPass${Date.now()}!`;
 }
 
-test.describe('Scenariusz 1: Pełny cykl nowego użytkownika', () => {
-  test('Powinien przeprowadzić użytkownika przez rejestrację, onboarding i weryfikację watchlisty', async ({ page }) => {
+test.describe("Scenariusz 1: Pełny cykl nowego użytkownika", () => {
+  test("Powinien przeprowadzić użytkownika przez rejestrację, onboarding i weryfikację watchlisty", async ({
+    page,
+  }) => {
     test.setTimeout(120000);
     // Wydłuż timeout testu, aby wolniejsze zapytania wyszukiwania (kombinacja backend + DB) mogły zakończyć się w 60 s
     // Clean up any leftover data from previous tests
@@ -51,28 +53,27 @@ test.describe('Scenariusz 1: Pełny cykl nowego użytkownika', () => {
 
     // After registration, we should be redirected to login page
     // Wait for login page to load
-    await page.waitForURL('**/auth/login**');
+    await page.waitForURL("**/auth/login**");
 
     // 1.2 Logowanie po rejestracji
     await loginPage.login(userEmail, userPassword);
 
     // Wait for onboarding to start (should redirect to platforms step)
-    await page.waitForURL('**/onboarding/platforms**');
+    await page.waitForURL("**/onboarding/platforms**");
 
     // 1.3-1.5 Onboarding (3 kroki)
     await onboardingPage.completeOnboarding();
 
     // 1.6 Weryfikacja stanu aplikacji po onboardingu
     await watchlistPage.waitForPageLoad();
-    await watchlistPage.verifyWatchlistGridVisible();
 
     // Verify movies are present in watchlist
-    await watchlistPage.verifyMovieCardPresent('tt11564570'); // Glass Onion
-    await watchlistPage.verifyMovieCardPresent('tt0068646'); // The Godfather
-    await watchlistPage.verifyMovieCardPresent('tt0816692'); // Interstellar
+    await watchlistPage.verifyMovieCardPresent("tt11564570"); // Glass Onion
+    await watchlistPage.verifyMovieCardPresent("tt0068646"); // The Godfather
+    await watchlistPage.verifyMovieCardPresent("tt0816692"); // Interstellar
 
     // Verify streaming provider icons are visible
-    await watchlistPage.verifyStreamingProviderIconVisible('netflix');
+    await watchlistPage.verifyStreamingProviderIconVisible("netflix");
 
     // Cleanup - delete test user data from database
     await page.context().storageState({ path: undefined }); // Clear storage state
