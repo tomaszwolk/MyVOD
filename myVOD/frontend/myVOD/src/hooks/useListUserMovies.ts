@@ -16,18 +16,34 @@ export function useListUserMovies(
   ordering?: string
 ) {
   const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
+  const totalPlatforms = usePlatformFilterStore((state) => state.platforms.length);
 
-  // Debug: log platform changes
-  console.log('useListUserMovies - selectedPlatformIds:', selectedPlatformIds);
+  const shouldApplyPlatformFilter =
+    totalPlatforms > 0 &&
+    selectedPlatformIds.length > 0 &&
+    selectedPlatformIds.length !== totalPlatforms;
+
+  const platformIdsForQuery = shouldApplyPlatformFilter ? selectedPlatformIds : undefined;
+
+  // Debug: log platform changes and whether we actually filter
+  console.log(
+    "useListUserMovies - platformIdsForQuery:",
+    platformIdsForQuery,
+    "(selected:",
+    selectedPlatformIds.length,
+    "total:",
+    totalPlatforms,
+    ")"
+  );
 
   return useInfiniteQuery({
-    queryKey: ["user-movies", status ?? "all", ordering, selectedPlatformIds],
+    queryKey: ["user-movies", status ?? "all", ordering, platformIdsForQuery],
     queryFn: ({ pageParam = 1 }) =>
       listUserMovies({
         status,
         page: pageParam,
         ordering,
-        platformIds: selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined
+        platformIds: platformIdsForQuery,
       }),
     enabled,
     staleTime: 0, // Don't cache data when platform filters change

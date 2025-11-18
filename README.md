@@ -212,8 +212,8 @@ The project is actively developed. Key features planned for future releases incl
 - **Enriched Movie Data**: Addition of localized titles, director/actor information, and making movie titles direct links to their IMDb pages.
 - **Demo Mode**: A "login as demo user" option to quickly explore the app's features without registration.
 - **Initial Recommendations**: A carousel of popular movies for new users to get started.
-- **OnVOD Page** - page where you can see all titles that are available in streaming platforms
-- **Filter by platform** - all available platforms can be filtered
+- **OnVOD Page** - page where you can see all titles that are available in streaming platforms - implemented 18.11.2025, need further improvements
+- **Filter by platform** - all available platforms can be filtered - implemented 18.11.2025
 
 ---
 

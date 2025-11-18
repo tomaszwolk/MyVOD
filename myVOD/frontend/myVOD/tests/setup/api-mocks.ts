@@ -10,6 +10,22 @@ export async function setupApiMocks(
   userPassword?: string,
   mockOnboardingAsComplete = false
 ): Promise<void> {
+  const mockedPlatforms = [
+    { id: 1, platform_slug: "netflix", platform_name: "Netflix" },
+    { id: 2, platform_slug: "hbomax", platform_name: "HBO Max" },
+    { id: 3, platform_slug: "disneyplus", platform_name: "Disney+" },
+    { id: 4, platform_slug: "primevideo", platform_name: "Amazon Prime Video" },
+    { id: 5, platform_slug: "appletvplus", platform_name: "Apple TV+" },
+  ];
+
+  await page.route("**/api/platforms/", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockedPlatforms),
+    });
+  });
+
   // For existing users (Scenario 2), mock onboarding as complete to skip onboarding flow
   if (mockOnboardingAsComplete) {
     await page.route("**/api/onboarding/status/", async (route) => {
@@ -115,7 +131,11 @@ export async function setupApiMocks(
         },
         watched_at: "2025-01-06T00:00:00Z",
         availability: [
-          { platform_id: 3, platform_name: "Amazon Prime", is_available: true },
+          {
+            platform_id: 3,
+            platform_name: "Amazon Prime Video",
+            is_available: true,
+          },
         ],
       },
     ];
@@ -167,18 +187,9 @@ export async function setupApiMocks(
 
     await page.route("**/api/user-movies/**", temporaryUserMoviesRoute);
   } else {
-    // For new users (Scenario 1), mock onboarding as incomplete to force onboarding flow
-    await page.route("**/api/onboarding/status/", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          hasPlatforms: false,
-          hasWatchlistMovies: false,
-          hasWatchedMovies: false,
-        }),
-      });
-    });
+    // For new users (Scenario 1), don't mock /me/ or /user-movies/
+    // Let the real backend handle everything after login
+    // This ensures proper session management and data consistency
   }
 
   // Mock AI suggestions endpoint for Scenario 3
@@ -209,7 +220,7 @@ export async function setupApiMocks(
             availability: [
               {
                 platform_id: 1,
-                platform_name: "Amazon Prime",
+                platform_name: "Amazon Prime Video",
                 is_available: true,
               },
             ],
@@ -232,6 +243,19 @@ export async function setupApiMocks(
   // Note: Using real backend for registration, login, movie search, adding movies, etc.
   // User profile and movies are mocked for existing users to skip onboarding flow
   // AI suggestions are mocked to control the test flow
+}
+
+/**
+ * Update API mocks after onboarding is complete
+ * For Scenario 1 (new users), this is a no-op since we don't mock /me/ or /user-movies/
+ * For other scenarios, this could be used to update mocks if needed
+ */
+export async function updateMocksAfterOnboarding(
+  page: Page,
+  userEmail: string
+): Promise<void> {
+  // No-op for Scenario 1 - real backend handles everything
+  // This function is kept for potential future use in other scenarios
 }
 
 /**

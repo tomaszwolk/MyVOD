@@ -1,45 +1,40 @@
-import { test } from '@playwright/test';
-import { LoginPage } from './page-objects/LoginPage';
-import { WatchlistPage } from './page-objects/WatchlistPage';
-import { WatchedPage } from './page-objects/WatchedPage';
-import { HeaderComponent } from './page-objects/HeaderComponent';
-import { setupApiMocks } from './setup/api-mocks';
+import { test } from "@playwright/test";
+import { LoginPage } from "./page-objects/LoginPage";
+import { WatchlistPage } from "./page-objects/WatchlistPage";
+import { WatchedPage } from "./page-objects/WatchedPage";
+import { HeaderComponent } from "./page-objects/HeaderComponent";
+import { setupApiMocks } from "./setup/api-mocks";
 
 /**
  * Test constants for Scenario 2
  */
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'test_user@example.com';
-const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'Qwed4$5T56n.';
+const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || "test_user@example.com";
+const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || "Qwed4$5T56n.";
 
 /**
  * Available test movies - test will use the first one that hasn't been processed yet
  */
 const TEST_MOVIES = [
-  { title: 'Pulp Fiction', tconst: 'tt0110912' },
-  { title: 'Gladiator', tconst: 'tt0172495' },
-  { title: 'The Wolf of Wall Street', tconst: 'tt0993846' },
-  { title: 'Inception', tconst: 'tt1375666' },
-  { title: 'The Dark Knight', tconst: 'tt0468569' },
-  { title: 'Parasite', tconst: 'tt6751668' },
-  { title: 'Interstellar', tconst: 'tt0816692' },
-  { title: 'The Matrix', tconst: 'tt0133093' },
-  { title: 'Fight Club', tconst: 'tt0137523' },
-  { title: 'Forrest Gump', tconst: 'tt0109830' }
+  { title: "Pulp Fiction", tconst: "tt0110912" },
+  { title: "Gladiator", tconst: "tt0172495" },
+  { title: "The Wolf of Wall Street", tconst: "tt0993846" },
+  { title: "Inception", tconst: "tt1375666" },
+  { title: "The Dark Knight", tconst: "tt0468569" },
+  { title: "Parasite", tconst: "tt6751668" },
+  { title: "Interstellar", tconst: "tt0816692" },
+  { title: "The Matrix", tconst: "tt0133093" },
+  { title: "Fight Club", tconst: "tt0137523" },
+  { title: "Forrest Gump", tconst: "tt0109830" },
 ];
 
 // Will be set during test execution
 let selectedMovie = TEST_MOVIES[0];
 
-test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
-  test('Powinien przeprowadzić pełny cykl zarządzania filmem: wyszukiwanie, dodawanie, oznaczanie jako obejrzany, przywracanie i usuwanie', async ({ page }) => {
+test.describe("Scenariusz 2: Podstawowy cykl życia filmu", () => {
+  test("Powinien przeprowadzić pełny cykl zarządzania filmem: wyszukiwanie, dodawanie, oznaczanie jako obejrzany, przywracanie i usuwanie", async ({
+    page,
+  }) => {
     test.setTimeout(180000); // Increase timeout to 3 minutes
-
-    // Clean up any leftover data from previous tests
-    await page.context().clearCookies();
-    await page.addInitScript(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
 
     // Arrange - Setup API mocks for existing user (skip onboarding)
     await setupApiMocks(page, TEST_USER_EMAIL, TEST_USER_PASSWORD, true); // mockOnboardingAsComplete = true
@@ -55,21 +50,32 @@ test.describe('Scenariusz 2: Podstawowy cykl życia filmu', () => {
     // 2.1 Logowanie istniejącego użytkownika testowego
     await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
-    // Wait for redirect to watchlist (user has completed onboarding)
+    // Wait for redirect to OnVOD page (new default page after login)
+    await page.waitForURL("**/app/onvod**", { timeout: 60000 });
+
+    // Navigate to watchlist page to start the test
+    await watchlistPage.navigateToWatchlist();
     await watchlistPage.waitForPageLoad();
 
     // 2.2 Znajdź i dodaj pierwszy dostępny film z listy
-    const availableMovie = await headerComponent.findAndAddFirstAvailableMovie(TEST_MOVIES);
+    const availableMovie = await headerComponent.findAndAddFirstAvailableMovie(
+      TEST_MOVIES
+    );
 
     if (!availableMovie) {
       // Skip test if no available movies found
-      test.skip(true, 'No available movies found for testing - all test movies have been processed');
+      test.skip(
+        true,
+        "No available movies found for testing - all test movies have been processed"
+      );
       return;
     }
 
     // Set the selected movie for the rest of the test
     selectedMovie = availableMovie;
-    console.log(`Using movie: ${selectedMovie.title} (${selectedMovie.tconst})`);
+    console.log(
+      `Using movie: ${selectedMovie.title} (${selectedMovie.tconst})`
+    );
 
     // Verify movie was added to watchlist
     await watchlistPage.verifyMovieCardPresent(selectedMovie.tconst);

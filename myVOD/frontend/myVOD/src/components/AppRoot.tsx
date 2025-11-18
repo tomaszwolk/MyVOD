@@ -13,19 +13,20 @@ export function AppRoot() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isLoading, requiredStep } = useOnboardingStatus();
-  const hasCompletedInitialCheck = typeof window !== "undefined"
-    ? sessionStorage.getItem(ONBOARDING_CHECKED_KEY) === "true"
-    : false;
+  const hasCompletedInitialCheck =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem(ONBOARDING_CHECKED_KEY) === "true"
+      : false;
 
   useEffect(() => {
     if (!isAuthenticated) {
       // Not authenticated - redirect to login
-      navigate('/auth/login', { replace: true });
+      navigate("/auth/login", { replace: true });
       return;
     }
 
     if (hasCompletedInitialCheck) {
-      navigate('/app/onvod', { replace: true });
+      navigate("/app/onvod", { replace: true });
       return;
     }
 
@@ -40,8 +41,14 @@ export function AppRoot() {
       return;
     }
 
-    navigate('/app/onvod', { replace: true });
-  }, [isAuthenticated, hasCompletedInitialCheck, isLoading, requiredStep, navigate]);
+    navigate("/app/onvod", { replace: true });
+  }, [
+    isAuthenticated,
+    hasCompletedInitialCheck,
+    isLoading,
+    requiredStep,
+    navigate,
+  ]);
 
   // While redirecting, show a loading state
   return (

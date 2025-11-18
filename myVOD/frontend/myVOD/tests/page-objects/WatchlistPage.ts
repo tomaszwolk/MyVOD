@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page } from "@playwright/test";
 
 /**
  * Page Object Model for Watchlist page
@@ -8,58 +8,37 @@ export class WatchlistPage {
   constructor(private page: Page) {}
 
   /**
-   * Wait for Sonner toast list to receive a new notification.
-   * This makes the sync resilient to translation or formatting changes.
-   */
-  private async waitForNewToast(previousToastCount: number): Promise<void> {
-    // Najpierw spróbujmy upewnić się, że poprzednie toasty wygasły
-    await this.page
-      .waitForFunction(() => {
-        const currentToasts = document.querySelectorAll('[data-sonner-toast]').length;
-        return currentToasts <= previousToastCount;
-      }, undefined, { timeout: 3000 })
-      .catch(() => {});
-
-    // Czekamy na pojawienie się nowego toasta (liczba > previousToastCount)
-    await this.page.waitForFunction(
-      (initialCount) => {
-        const toastElements = document.querySelectorAll('[data-sonner-toast]');
-        return toastElements.length > initialCount;
-      },
-      previousToastCount,
-      { timeout: 10000 }
-    );
-
-    // Dajmy treści toasta chwilę na render
-    await this.page.waitForTimeout(500);
-  }
-
-  /**
    * Navigate to the watchlist page
    */
   async navigateToWatchlist(): Promise<void> {
-    await this.page.goto('/app/watchlist');
+    await this.page.goto("/app/watchlist");
   }
 
   /**
    * Verify that the watchlist grid is visible
    */
   async verifyWatchlistGridVisible(): Promise<void> {
-    await this.page.getByTestId('watchlist-grid').waitFor({ state: 'visible' });
+    await this.page.getByTestId("watchlist-grid").waitFor({ state: "visible" });
   }
 
   /**
    * Verify that a specific movie card is present in the watchlist
    */
   async verifyMovieCardPresent(movieTconst: string): Promise<void> {
-    await this.page.getByTestId(`movie-card-${movieTconst}`).waitFor({ state: 'visible' });
+    await this.page
+      .getByTestId(`movie-card-${movieTconst}`)
+      .waitFor({ state: "visible" });
   }
 
   /**
    * Verify that a streaming provider icon is visible for a specific platform
    */
-  async verifyStreamingProviderIconVisible(platformSlug: string): Promise<void> {
-    await this.page.getByTestId(`streaming-provider-icon-${platformSlug}`).waitFor({ state: 'visible' });
+  async verifyStreamingProviderIconVisible(
+    platformSlug: string
+  ): Promise<void> {
+    await this.page
+      .getByTestId(`streaming-provider-icon-${platformSlug}`)
+      .waitFor({ state: "visible" });
   }
 
   /**
@@ -68,7 +47,7 @@ export class WatchlistPage {
   async markMovieAsWatched(movieId: string): Promise<void> {
     // Check if movie is actually on watchlist before trying to mark as watched
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
-    const movieExists = await movieCard.count() > 0;
+    const movieExists = (await movieCard.count()) > 0;
 
     if (!movieExists) {
       // Movie is not on watchlist, skip marking as watched
@@ -76,17 +55,14 @@ export class WatchlistPage {
     }
 
     // Ensure the movie card is fully visible before interacting
-    await movieCard.waitFor({ state: 'visible', timeout: 5000 });
-
-    // Count existing toasts before action
-    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
+    await movieCard.waitFor({ state: "visible", timeout: 5000 });
 
     // Find the movie card and click the "Obejrzane" button
-    const markAsWatchedButton = movieCard.getByTestId('mark-as-watched-button');
+    const markAsWatchedButton = movieCard.getByTestId("mark-as-watched-button");
     await markAsWatchedButton.click();
 
-    // Wait for a new toast to appear (count should increase)
-    await this.waitForNewToast(initialToastCount);
+    // Wait for the movie card to be removed from watchlist (more reliable than waiting for toast)
+    await movieCard.waitFor({ state: "detached", timeout: 10000 });
   }
 
   /**
@@ -95,7 +71,7 @@ export class WatchlistPage {
   async deleteMovieFromWatchlist(movieId: string): Promise<void> {
     // Check if movie is actually on watchlist before trying to delete
     const movieCard = this.page.getByTestId(`movie-card-${movieId}`);
-    const movieExists = await movieCard.count() > 0;
+    const movieExists = (await movieCard.count()) > 0;
 
     if (!movieExists) {
       // Movie is not on watchlist, skip deletion
@@ -103,19 +79,20 @@ export class WatchlistPage {
     }
 
     // Ensure the movie card is fully visible and interactive before clicking
-    await movieCard.waitFor({ state: 'visible', timeout: 5000 });
+    await movieCard.waitFor({ state: "visible", timeout: 5000 });
 
     // Find the movie card and click the delete button
-    const deleteButton = movieCard.getByTestId('delete-movie-button');
+    const deleteButton = movieCard.getByTestId("delete-movie-button");
     await deleteButton.click();
 
     // Wait for confirmation dialog and confirm deletion
-    await this.page.getByTestId('confirm-delete-dialog').waitFor({ state: 'visible' });
-    const initialToastCount = await this.page.locator('[data-sonner-toast]').count();
-    await this.page.getByTestId('confirm-delete-button').click();
+    await this.page
+      .getByTestId("confirm-delete-dialog")
+      .waitFor({ state: "visible" });
+    await this.page.getByTestId("confirm-delete-button").click();
 
-    // Wait for toast notification confirming the deletion
-    await this.waitForNewToast(initialToastCount);
+    // Wait for the movie card to be removed from DOM (more reliable than waiting for toast)
+    await movieCard.waitFor({ state: "detached", timeout: 10000 });
   }
 
   /**
@@ -123,16 +100,22 @@ export class WatchlistPage {
    */
   async waitForPageLoad(): Promise<void> {
     // Wait for URL to be /app/watchlist (handles redirects from /)
-    await this.page.waitForURL('**/app/watchlist**', { timeout: 60000 });
+    await this.page.waitForURL("**/app/watchlist**", { timeout: 60000 });
 
     // Wait for network to be idle
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("domcontentloaded");
 
     // Wait for the page to finish loading (skeleton should disappear)
     // We wait for either watchlist-grid (if there are movies) or empty state
     await Promise.race([
-      this.page.getByTestId('watchlist-grid').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {}),
-      this.page.getByText('Twoja watchlista jest pusta').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
+      this.page
+        .getByTestId("watchlist-grid")
+        .waitFor({ state: "visible", timeout: 30000 })
+        .catch(() => {}),
+      this.page
+        .getByText("Twoja lista filmów jest pusta")
+        .waitFor({ state: "visible", timeout: 30000 })
+        .catch(() => {}),
     ]);
   }
 
@@ -140,7 +123,7 @@ export class WatchlistPage {
    * Click the "Get AI Suggestions" button
    */
   async clickGetSuggestionsButton(): Promise<void> {
-    const button = this.page.getByTestId('get-ai-suggestions-button');
+    const button = this.page.getByTestId("get-ai-suggestions-button");
     await button.click();
   }
 
@@ -148,7 +131,7 @@ export class WatchlistPage {
    * Check if the "Get AI Suggestions" button is disabled
    */
   async isSuggestionsButtonDisabled(): Promise<boolean> {
-    const button = this.page.getByTestId('get-ai-suggestions-button');
+    const button = this.page.getByTestId("get-ai-suggestions-button");
     return await button.isDisabled();
   }
 
@@ -158,7 +141,9 @@ export class WatchlistPage {
   async verifySuggestionsButtonDisabled(): Promise<void> {
     const isDisabled = await this.isSuggestionsButtonDisabled();
     if (!isDisabled) {
-      throw new Error('Expected AI suggestions button to be disabled due to rate limiting');
+      throw new Error(
+        "Expected AI suggestions button to be disabled due to rate limiting"
+      );
     }
   }
 
@@ -171,8 +156,10 @@ export class WatchlistPage {
 
     // Check that expected platform icons are now visible on movie cards
     for (const platform of expectedPlatforms) {
-      const platformIcon = this.page.getByTestId(`streaming-provider-icon-${platform}`);
-      await platformIcon.waitFor({ state: 'visible', timeout: 10000 });
+      const platformIcon = this.page.getByTestId(
+        `streaming-provider-icon-${platform}`
+      );
+      await platformIcon.waitFor({ state: "visible", timeout: 10000 });
     }
 
     // Optionally verify that previously available platforms are no longer shown
