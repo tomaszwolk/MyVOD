@@ -96,7 +96,6 @@ describe('useOnboardingStatus', () => {
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: true,
-        hasWatchedMovies: true,
       });
     });
 
@@ -133,15 +132,14 @@ describe('useOnboardingStatus', () => {
       });
 
       expect(result.current.isOnboardingComplete).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/add');
+      expect(result.current.requiredStep).toBe('/onboarding/movies');
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: false,
       });
     });
 
-    it('should return watched step when platforms and watchlist complete but no watched movies', async () => {
+    it('should return complete onboarding when platforms and watchlist complete (watched not required)', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
       mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : [])
@@ -155,12 +153,11 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.isOnboardingComplete).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/watched');
+      expect(result.current.isOnboardingComplete).toBe(true);
+      expect(result.current.requiredStep).toBeNull();
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: true,
-        hasWatchedMovies: false,
       });
     });
   });
@@ -204,7 +201,7 @@ describe('useOnboardingStatus', () => {
 
       // Should assume no watchlist movies when loading fails
       expect(result.current.progress.hasWatchlistMovies).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/add');
+      expect(result.current.requiredStep).toBe('/onboarding/movies');
     });
 
     it('should handle watched loading error gracefully', async () => {
@@ -224,9 +221,9 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Should assume no watched movies when loading fails
-      expect(result.current.progress.hasWatchedMovies).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/watched');
+      // Watched movies loading error shouldn't block completion if watchlist is complete
+      // since we simplified to 2 steps
+      expect(result.current.isOnboardingComplete).toBe(true);
     });
 
     it('should handle null/undefined profile gracefully', async () => {
@@ -279,6 +276,8 @@ describe('useOnboardingStatus', () => {
     });
 
     it('should handle exactly 3 watched movies', async () => {
+      // This test now checks that having watched movies doesn't affect onboarding status
+      // as we removed the requirement
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
       mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : mockWatchedMovies)
@@ -292,7 +291,6 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.progress.hasWatchedMovies).toBe(true);
       expect(result.current.isOnboardingComplete).toBe(true);
     });
 
@@ -312,10 +310,12 @@ describe('useOnboardingStatus', () => {
       });
 
       expect(result.current.progress.hasWatchlistMovies).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/add');
+      expect(result.current.requiredStep).toBe('/onboarding/movies');
     });
 
     it('should handle less than 3 watched movies', async () => {
+      // This test now checks that having insufficient watched movies
+      // doesn't affect onboarding status as we removed the requirement
       const insufficientWatched = mockWatchedMovies.slice(0, 1); // Only 1 movie
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
       mockFetchUserMoviesSimpleList.mockImplementation((status) =>
@@ -331,8 +331,8 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.progress.hasWatchedMovies).toBe(false);
-      expect(result.current.requiredStep).toBe('/onboarding/watched');
+      // Should be complete because watchlist requirement is met
+      expect(result.current.isOnboardingComplete).toBe(true);
     });
 
     it('should handle more than 3 movies (should still be considered complete)', async () => {
@@ -365,25 +365,21 @@ describe('useOnboardingStatus', () => {
     const completeProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: true,
-      hasWatchedMovies: true,
     };
 
     const noPlatformsProgress: OnboardingProgress = {
       hasPlatforms: false,
       hasWatchlistMovies: false,
-      hasWatchedMovies: false,
     };
 
     const platformsOnlyProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: false,
-      hasWatchedMovies: false,
     };
 
     const platformsAndWatchlistProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: true,
-      hasWatchedMovies: false,
     };
 
     it('should return fallback path when all steps complete', () => {
@@ -398,12 +394,14 @@ describe('useOnboardingStatus', () => {
 
     it('should return add path when platforms complete but no watchlist', () => {
       const result = getNextOnboardingPath(platformsOnlyProgress);
-      expect(result).toBe('/onboarding/add');
+      expect(result).toBe('/onboarding/movies');
     });
 
     it('should return watched path when platforms and watchlist complete but no watched', () => {
+      // This case is now handled differently - user is complete
+      // This test verifies that we don't redirect to watched step anymore
       const result = getNextOnboardingPath(platformsAndWatchlistProgress);
-      expect(result).toBe('/onboarding/watched');
+      expect(result).toBe('/');
     });
 
     it('should return custom fallback path', () => {
@@ -413,7 +411,7 @@ describe('useOnboardingStatus', () => {
 
     it('should skip to next step from specified step', () => {
       const result = getNextOnboardingPath(platformsOnlyProgress, { fromStep: 'platforms' });
-      expect(result).toBe('/onboarding/add');
+      expect(result).toBe('/onboarding/movies');
     });
 
     it('should handle unknown fromStep gracefully', () => {
@@ -422,20 +420,20 @@ describe('useOnboardingStatus', () => {
     });
 
     it('should handle edge case: fromStep at end of sequence', () => {
-      const result = getNextOnboardingPath(completeProgress, { fromStep: 'watched' });
+      // Since we removed 'watched' step, we use 'movies' as the end step
+      const result = getNextOnboardingPath(completeProgress, { fromStep: 'movies' });
       expect(result).toBe('/');
     });
 
     it('should handle partial progress correctly', () => {
-      // User has platforms and watched movies but no watchlist movies
+      // User has platforms but no watchlist movies
       const partialProgress: OnboardingProgress = {
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: true,
       };
 
       const result = getNextOnboardingPath(partialProgress);
-      expect(result).toBe('/onboarding/add'); // Should still go to add step
+      expect(result).toBe('/onboarding/movies'); // Should still go to movies step
     });
   });
 

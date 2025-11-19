@@ -202,7 +202,7 @@ describe("OnboardingMoviesPage Integration Tests", () => {
         hasPlatforms: true,
         hasWatchlistMovies: false,
       },
-      { fromStep: "add" }
+      { fromStep: "movies" }
     );
   });
 

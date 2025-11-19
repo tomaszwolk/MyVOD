@@ -82,9 +82,7 @@ export function useOnboardingStatus() {
     });
 
   // Fetch watched movies
-  const { data: watchedMovies = [], isLoading: isLoadingWatched } = useQuery<
-    UserMovieDto[]
-  >({
+  const { isLoading: isLoadingWatched } = useQuery<UserMovieDto[]>({
     queryKey: ["user-movies", "watched", "simple"],
     queryFn: () => fetchUserMoviesSimpleList("watched"),
     retry: false,
