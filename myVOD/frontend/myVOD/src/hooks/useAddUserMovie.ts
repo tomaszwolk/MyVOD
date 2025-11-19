@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  InfiniteData,
+} from "@tanstack/react-query";
 import { addUserMovie } from "@/lib/api/movies";
 import type {
   CreateUserMovieCommand,
@@ -7,6 +11,11 @@ import type {
 } from "@/types/api.types";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
+
+// Define a type for the mutation context
+type MutationContext = {
+  previousOnVODMovies?: InfiniteData<PaginatedResponse<UserMovieDto>>;
+};
 
 /**
  * Custom hook for adding movies to user lists using TanStack Query.
@@ -18,7 +27,12 @@ import { isAxiosError } from "axios";
 export function useAddUserMovie() {
   const queryClient = useQueryClient();
 
-  return useMutation<UserMovieDto, Error, CreateUserMovieCommand>({
+  return useMutation<
+    UserMovieDto,
+    Error,
+    CreateUserMovieCommand,
+    MutationContext
+  >({
     mutationFn: addUserMovie,
     onMutate: async (newMovie) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
@@ -26,7 +40,7 @@ export function useAddUserMovie() {
 
       // Snapshot the previous value
       const previousOnVODMovies = queryClient.getQueryData<
-        PaginatedResponse<UserMovieDto>
+        InfiniteData<PaginatedResponse<UserMovieDto>>
       >(["on-vod-movies"]);
 
       // Optimistically update to the new value
@@ -37,20 +51,29 @@ export function useAddUserMovie() {
             movie.movie.tconst === newMovie.tconst
               ? {
                   ...movie,
-                  watchlisted_at: newMovie.action !== 'mark_as_watched' ? new Date().toISOString() : null,
-                  watched_at: newMovie.action === 'mark_as_watched' ? new Date().toISOString() : null,
+                  watchlisted_at:
+                    newMovie.action !== "mark_as_watched"
+                      ? new Date().toISOString()
+                      : null,
+                  watched_at:
+                    newMovie.action === "mark_as_watched"
+                      ? new Date().toISOString()
+                      : null,
                   user_rating: newMovie.rating ?? null,
                 }
               : movie
           ),
         }));
-        
-        queryClient.setQueryData(
+
+        queryClient.setQueryData<InfiniteData<PaginatedResponse<UserMovieDto>>>(
           ["on-vod-movies"],
-          (old: PaginatedResponse<UserMovieDto>) => ({
-            ...old,
-            pages: updatedPages,
-          })
+          (old) =>
+            old
+              ? {
+                  ...old,
+                  pages: updatedPages,
+                }
+              : undefined
         );
       }
 
@@ -70,11 +93,11 @@ export function useAddUserMovie() {
       }
     },
     onSuccess: (data) => {
-        if (data.watched_at) {
-          toast.success(`"${data.movie.primary_title}" dodano do obejrzanych`);
-        } else {
-          toast.success(`"${data.movie.primary_title}" dodano do watchlisty`);
-        }
+      if (data.watched_at) {
+        toast.success(`"${data.movie.primary_title}" dodano do obejrzanych`);
+      } else {
+        toast.success(`"${data.movie.primary_title}" dodano do watchlisty`);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["on-vod-movies"] });

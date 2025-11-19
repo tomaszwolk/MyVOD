@@ -53,6 +53,7 @@ export function SelectedMoviesList({
               posterUrl={item.poster_path}
               avgRating={item.avg_rating}
               userRating={item.user_rating}
+              status="watched"
               onRateClick={
                 item.userMovieId
                   ? () =>

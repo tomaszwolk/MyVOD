@@ -4,16 +4,18 @@ import { getUserProfile } from "@/lib/api/auth";
 import { fetchUserMoviesSimpleList } from "@/lib/api/movies";
 import type { UserMovieDto, UserProfileDto } from "@/types/api.types";
 
-type OnboardingStepKey = "platforms" | "movies";
+type OnboardingStepKey = "platforms" | "movies" | "watched";
 
 export type OnboardingProgress = {
   hasPlatforms: boolean;
   hasWatchlistMovies: boolean;
+  hasWatchedMovies: boolean;
 };
 
 const ONBOARDING_SEQUENCE: Array<{ key: OnboardingStepKey; path: string }> = [
   { key: "platforms", path: "/onboarding/platforms" },
   { key: "movies", path: "/onboarding/movies" },
+  { key: "watched", path: "/onboarding/watched" },
 ];
 
 type NextStepOptions = {
@@ -32,6 +34,7 @@ export function getNextOnboardingPath(
   const completionMap: Record<OnboardingStepKey, boolean> = {
     platforms: progress.hasPlatforms,
     movies: progress.hasWatchlistMovies,
+    watched: progress.hasWatchedMovies,
   };
 
   // Handle unknown fromStep - always start from the beginning
@@ -82,7 +85,9 @@ export function useOnboardingStatus() {
     });
 
   // Fetch watched movies
-  const { isLoading: isLoadingWatched } = useQuery<UserMovieDto[]>({
+  const { data: watchedMovies = [], isLoading: isLoadingWatched } = useQuery<
+    UserMovieDto[]
+  >({
     queryKey: ["user-movies", "watched", "simple"],
     queryFn: () => fetchUserMoviesSimpleList("watched"),
     retry: false,
@@ -93,6 +98,7 @@ export function useOnboardingStatus() {
   // Check completion status
   const hasPlatforms = (profile?.platforms?.length ?? 0) >= 1;
   const hasWatchlistMovies = watchlistMovies.length >= 3;
+  const hasWatchedMovies = watchedMovies.length >= 3;
 
   // Determine which step user should be on (only when data is loaded)
   let requiredStep: string | null = null;
@@ -102,6 +108,8 @@ export function useOnboardingStatus() {
       requiredStep = "/onboarding/platforms";
     } else if (!hasWatchlistMovies) {
       requiredStep = "/onboarding/movies";
+    } else if (!hasWatchedMovies) {
+      requiredStep = "/onboarding/watched";
     }
   }
 
@@ -111,14 +119,16 @@ export function useOnboardingStatus() {
     requiredStep = "/onboarding/platforms";
   }
 
-  const isOnboardingComplete = hasPlatforms && hasWatchlistMovies;
+  const isOnboardingComplete =
+    hasPlatforms && hasWatchlistMovies && hasWatchedMovies;
 
   const progress = useMemo(
     () => ({
       hasPlatforms,
       hasWatchlistMovies,
+      hasWatchedMovies,
     }),
-    [hasPlatforms, hasWatchlistMovies]
+    [hasPlatforms, hasWatchlistMovies, hasWatchedMovies]
   );
 
   return {
@@ -128,5 +138,6 @@ export function useOnboardingStatus() {
     progress,
     profile,
     watchlistMovies,
+    watchedMovies,
   };
 }

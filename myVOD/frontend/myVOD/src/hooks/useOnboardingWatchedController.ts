@@ -8,11 +8,9 @@ import {
   deleteUserMovie,
   fetchUserMoviesSimpleList,
 } from "@/lib/api/movies";
-import { useRateMovie } from "@/hooks/useRateMovie";
 import type { SearchOptionVM, UserMovieDto } from "@/types/api.types";
 import type {
   OnboardingSelectedItem,
-  OnboardingWatchedViewModel,
   SelectedSource,
 } from "@/types/view/onboarding-watched.types";
 import {
@@ -94,15 +92,13 @@ export function useOnboardingWatchedController() {
       command,
     }: {
       id: number;
-      command: { action: "mark_as_watched" | "restore_to_watchlist" };
+      command: { action: "mark_as_watched" | "restore_to_watchlist" | "rate_movie"; rating?: number };
     }) => patchUserMovie(id, command),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-movies"] });
     },
   });
 
-  // Mutation for rating movies
-  const rateMovieMutation = useRateMovie();
 
   // Mutation for deleting user movie
   const deleteUserMovieMutation = useMutation({
@@ -146,7 +142,7 @@ export function useOnboardingWatchedController() {
       try {
         const result: UserMovieDto = await addUserMovieMutation.mutateAsync({
           tconst: movie.tconst,
-          mark_as_watched: true,
+          action: "mark_as_watched",
         });
 
         userMovieId = result.id;
@@ -285,65 +281,44 @@ export function useOnboardingWatchedController() {
     }
 
     try {
-      await rateMovieMutation.mutateAsync({
+      await patchUserMovieMutation.mutateAsync({
         id: userMovieId,
-        command: { action: "rate_movie", rating },
+        command: {
+          action: "rate_movie",
+          rating,
+        },
       });
-
-      // Update the rating in local state
-      setSelected((prev) =>
-        prev.map((item) =>
-          item.userMovieId === userMovieId
-            ? { ...item, user_rating: rating }
-            : item
-        )
-      );
-
-      toast.success("Ocena została zapisana");
+      toast.success("Film został oceniony");
     } catch (error) {
-      const apiError = error as ApiError;
-      if (apiError?.status && apiError.status >= 500) {
-        toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
-      } else {
-        toast.error("Nie udało się zapisać oceny");
-      }
-      console.error("Error rating movie:", error);
+      console.error("Rate movie error:", error);
+      toast.error("Nie udało się ocenić filmu");
     }
   };
 
-  /**
-   * Finishes the onboarding and navigates to the main app.
-   */
-  const finish = () => {
-    setIsSubmitting(true);
-
-    // Navigate to main app (soft guard allows this)
-    toast.success("Onboarding zakończony!");
-    const destination = getNextOnboardingPath(progress, {
-      fromStep: "watched",
-    });
-    navigate(destination, { replace: true });
-  };
-
-  /**
-   * Skips this step and finishes the onboarding.
-   */
-  const skip = () => {
-    setIsSubmitting(true);
-
-    // Navigate to main app (soft guard allows this)
-    const destination = getNextOnboardingPath(progress, {
-      fromStep: "watched",
-    });
-    navigate(destination, { replace: true });
-  };
-
-  // Build view model
-  const viewModel: OnboardingWatchedViewModel = {
+  // View model for the component
+  const viewModel = {
     query,
     isSubmitting,
     selected,
     requiredSelected: REQUIRED_SELECTED,
+  };
+
+  // Finish the onboarding flow
+  const finish = async () => {
+    setIsSubmitting(true);
+    // Show success message
+    toast.success("Onboarding zakończony!");
+    // Navigate to next step based on completion
+    const nextPath = getNextOnboardingPath(progress, { fromStep: "watched" });
+    navigate(nextPath, { replace: true });
+  };
+
+  // Skip the onboarding flow
+  const skip = async () => {
+    setIsSubmitting(true);
+    // Navigate to next step based on current progress
+    const nextPath = getNextOnboardingPath(progress, { fromStep: "watched" });
+    navigate(nextPath, { replace: true });
   };
 
   return {

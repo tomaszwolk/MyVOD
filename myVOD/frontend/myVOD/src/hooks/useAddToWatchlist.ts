@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { addUserMovie } from "@/lib/api/movies";
-import type { AddUserMovieCommand, UserMovieDto } from "@/types/api.types";
+import type { CreateUserMovieCommand, UserMovieDto } from "@/types/api.types";
 import { isAxiosError } from "axios";
 
 interface ApiErrorResponse {
@@ -19,7 +19,7 @@ interface ApiErrorResponse {
 export function useAddToWatchlist() {
   const queryClient = useQueryClient();
 
-  return useMutation<UserMovieDto, unknown, AddUserMovieCommand>({
+  return useMutation<UserMovieDto, unknown, CreateUserMovieCommand>({
     mutationFn: (command) => addUserMovie(command),
     onSuccess: (data) => {
       // Invalidate watchlist queries to refresh the list

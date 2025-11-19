@@ -591,7 +591,7 @@ describe("useOnboardingWatchedController", () => {
       });
     });
 
-    it("should call POST /api/user-movies with tconst and mark_as_watched=true", async () => {
+    it("should call POST /api/user-movies with tconst and action=mark_as_watched", async () => {
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null,
@@ -610,15 +610,15 @@ describe("useOnboardingWatchedController", () => {
       expect(mockAddUserMovie).toHaveBeenCalledWith(
         {
           tconst: "tt0111161",
-          mark_as_watched: true,
+          action: "mark_as_watched",
         },
         expect.any(Object) // Additional mutation options
       );
       expect(mockAddUserMovie).toHaveBeenCalledTimes(1);
     });
 
-    it("should handle successful movie addition with mark_as_watched=true", async () => {
-      // POST with mark_as_watched=true should handle everything in one call
+    it("should handle successful movie addition with action=mark_as_watched", async () => {
+      // POST with action="mark_as_watched" should handle everything in one call
       mockAddUserMovie.mockResolvedValue({
         ...mockUserMovieDto,
         watchlisted_at: null, // newly created
@@ -638,7 +638,7 @@ describe("useOnboardingWatchedController", () => {
       expect(mockAddUserMovie).toHaveBeenCalledWith(
         {
           tconst: "tt0111161",
-          mark_as_watched: true,
+          action: "mark_as_watched",
         },
         expect.any(Object)
       );

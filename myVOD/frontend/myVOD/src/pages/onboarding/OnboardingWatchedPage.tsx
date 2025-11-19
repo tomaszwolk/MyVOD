@@ -37,7 +37,7 @@ export function OnboardingWatchedPage() {
   const hasMinimumMovies =
     viewModel.selected.length >= viewModel.requiredSelected;
   const selectedTconsts = new Set(
-    viewModel.selected.map((item) => item.tconst)
+    viewModel.selected.map((item: { tconst: string }) => item.tconst)
   );
 
   const handleRateClick = (userMovieId: number, movieTitle: string, currentRating: number | null) => {
@@ -106,12 +106,12 @@ export function OnboardingWatchedPage() {
             <MovieSearchCombobox
               value={viewModel.query}
               onChange={setQuery}
-              onSelect={pick}
+              onAddToWatchlist={() => {}}
+              onMarkAsWatched={pick}
+              onRate={() => {}}
               disabled={viewModel.isSubmitting}
               selectedTconsts={selectedTconsts}
               placeholder="Szukaj filmów, które widziałeś..."
-              buttonText="Oznacz"
-              ariaLabel="Oznacz jako obejrzany"
               testId="watched-search-combobox"
             />
           </div>

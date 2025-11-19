@@ -32,29 +32,24 @@ export function useRateMovie() {
             : movie;
 
         if (previousOnVODMovies) {
-          const updatedPages = previousOnVODMovies.pages.map((page) => ({
-            ...page,
-            results: page.results.map(optimisticUpdate),
-          }));
-          queryClient.setQueryData(["on-vod-movies"], (old: PaginatedResponse<UserMovieDto>) => ({ ...old, pages: updatedPages }));
+          const updatedResults = previousOnVODMovies.results.map(optimisticUpdate);
+          queryClient.setQueryData(["on-vod-movies"], { ...previousOnVODMovies, results: updatedResults });
         }
 
         if (previousWatchedMovies) {
-            const updatedPages = previousWatchedMovies.pages.map((page) => ({
-              ...page,
-              results: page.results.map(optimisticUpdate),
-            }));
-            queryClient.setQueryData(["user-movies", "watched"], (old: PaginatedResponse<UserMovieDto>) => ({ ...old, pages: updatedPages }));
-          }
+          const updatedResults = previousWatchedMovies.results.map(optimisticUpdate);
+          queryClient.setQueryData(["user-movies", "watched"], { ...previousWatchedMovies, results: updatedResults });
+        }
   
         return { previousOnVODMovies, previousWatchedMovies };
       },
       onError: (_err, _vars, context) => {
-        if (context?.previousOnVODMovies) {
-          queryClient.setQueryData(["on-vod-movies"], context.previousOnVODMovies);
+        const ctx = context as { previousOnVODMovies?: PaginatedResponse<UserMovieDto>; previousWatchedMovies?: PaginatedResponse<UserMovieDto> };
+        if (ctx?.previousOnVODMovies) {
+          queryClient.setQueryData(["on-vod-movies"], ctx.previousOnVODMovies);
         }
-        if (context?.previousWatchedMovies) {
-            queryClient.setQueryData(["user-movies", "watched"], context.previousWatchedMovies);
+        if (ctx?.previousWatchedMovies) {
+            queryClient.setQueryData(["user-movies", "watched"], ctx.previousWatchedMovies);
         }
         toast.error("Nie udało się zapisać oceny.");
       },

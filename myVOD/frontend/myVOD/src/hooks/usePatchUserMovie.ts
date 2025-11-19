@@ -40,29 +40,24 @@ export function usePatchUserMovie() {
       };
 
       if (previousOnVODMovies) {
-        const updatedPages = previousOnVODMovies.pages.map((page) => ({
-          ...page,
-          results: page.results.map(optimisticUpdate),
-        }));
-        queryClient.setQueryData(["on-vod-movies"], { ...previousOnVODMovies, pages: updatedPages });
+        const updatedResults = previousOnVODMovies.results.map(optimisticUpdate);
+        queryClient.setQueryData(["on-vod-movies"], { ...previousOnVODMovies, results: updatedResults });
       }
 
       if (previousUserMovies) {
-        const updatedPages = previousUserMovies.pages.map((page) => ({
-            ...page,
-            results: page.results.map(optimisticUpdate),
-          }));
-          queryClient.setQueryData(["user-movies"], { ...previousUserMovies, pages: updatedPages });
+        const updatedResults = previousUserMovies.results.map(optimisticUpdate);
+        queryClient.setQueryData(["user-movies"], { ...previousUserMovies, results: updatedResults });
       }
 
       return { previousOnVODMovies, previousUserMovies };
     },
     onError: (_err, _vars, context) => {
-        if (context?.previousOnVODMovies) {
-          queryClient.setQueryData(["on-vod-movies"], context.previousOnVODMovies);
+        const ctx = context as { previousOnVODMovies?: PaginatedResponse<UserMovieDto>; previousUserMovies?: PaginatedResponse<UserMovieDto> };
+        if (ctx?.previousOnVODMovies) {
+          queryClient.setQueryData(["on-vod-movies"], ctx.previousOnVODMovies);
         }
-        if (context?.previousUserMovies) {
-            queryClient.setQueryData(["user-movies"], context.previousUserMovies);
+        if (ctx?.previousUserMovies) {
+            queryClient.setQueryData(["user-movies"], ctx.previousUserMovies);
         }
         toast.error("Nie udało się zaktualizować statusu filmu.");
     },

@@ -96,6 +96,7 @@ describe('useOnboardingStatus', () => {
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: true,
+        hasWatchedMovies: true,
       });
     });
 
@@ -136,10 +137,11 @@ describe('useOnboardingStatus', () => {
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: false,
+        hasWatchedMovies: false,
       });
     });
 
-    it('should return complete onboarding when platforms and watchlist complete (watched not required)', async () => {
+    it('should return watched step when platforms and watchlist complete but no watched movies', async () => {
       mockGetUserProfile.mockResolvedValue(mockUserProfile);
       mockFetchUserMoviesSimpleList.mockImplementation((status) =>
         Promise.resolve(status === 'watchlist' ? mockWatchlistMovies : [])
@@ -153,11 +155,12 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.isOnboardingComplete).toBe(true);
-      expect(result.current.requiredStep).toBeNull();
+      expect(result.current.isOnboardingComplete).toBe(false);
+      expect(result.current.requiredStep).toBe('/onboarding/watched');
       expect(result.current.progress).toEqual({
         hasPlatforms: true,
         hasWatchlistMovies: true,
+        hasWatchedMovies: false,
       });
     });
   });
@@ -221,9 +224,8 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Watched movies loading error shouldn't block completion if watchlist is complete
-      // since we simplified to 2 steps
-      expect(result.current.isOnboardingComplete).toBe(true);
+      // Watched movies loading error should prevent completion since all steps are required
+      expect(result.current.isOnboardingComplete).toBe(false);
     });
 
     it('should handle null/undefined profile gracefully', async () => {
@@ -331,8 +333,8 @@ describe('useOnboardingStatus', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Should be complete because watchlist requirement is met
-      expect(result.current.isOnboardingComplete).toBe(true);
+      // Should not be complete because watched movies requirement is not met
+      expect(result.current.isOnboardingComplete).toBe(false);
     });
 
     it('should handle more than 3 movies (should still be considered complete)', async () => {
@@ -365,21 +367,25 @@ describe('useOnboardingStatus', () => {
     const completeProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: true,
+      hasWatchedMovies: true,
     };
 
     const noPlatformsProgress: OnboardingProgress = {
       hasPlatforms: false,
       hasWatchlistMovies: false,
+      hasWatchedMovies: false,
     };
 
     const platformsOnlyProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: false,
+      hasWatchedMovies: false,
     };
 
     const platformsAndWatchlistProgress: OnboardingProgress = {
       hasPlatforms: true,
       hasWatchlistMovies: true,
+      hasWatchedMovies: false,
     };
 
     it('should return fallback path when all steps complete', () => {
@@ -398,10 +404,8 @@ describe('useOnboardingStatus', () => {
     });
 
     it('should return watched path when platforms and watchlist complete but no watched', () => {
-      // This case is now handled differently - user is complete
-      // This test verifies that we don't redirect to watched step anymore
       const result = getNextOnboardingPath(platformsAndWatchlistProgress);
-      expect(result).toBe('/');
+      expect(result).toBe('/onboarding/watched');
     });
 
     it('should return custom fallback path', () => {

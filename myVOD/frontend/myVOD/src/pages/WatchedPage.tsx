@@ -12,7 +12,6 @@ import {
   useRestoreToWatchlist,
   useDeleteFromWatched,
 } from "@/hooks/useWatchedActions";
-import { useRateMovie } from "@/hooks/useRateMovie";
 import { useAddMovie } from "@/hooks/useAddMovie";
 import { useListUserMovies } from "@/hooks/useListUserMovies";
 import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
@@ -129,7 +128,6 @@ export function WatchedPage() {
   const deleteFromWatchedMutation = useDeleteFromWatched();
   const addMovieMutation = useAddMovie();
   const patchUserMovieMutation = usePatchUserMovie();
-  const rateMovieMutation = useRateMovie();
 
   // AI suggestions query for checking rate limit status
   const suggestionsQuery = useAISuggestions({
@@ -267,7 +265,7 @@ export function WatchedPage() {
     (rating: number) => {
       if (!ratingModalState.userMovieId) return;
 
-      rateMovieMutation.mutate(
+      patchUserMovieMutation.mutate(
         {
           id: ratingModalState.userMovieId,
           command: { action: "rate_movie", rating },
@@ -290,7 +288,7 @@ export function WatchedPage() {
         }
       );
     },
-    [ratingModalState, rateMovieMutation]
+    [ratingModalState, patchUserMovieMutation]
   );
 
   // Create watchlist tconst set for suggestions modal
@@ -343,7 +341,7 @@ export function WatchedPage() {
         }
 
         const result = await addMovieMutation.mutateAsync({ tconst });
-        toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
+        toast.success(`"${result.movie.primary_title}" dodano do watchlisty`);
       } catch (error) {
         if (
           isAxiosError<MovieMutationErrorResponse>(error) &&
@@ -373,9 +371,9 @@ export function WatchedPage() {
       try {
         const result = await addMovieMutation.mutateAsync({
           tconst,
-          mark_as_watched: true,
+          action: "mark_as_watched",
         });
-        toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
+        toast.success(`"${result.movie.primary_title}" dodano do obejrzanych`);
       } catch (error) {
         if (
           isAxiosError<MovieMutationErrorResponse>(error) &&

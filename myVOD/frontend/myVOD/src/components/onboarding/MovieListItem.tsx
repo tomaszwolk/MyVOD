@@ -10,9 +10,11 @@ type MovieListItemProps = {
   startYear: number | null;
   genres: string[] | null;
   posterUrl: string | null;
+  avgRating: string | null;
   userRating?: number | null;
   status: "watchlisted" | "watched";
   onRemove: () => void;
+  onRateClick?: () => void;
   isRemoving?: boolean;
 };
 
@@ -22,9 +24,11 @@ export function MovieListItem({
   startYear,
   genres,
   posterUrl,
+  avgRating,
   userRating,
   status,
   onRemove,
+  onRateClick,
   isRemoving,
 }: MovieListItemProps) {
   const hasGenres = genres && genres.length > 0;
@@ -61,7 +65,15 @@ export function MovieListItem({
       </TMDBPoster>
 
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate">{primaryTitle}</h4>
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="font-medium text-sm truncate">{primaryTitle}</h4>
+          {avgRating && (
+            <div className="flex items-center gap-1 text-xs text-yellow-600">
+              <Star className="h-3 w-3 fill-current" />
+              <span>{avgRating}</span>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {startYear && <span>{startYear}</span>}
           {displayGenres && (
@@ -79,17 +91,31 @@ export function MovieListItem({
             </Badge>
           )}
           {status === "watched" && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              Obejrzany
-              {userRating && (
-                <>
-                  <span className="mx-1">|</span>
-                  <Star className="h-3 w-3 text-blue-500" />
-                  <span>{userRating}/10</span>
-                </>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                Obejrzany
+                {userRating && (
+                  <>
+                    <span className="mx-1">|</span>
+                    <Star className="h-3 w-3 text-blue-500" />
+                    <span>{userRating}/10</span>
+                  </>
+                )}
+              </Badge>
+              {onRateClick && !userRating && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-5 px-2 text-xs"
+                  onClick={onRateClick}
+                  title="Oceń film"
+                >
+                  <Star className="h-3 w-3 mr-1" />
+                  Oceń
+                </Button>
               )}
-            </Badge>
+            </div>
           )}
         </div>
       </div>

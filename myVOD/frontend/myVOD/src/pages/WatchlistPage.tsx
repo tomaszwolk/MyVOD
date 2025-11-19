@@ -224,7 +224,7 @@ export function WatchlistPage() {
 
       try {
         const result = await addMovieMutation.mutateAsync({ tconst });
-        toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
+        toast.success(`"${result.movie.primary_title}" dodano do watchlisty`);
       } catch (error) {
         if (isAxiosError<MovieMutationErrorResponse>(error)) {
           const status = error.response?.status;
@@ -249,9 +249,9 @@ export function WatchlistPage() {
       try {
         const result = await addMovieMutation.mutateAsync({
           tconst,
-          mark_as_watched: true,
+          action: "mark_as_watched",
         });
-        toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
+        toast.success(`"${result.movie.primary_title}" dodano do obejrzanych`);
       } catch (error) {
         if (isAxiosError<MovieMutationErrorResponse>(error)) {
           const status = error.response?.status;
