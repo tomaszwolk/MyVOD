@@ -16,7 +16,6 @@ import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 import { formatDistanceToNow } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Star, Trophy } from "lucide-react";
 
 /**
  * Props for UserMovieRow component.

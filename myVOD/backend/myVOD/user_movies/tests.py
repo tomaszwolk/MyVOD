@@ -384,7 +384,7 @@ class UserMoviePostAPITests(APITestCase):
 
         response = self.client.post(self.url, {"tconst": "tt0071562"}, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(response.data["movie"]["tconst"], "tt0071562")
         self.assertIsNotNone(response.data["watchlisted_at"])

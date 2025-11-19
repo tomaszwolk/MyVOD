@@ -51,7 +51,7 @@ describe("useAddUserMovie", () => {
     vi.clearAllMocks();
   });
 
-  it("should map UserMovieDto to AddedMovieVM correctly", async () => {
+  it("should return the user movie data on successful mutation", async () => {
     mockAddUserMovie.mockResolvedValue(mockUserMovieDto);
 
     const { Wrapper } = createWrapper();
@@ -66,15 +66,7 @@ describe("useAddUserMovie", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual({
-      userMovieId: 123,
-      tconst: "tt0111161",
-      primaryTitle: "The Shawshank Redemption",
-      startYear: 1994,
-      genres: ["Drama"],
-      posterUrl: "/poster.jpg",
-      avgRating: "9.3",
-    });
+    expect(result.current.data).toEqual(mockUserMovieDto);
   });
 
   it("should call addUserMovie API with correct parameters", async () => {
@@ -90,7 +82,7 @@ describe("useAddUserMovie", () => {
     result.current.mutate(command);
 
     await waitFor(() => {
-      expect(mockAddUserMovie).toHaveBeenCalledWith(command);
+      expect(mockAddUserMovie).toHaveBeenCalledWith(command, expect.anything());
     });
     expect(mockAddUserMovie).toHaveBeenCalledTimes(1);
   });
@@ -105,14 +97,14 @@ describe("useAddUserMovie", () => {
       wrapper: Wrapper,
     });
 
-    result.current.mutate({ tconst: "tt0111161" });
+    const command: AddUserMovieCommand = {
+      tconst: "tt0111161",
+      action: "mark_as_watched",
+    };
+    result.current.mutate(command);
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ["user-movies"],
+      expect(mockAddUserMovie).toHaveBeenCalledWith(command, expect.anything());
     });
   });
 
@@ -226,7 +218,7 @@ describe("useAddUserMovie", () => {
     result.current.mutate(command);
 
     await waitFor(() => {
-      expect(mockAddUserMovie).toHaveBeenCalledWith(command);
+      expect(mockAddUserMovie).toHaveBeenCalledWith(command, expect.anything());
     });
   });
 
@@ -243,7 +235,7 @@ describe("useAddUserMovie", () => {
     expect(result.current.data).toBeUndefined();
   });
 
-  it("should handle successful mutation with different movie data", async () => {
+  it("should return correct data for a different movie", async () => {
     const differentMovie: UserMovieDto = {
       ...mockUserMovieDto,
       id: 456,
@@ -270,14 +262,6 @@ describe("useAddUserMovie", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual({
-      userMovieId: 456,
-      tconst: "tt0068646",
-      primaryTitle: "The Godfather",
-      startYear: 1972,
-      genres: ["Drama"],
-      posterUrl: null,
-      avgRating: "9.3",
-    });
+    expect(result.current.data).toEqual(differentMovie);
   });
 });

@@ -1,4 +1,4 @@
-import { Star, Trophy } from "lucide-react";
+import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -7,7 +7,6 @@ interface MovieRatingProps {
   userRating: number | null;
   onRateClick: () => void;
   tconst: string;
-  showUserRating?: boolean;
 }
 
 export const MovieRating = ({
@@ -15,7 +14,6 @@ export const MovieRating = ({
   userRating,
   onRateClick,
   tconst,
-  showUserRating = true,
 }: MovieRatingProps) => {
   return (
     <div className="flex items-center gap-2">

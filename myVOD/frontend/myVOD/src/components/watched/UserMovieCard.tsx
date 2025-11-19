@@ -14,7 +14,6 @@ import {
 import type { WatchedMovieItemVM } from "@/types/view/watched.types";
 import type { PlatformDto } from "@/types/api.types";
 import { cn } from "@/lib/utils";
-import { Star, Trophy } from "lucide-react";
 
 /**
  * Props for UserMovieCard component.

@@ -50,11 +50,10 @@ describe("UserMovieCard", () => {
 
   it("should render movie title and details", () => {
     render(<UserMovieCard {...defaultProps} />);
-
-    expect(screen.getByText("The Shawshank Redemption")).toBeInTheDocument();
-    expect(screen.getByText("1994")).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.item.title)).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.item.year)).toBeInTheDocument();
     expect(screen.getByText("Drama, Crime")).toBeInTheDocument();
-    expect(screen.getByText("9.3 / 10")).toBeInTheDocument();
+    expect(screen.getByText("9.3")).toBeInTheDocument();
   });
 
   it("should render poster image when available", () => {
