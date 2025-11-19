@@ -43,19 +43,18 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - Kluczowe komponenty widoku: CheckboxGroup z ikonami platform, Buttons (Dalej, Skip), Progress bar.
 - UX, dostępność i względy bezpieczeństwa: możliwość przejścia dalej bez wyboru, zachowanie wyboru, focus i role dla checkboxów, wizualne stany zaznaczenia.
 
-4) Widok: Onboarding – Krok 2: Dodaj filmy do watchlisty
-- Ścieżka widoku: `/onboarding/first-movies`
-- Główny cel: Dodanie minimum 3 filmów do watchlisty poprzez wyszukiwarkę z autocomplete (użytkownik może dodać więcej niż 3).
-- Kluczowe informacje do wyświetlenia: pole wyszukiwania, dropdown do 10 wyników (plakat, tytuł, rok, ocena), licznik „Dodane: X”, lista dodanych, dynamiczny tytuł.
-- Kluczowe komponenty widoku: Combobox z debounce, Lista wyników, Lista dodanych pozycji (mini-kafelki), Buttons (Dalej, Skip).
-- UX, dostępność i względy bezpieczeństwa: responsywność i łatwe trafianie w pozycje listy, placeholder dla braku plakatu, jasny komunikat przy braku wyników, zapobieganie duplikatom w sesji, walidacja minimum 3 filmów do przejścia dalej.
+4) Widok: Onboarding – Krok 2: Dodaj lub oznacz filmy
+- Ścieżka widoku: `/onboarding/movies`
+- Główny cel: Dodanie filmów do watchlisty, oznaczenie jako obejrzane lub ocena. Wymagane minimum 3 interakcje, aby przejść dalej.
+- Kluczowe informacje do wyświetlenia: pole wyszukiwania (Combobox), lista dodanych/oznaczonych filmów, pasek postępu „Krok 2/2”, dynamiczny tytuł i wskazówki.
+- Kluczowe komponenty widoku: `OnboardingMoviesPage`, `MovieSearchCombobox` (z akcjami: Watchlist, Watched, Rate), `AddedMoviesList` (wyświetlająca status filmu), `RatingModal`, Buttons (Zakończ, Skip).
+- UX, dostępność i względy bezpieczeństwa:
+  - Szybkie dodawanie: jedno kliknięcie w ikonę na liście wyników.
+  - Ujednolicony interfejs: wszystkie akcje (chcę obejrzeć / widziałem / oceniam) dostępne w jednym miejscu.
+  - Walidacja: blokada przycisku "Zakończ" do momentu wykonania 3 akcji.
+  - Płynna nawigacja: po zakończeniu przekierowanie do `/app/onvod`.
 
-5) Widok: Onboarding – Krok 3: Oznacz filmy jako obejrzane
-- Ścieżka widoku: `/onboarding/watched`
-- Główny cel: Oznaczenie minimum 3 filmów jako obejrzane (użytkownik może oznaczyć więcej niż 3).
-- Kluczowe informacje do wyświetlenia: pole wyszukiwania, wyniki, licznik „Oznaczone: X”, lista oznaczonych, dynamiczny tytuł.
-- Kluczowe komponenty widoku: Combobox, Kafelki/wiersze wyników z akcją „Oznacz obejrzane”, Buttons (Zakończ, Skip).
-- UX, dostępność i względy bezpieczeństwa: brak wymuszeń (wymagane minimum 3 do przejścia dalej), komunikaty sukcesu/błędu, mechanika: dodanie, jeśli brak, a następnie oznaczenie jako obejrzane w tle, tytuł zmienia się dynamicznie po dodaniu 3 filmów.
+5) (Widok usunięty - zintegrowany z Krokiem 2)
 
 6) Widok: Dashboard – onVOD
 - Ścieżka widoku: `/app/onvod`
@@ -135,7 +134,7 @@ Główne przepływy i przejścia między widokami:
 1) Rejestracja → Logowanie → Onboarding → Dashboard onVOD
 - Rejestracja (`/auth/register`) – 201; przekierowanie do logowania.
 - Logowanie (`/auth/login`) – po sukcesie sprawdzenie stanu onboardingu (pierwsze logowanie) i redirect do `/onboarding/platforms` lub `/app/onvod`.
-- Onboarding kroki 1–3 (`/onboarding/*`) – każdy krok pozwala „Skip”; po „Zakończ/Skip” → `/app/onvod`.
+- Onboarding kroki 1–2 (`/onboarding/*`) – każdy krok pozwala „Skip”; po „Zakończ/Skip” → `/app/onvod`.
 
 2) Główny przypadek użycia – Dodaj film i obejrzyj
 - Start: `/app/onvod` lub `/app/watchlist`.
@@ -186,7 +185,7 @@ Layouty i nawigacja:
 Struktura tras (skrót):
 - `/` → redirect na `/app/onvod` (jeśli zalogowany) albo `/auth/login`.
 - `/auth/login`, `/auth/register` (publiczne).
-- `/onboarding/platforms`, `/onboarding/add`, `/onboarding/watched` (chronione, tylko przy pierwszym logowaniu).
+- `/onboarding/platforms`, `/onboarding/movies` (chronione, tylko przy pierwszym logowaniu).
 - `/app/onvod`, `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
 - `/app/admin/dashboard` (chronione, wymaga `is_staff = TRUE`). Admin dashboard z metrykami, wykresami, top filmami i logami błędów.
 - `/error/unauthorized` - strona błędu autoryzacji (JWT wygasł).

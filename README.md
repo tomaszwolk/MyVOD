@@ -175,7 +175,7 @@ In scope for MVP
 - Accounts (email + password), JWT-based authentication, basic profile with platform preferences
 - Mark as watched + history
 - AI suggestions (Gemini-flash-lite) with 24h cache and daily usage limit
-- Onboarding flow (3 steps)
+- Onboarding flow (2 steps)
 - Basic analytics and admin dashboard
 - GDPR-compliant data deletion
 - User and IMDB ratings
