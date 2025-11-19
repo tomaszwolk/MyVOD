@@ -10,6 +10,7 @@ import { AddedMoviesList } from "@/components/onboarding/AddedMoviesList";
 import { OnboardingFooterNav } from "@/components/onboarding/OnboardingFooterNav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAddUserMovie } from "@/hooks/useAddUserMovie";
+import { useRateMovie } from "@/hooks/useRateMovie";
 import {
   getNextOnboardingPath,
   useOnboardingStatus,
@@ -17,47 +18,52 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { deleteUserMovie } from "@/lib/api/movies";
 import type { AddedMovieVM, SearchOptionVM } from "@/types/api.types";
+import { RatingModal } from "@/components/watched/RatingModal";
 
 interface ApiError extends Error {
   status?: number;
 }
 
+// Extend AddedMovieVM to include status
+interface OnboardingMovieVM extends AddedMovieVM {
+  status: "watchlisted" | "watched";
+  user_rating?: number | null;
+}
+
 /**
- * Onboarding page for adding movies to watchlist.
- * Step 2 of 3 in the onboarding flow.
- * Allows users to search and add unlimited movies to their watchlist, but requires at least 3.
+ * Onboarding page for adding movies to watchlist or marking them as watched.
+ * Step 2 of 2 in the onboarding flow.
  */
-export function OnboardingAddPage() {
+export function OnboardingMoviesPage() {
   const navigate = useNavigate();
-  const [added, setAdded] = useState<AddedMovieVM[]>([]);
+  const [added, setAdded] = useState<OnboardingMovieVM[]>([]);
   const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
   const [removingTconsts, setRemovingTconsts] = useState<Set<string>>(
     new Set()
   );
-  const [query, setQuery] = useState(""); // <-- DODAJ TEN STAN
+  const [query, setQuery] = useState("");
   const hasPrefilledFromWatchlistRef = useRef(false);
   const errorSectionRef = useRef<HTMLDivElement>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [ratingModalState, setRatingModalState] = useState<{
+    open: boolean;
+    movie: SearchOptionVM | null;
+  }>({ open: false, movie: null });
 
   const addUserMovieMutation = useAddUserMovie();
+  const rateMovieMutation = useRateMovie();
   const { progress, watchlistMovies } = useOnboardingStatus();
   const queryClient = useQueryClient();
 
   const REQUIRED_MOVIES = 3;
 
-  // Prefill with existing watchlist movies (if available)
+  // Prefill with existing watchlist movies
   useEffect(() => {
-    if (hasPrefilledFromWatchlistRef.current) {
-      return;
-    }
-
-    if (!watchlistMovies || watchlistMovies.length === 0) {
-      return;
-    }
+    if (hasPrefilledFromWatchlistRef.current || !watchlistMovies) return;
 
     const prefilled = watchlistMovies
       .slice(0, REQUIRED_MOVIES)
-      .map<AddedMovieVM>((movie) => ({
+      .map<OnboardingMovieVM>((movie) => ({
         userMovieId: movie.id,
         tconst: movie.movie.tconst,
         primaryTitle: movie.movie.primary_title,
@@ -65,6 +71,7 @@ export function OnboardingAddPage() {
         genres: movie.movie.genres,
         avgRating: movie.movie.avg_rating,
         posterUrl: movie.movie.poster_path,
+        status: "watchlisted", // Assume prefilled are watchlisted
       }));
 
     setAdded(prefilled);
@@ -73,81 +80,131 @@ export function OnboardingAddPage() {
       setValidationError(null);
     }
     hasPrefilledFromWatchlistRef.current = true;
-  }, [watchlistMovies, REQUIRED_MOVIES]);
+  }, [watchlistMovies]);
 
-  const handleAddMovie = async (searchOption: SearchOptionVM) => {
-    // Prevent adding if duplicate in session
-    if (addedSet.has(searchOption.tconst)) {
-      return;
-    }
+  const handleApiError = (error: unknown, tconst: string) => {
+    const apiError = error as ApiError;
+    setAdded((prev) => prev.filter((movie) => movie.tconst !== tconst));
+    setAddedSet((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(tconst);
+      return newSet;
+    });
 
-    try {
-      // Add to pending state immediately for UI feedback
-      const tempAddedMovie: AddedMovieVM = {
-        userMovieId: null,
-        tconst: searchOption.tconst,
-        primaryTitle: searchOption.primaryTitle,
-        startYear: searchOption.startYear,
-        genres: null, // New movies from search don't have genres yet
-        avgRating: searchOption.avgRating,
-        posterUrl: searchOption.posterUrl,
-      };
-
-      setAdded((prev) => {
-        const updated = [...prev, tempAddedMovie];
-        if (updated.length >= REQUIRED_MOVIES) {
-          setValidationError(null);
-        }
-        return updated;
-      });
-      setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
-
-      // Call API
-      const savedMovie = await addUserMovieMutation.mutateAsync({
-        tconst: searchOption.tconst,
-      });
-
-      setAdded((prev) =>
-        prev.map((movie) =>
-          movie.tconst === searchOption.tconst ? savedMovie : movie
-        )
-      );
-
-      // Success toast
-      toast.success(
-        `"${searchOption.primaryTitle}" został dodany do Twojej watchlisty`
-      );
-    } catch (error) {
-      const apiError = error as ApiError;
-      // Remove from state on error
-      setAdded((prev) =>
-        prev.filter((movie) => movie.tconst !== searchOption.tconst)
-      );
-      setAddedSet((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(searchOption.tconst);
-        return newSet;
-      });
-
-      // Handle different error types
-      if (apiError?.status === 409) {
-        // Movie already on watchlist - disable in session and show info toast
-        setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
-        toast.info("Ten film jest już na Twojej watchliście");
-      } else if (apiError?.status === 400) {
-        // Invalid tconst or movie not found
-        toast.error("Nie udało się dodać filmu");
-      } else if (apiError?.status && apiError.status >= 500) {
-        // Server error
-        toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
-      } else {
-        // Other errors (network, etc.)
-        toast.error("Wystąpił błąd podczas dodawania filmu");
-      }
+    if (apiError?.status === 409) {
+      setAddedSet((prev) => new Set(prev).add(tconst));
+      toast.info("Ten film jest już na Twojej liście");
+    } else {
+      toast.error("Wystąpił błąd. Spróbuj ponownie później.");
     }
   };
 
-  const handleRemoveMovie = async (movie: AddedMovieVM) => {
+  const handleAddToWatchlist = async (searchOption: SearchOptionVM) => {
+    if (addedSet.has(searchOption.tconst)) return;
+
+    const optimisticMovie: OnboardingMovieVM = {
+      ...searchOption,
+      userMovieId: null,
+      status: "watchlisted",
+    };
+    setAdded((prev) => [...prev, optimisticMovie]);
+    setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
+
+    try {
+      const savedMovie = await addUserMovieMutation.mutateAsync({
+        tconst: searchOption.tconst,
+      });
+      setAdded((prev) =>
+        prev.map((m) =>
+          m.tconst === savedMovie.tconst
+            ? { ...savedMovie, status: "watchlisted" }
+            : m
+        )
+      );
+      toast.success(`"${savedMovie.movie.primary_title}" dodano do watchlisty`);
+    } catch (error) {
+      handleApiError(error, searchOption.tconst);
+    }
+  };
+
+  const handleMarkAsWatched = async (searchOption: SearchOptionVM) => {
+    if (addedSet.has(searchOption.tconst)) return;
+
+    const optimisticMovie: OnboardingMovieVM = {
+      ...searchOption,
+      userMovieId: null,
+      status: "watched",
+    };
+    setAdded((prev) => [...prev, optimisticMovie]);
+    setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
+
+    try {
+      const savedMovie = await addUserMovieMutation.mutateAsync({
+        tconst: searchOption.tconst,
+        action: "mark_as_watched",
+      });
+      setAdded((prev) =>
+        prev.map((m) =>
+          m.tconst === savedMovie.tconst
+            ? { ...savedMovie, status: "watched" }
+            : m
+        )
+      );
+      toast.success(
+        `"${savedMovie.movie.primary_title}" oznaczono jako obejrzany`
+      );
+    } catch (error) {
+      handleApiError(error, searchOption.tconst);
+    }
+  };
+
+  const handleRate = (movie: SearchOptionVM) => {
+    if (addedSet.has(movie.tconst)) return;
+    setRatingModalState({ open: true, movie });
+  };
+
+  const handleRateSubmit = async (rating: number) => {
+    const movieToRate = ratingModalState.movie;
+    if (!movieToRate) return;
+
+    setRatingModalState({ open: false, movie: null });
+
+    const optimisticMovie: OnboardingMovieVM = {
+      ...movieToRate,
+      userMovieId: null,
+      status: "watched",
+      user_rating: rating,
+    };
+    setAdded((prev) => [...prev, optimisticMovie]);
+    setAddedSet((prev) => new Set(prev).add(movieToRate.tconst));
+
+    try {
+      const savedMovie = await rateMovieMutation.mutateAsync({
+        command: {
+          tconst: movieToRate.tconst,
+          rating,
+        },
+      });
+      setAdded((prev) =>
+        prev.map((m) =>
+          m.tconst === savedMovie.tconst
+            ? {
+                ...savedMovie,
+                status: "watched",
+                user_rating: savedMovie.user_rating,
+              }
+            : m
+        )
+      );
+      toast.success(
+        `Oceniono "${savedMovie.movie.primary_title}" na ${rating}/10`
+      );
+    } catch (error) {
+      handleApiError(error, movieToRate.tconst);
+    }
+  };
+
+  const handleRemoveMovie = async (movie: OnboardingMovieVM) => {
     if (removingTconsts.has(movie.tconst)) {
       return;
     }
@@ -222,11 +279,11 @@ export function OnboardingAddPage() {
       headerActions={headerActions}
     >
       <div data-testid="onboarding-step-2">
-        <ProgressBar current={2} total={3} className="mt-2" />
+        <ProgressBar current={2} total={2} className="mt-2" />
 
         <OnboardingHeader
-          title="Dodaj przynajmniej 3 filmy do watchlisty"
-          hint="Większa ilość filmów poprawi rekomendacje"
+          title="Dodaj lub oznacz filmy"
+          hint="Dodaj filmy do watchlisty, oznacz jako obejrzane lub oceń, abyśmy mogli lepiej dopasować rekomendacje."
           className="mt-4"
         />
 
@@ -234,13 +291,14 @@ export function OnboardingAddPage() {
           {/* Movie search combobox */}
           <div className="max-w-lg mx-auto mt-6">
             <MovieSearchCombobox
-              value={query} // <-- DODAJ TO
-              onChange={setQuery} // <-- DODAJ TO
-              onSelect={handleAddMovie}
+              value={query}
+              onChange={setQuery}
+              onAddToWatchlist={handleAddToWatchlist}
+              onMarkAsWatched={handleMarkAsWatched}
+              onRate={handleRate}
               selectedTconsts={addedSet}
-              placeholder="Szukaj filmów do dodania..."
-              buttonText="Dodaj"
-              ariaLabel="Dodaj film do watchlisty"
+              placeholder="Szukaj filmów..."
+              ariaLabel="Dodaj lub oznacz film"
             />
           </div>
 
@@ -255,7 +313,11 @@ export function OnboardingAddPage() {
 
           {/* Footer navigation */}
           <div className="pt-4">
-            <OnboardingFooterNav onSkip={handleSkip} onNext={handleNext} />
+            <OnboardingFooterNav
+              onSkip={handleSkip}
+              onNext={handleNext}
+              nextButtonText="Zakończ"
+            />
           </div>
         </div>
 
@@ -270,6 +332,14 @@ export function OnboardingAddPage() {
             <AlertDescription>{validationError}</AlertDescription>
           </Alert>
         )}
+
+        <RatingModal
+          isOpen={ratingModalState.open}
+          onClose={() => setRatingModalState({ open: false, movie: null })}
+          onSubmit={handleRateSubmit}
+          movieTitle={ratingModalState.movie?.primaryTitle || ""}
+          currentRating={null}
+        />
       </div>
     </OnboardingLayout>
   );

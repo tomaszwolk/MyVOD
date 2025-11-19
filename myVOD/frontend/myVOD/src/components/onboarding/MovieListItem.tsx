@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Eye, Bookmark, Star } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import { MovieRating } from "@/components/watched/MovieRating";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type MovieListItemProps = {
   tconst: string;
@@ -12,6 +13,7 @@ type MovieListItemProps = {
   posterUrl: string | null;
   avgRating?: string | null;
   userRating?: number | null;
+  status: "watchlisted" | "watched";
   onRateClick?: () => void;
   onRemove: () => void;
   isRemoving?: boolean;
@@ -25,7 +27,7 @@ export function MovieListItem({
   posterUrl,
   avgRating,
   userRating,
-  onRateClick,
+  status,
   onRemove,
   isRemoving,
 }: MovieListItemProps) {
@@ -73,14 +75,26 @@ export function MovieListItem({
             </>
           )}
         </div>
-        <div className="mt-1">
-          <MovieRating
-            imdbRating={avgRating ?? null}
-            userRating={userRating ?? null}
-            onRateClick={onRateClick ?? (() => {})} // Empty function if no rating functionality
-            tconst={tconst}
-            showUserRating={!!onRateClick}
-          />
+        <div className="mt-1 flex items-center gap-2">
+          {status === "watchlisted" && (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Bookmark className="h-3 w-3" />
+              Na watchliście
+            </Badge>
+          )}
+          {status === "watched" && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              Obejrzany
+              {userRating && (
+                <>
+                  <span className="mx-1">|</span>
+                  <Star className="h-3 w-3 text-blue-500" />
+                  <span>{userRating}/10</span>
+                </>
+              )}
+            </Badge>
+          )}
         </div>
       </div>
 

@@ -2,9 +2,15 @@ import { Badge } from "@/components/ui/badge";
 import type { AddedMovieVM } from "@/types/api.types";
 import { MovieListItem } from "./MovieListItem";
 
+// Extend AddedMovieVM to include status
+interface OnboardingMovieVM extends AddedMovieVM {
+  status: "watchlisted" | "watched";
+  user_rating?: number | null;
+}
+
 type AddedMoviesListProps = {
-  items: AddedMovieVM[];
-  onRemove: (item: AddedMovieVM) => void;
+  items: OnboardingMovieVM[];
+  onRemove: (item: OnboardingMovieVM) => void;
   removingTconsts?: Set<string>;
 };
 
@@ -42,6 +48,8 @@ export function AddedMoviesList({
             genres={item.genres}
             posterUrl={item.posterUrl}
             avgRating={item.avgRating}
+            status={item.status}
+            userRating={item.user_rating}
             onRemove={() => onRemove(item)}
             isRemoving={removingTconsts?.has(item.tconst)}
           />

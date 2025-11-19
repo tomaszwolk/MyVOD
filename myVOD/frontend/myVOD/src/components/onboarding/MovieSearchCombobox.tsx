@@ -9,8 +9,72 @@ import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { TMDBPoster } from "@/components/TMDBPoster";
 import type { SearchOptionVM } from "@/types/api.types";
-import { Loader2 } from "lucide-react";
+import { Loader2, BookmarkPlus, Eye, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+
+/**
+ * Props for OnboardingMovieActions component.
+ */
+type OnboardingMovieActionsProps = {
+  movie: SearchOptionVM;
+  onAddToWatchlist: (movie: SearchOptionVM) => void;
+  onMarkAsWatched: (movie: SearchOptionVM) => void;
+  onRate: (movie: SearchOptionVM) => void;
+  ariaLabelPrefix: string;
+};
+
+/**
+ * Component with actions for a movie in the onboarding search results.
+ */
+function OnboardingMovieActions({
+  movie,
+  onAddToWatchlist,
+  onMarkAsWatched,
+  onRate,
+  ariaLabelPrefix,
+}: OnboardingMovieActionsProps) {
+  return (
+    <div className="flex-shrink-0 flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddToWatchlist(movie);
+        }}
+        aria-label={`${ariaLabelPrefix} ${movie.primaryTitle} to watchlist`}
+        title="Dodaj do watchlisty"
+      >
+        <BookmarkPlus className="h-5 w-5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          onMarkAsWatched(movie);
+        }}
+        aria-label={`${ariaLabelPrefix} ${movie.primaryTitle} as watched`}
+        title="Oznacz jako obejrzany"
+      >
+        <Eye className="h-5 w-5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRate(movie);
+        }}
+        aria-label={`Rate ${movie.primaryTitle}`}
+        title="Oceń film"
+      >
+        <Star className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
 
 /**
  * Props for MovieSearchCombobox component.
@@ -18,11 +82,12 @@ import { cn } from "@/lib/utils";
 type MovieSearchComboboxProps = {
   value: string;
   onChange: (value: string) => void;
-  onSelect: (movie: SearchOptionVM) => void;
+  onAddToWatchlist: (movie: SearchOptionVM) => void;
+  onMarkAsWatched: (movie: SearchOptionVM) => void;
+  onRate: (movie: SearchOptionVM) => void;
   disabled?: boolean;
   selectedTconsts: Set<string>;
   placeholder?: string;
-  buttonText?: string;
   ariaLabel?: string;
   testId?: string;
 };
@@ -34,12 +99,13 @@ type MovieSearchComboboxProps = {
 export function MovieSearchCombobox({
   value,
   onChange,
-  onSelect,
+  onAddToWatchlist,
+  onMarkAsWatched,
+  onRate,
   disabled = false,
   selectedTconsts,
   placeholder = "Szukaj filmów...",
-  buttonText = "Oznacz",
-  ariaLabel = "Oznacz film jako obejrzany",
+  ariaLabel = "Wyszukaj film",
   testId = "movie-search-combobox",
 }: MovieSearchComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,7 +153,8 @@ export function MovieSearchCombobox({
         if (activeIndex >= 0 && activeIndex < results.length) {
           const selectedItem = results[activeIndex];
           if (!selectedTconsts.has(selectedItem.tconst)) {
-            handleSelectOption(selectedItem);
+            // Default action on Enter is to add to watchlist
+            onAddToWatchlist(selectedItem);
           }
         }
         break;
@@ -103,9 +170,8 @@ export function MovieSearchCombobox({
   const handleSelectOption = (movie: SearchOptionVM) => {
     if (disabled || selectedTconsts.has(movie.tconst)) return;
 
-    onSelect(movie);
-    // Keep search results visible after adding a movie to allow adding multiple movies
-    // Don't clear query, close popover, or reset active index
+    // This function is now only for click events on the list item itself
+    onAddToWatchlist(movie);
   };
 
   const activeId =
@@ -218,19 +284,15 @@ export function MovieSearchCombobox({
                       </div>
                     </div>
 
-                    {/* Action button */}
+                    {/* Action buttons */}
                     {!isSelected && (
-                      <button
-                        type="button"
-                        className="flex-shrink-0 px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectOption(movie);
-                        }}
-                        aria-label={`${ariaLabel} ${movie.primaryTitle}`}
-                      >
-                        {buttonText}
-                      </button>
+                      <OnboardingMovieActions
+                        movie={movie}
+                        onAddToWatchlist={onAddToWatchlist}
+                        onMarkAsWatched={onMarkAsWatched}
+                        onRate={onRate}
+                        ariaLabelPrefix="Onboarding action"
+                      />
                     )}
                   </li>
                 );

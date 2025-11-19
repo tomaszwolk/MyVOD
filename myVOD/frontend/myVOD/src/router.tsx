@@ -8,7 +8,11 @@ import { WatchedPage } from "@/pages/WatchedPage";
 import { OnVODPage } from "@/pages/OnVODPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { AdminDashboardPage } from "@/pages/AdminDashboardPage";
-import { OnboardingPlatformsPage, OnboardingFirstMoviesPage, OnboardingAddPage, OnboardingWatchedPage } from "@/pages/onboarding";
+import {
+  OnboardingPlatformsPage,
+  OnboardingFirstMoviesPage,
+  OnboardingMoviesPage,
+} from "@/pages/onboarding";
 import { AppRoot } from "@/components/AppRoot";
 import { OnboardingGuard } from "@/components/OnboardingGuard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -127,12 +131,8 @@ export const router = createBrowserRouter([
             element: <OnboardingFirstMoviesPage />,
           },
           {
-            path: "add",
-            element: <OnboardingAddPage />,
-          },
-          {
-            path: "watched",
-            element: <OnboardingWatchedPage />,
+            path: "movies",
+            element: <OnboardingMoviesPage />,
           },
         ],
       },
@@ -151,4 +151,3 @@ export const router = createBrowserRouter([
     element: <NotFoundPage />,
   },
 ]);
-
