@@ -1,5 +1,6 @@
-import { Star } from "lucide-react";
+import { Star, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface MovieRatingProps {
   imdbRating: string | null;
@@ -17,14 +18,24 @@ export const MovieRating = ({
   showUserRating = true,
 }: MovieRatingProps) => {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
+      {/* IMDb Rating */}
+      <a
+        href={`https://www.imdb.com/title/${tconst}/`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`IMDb rating: ${imdbRating}`}
+        className="flex items-center gap-1 text-foreground hover:opacity-80 transition-opacity"
+      >
         <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-        <span className="text-sm">
-          {imdbRating ? `${imdbRating} / 10` : "N/A"}
-        </span>
-      </div>
-      {showUserRating && (
+        <span className="font-semibold">{imdbRating}</span>
+      </a>
+
+      {/* Separator */}
+      <div className="h-4 w-px bg-border" />
+
+      {/* User Rating */}
+      <TooltipProvider>
         <div
           className="flex items-center gap-1 cursor-pointer"
           onClick={(e) => {
@@ -47,11 +58,9 @@ export const MovieRating = ({
               userRating && "fill-blue-400"
             )}
           />
-          <span className="text-sm">
-            {userRating ? `${userRating} / 10` : "Rate"}
-          </span>
+          <span className="">{userRating ? `${userRating}` : "Rate"}</span>
         </div>
-      )}
+      </TooltipProvider>
     </div>
   );
 };

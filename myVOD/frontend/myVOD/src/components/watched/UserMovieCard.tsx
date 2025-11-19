@@ -104,12 +104,14 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 {/* Title */}
-                <h3
-                  id={`movie-title-${item.id}`}
-                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+                <a
+                  href={`https://www.imdb.com/title/${item.tconst}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-sm line-clamp-2 mb-1 text-foreground hover:underline"
                 >
-                  {item.title}
-                </h3>
+                  <h3 id={`movie-title-${item.id}`}>{item.title}</h3>
+                </a>
               </TooltipTrigger>
 
               {/* Year, Genres, Rating */}
@@ -136,27 +138,11 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
                 <p className="font-bold">{item.title}</p>
                 {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
                 <div className="mt-2 pt-2 border-t border-border">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span className="font-semibold text-sm">
-                      {item.imdbRating || "-"}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Trophy className="h-4 w-4" />
-                      <span>
-                        Twoja ocena:{" "}
-                        <span className="font-semibold">
-                          {item.userRating ? `${item.userRating}/10` : "-"}
-                        </span>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4" />
-                      <span>IMDB.com rating: {item.imdbRating || "-"}</span>
-                    </div>
-                  </div>
+                  <p>
+                    Twoja ocena:{" "}
+                    {item.userRating ? `${item.userRating}/10` : "-"}
+                  </p>
+                  <p>Ocena IMDb: {item.imdbRating || "-"}</p>
                 </div>
               </TooltipContent>
             </Tooltip>

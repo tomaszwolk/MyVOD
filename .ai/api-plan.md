@@ -296,17 +296,19 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 
 #### `POST /api/user-movies/`
 
--   **Description**: Adds a new movie to the user's watchlist. Optionally tracks if the movie was added from an AI suggestion via the `added_from_ai_suggestion` flag.
+-   **Description**: Adds a new movie to the user's watchlist, marks as watched, or rates a movie. The behavior depends on the provided `action` and `rating` parameters.
 -   **Authentication**: Required.
 -   **Request Body**:
     ```json
     {
-      "tconst": "tt0816692"
+      "tconst": "tt0816692",
+      "action": "mark_as_watched", // Optional. If absent, adds to watchlist.
+      "rating": 8, // Optional. Implies 'mark_as_watched'.
+      "added_from_ai_suggestion": false // Optional.
     }
     ```
-    -   **Note**: The backend service supports an optional `added_from_ai_suggestion` parameter (default: `False`) to track whether movies were added from AI suggestions for analytics purposes.
 
--   **Success Response** (201 Created): Returns the newly created `user-movie` object.
+-   **Success Response** (201 Created or 200 OK): Returns the newly created or updated `user-movie` object.
   ```json
   {
     "id": 102,
@@ -324,7 +326,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     ],
     "watchlisted_at": "2025-10-12T14:30:00Z",
     "watched_at": null,
-    "user_rating": null
+    "user_rating": 8
   }
   ```
 -   **Error Responses**:

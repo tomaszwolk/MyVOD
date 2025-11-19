@@ -2,7 +2,7 @@ import { http } from "@/lib/http";
 import type {
   MovieSearchResultDto,
   UserMovieDto,
-  AddUserMovieCommand,
+  CreateUserMovieCommand,
   UpdateUserMovieCommand,
   AISuggestionsDto,
   PaginatedResponse,
@@ -45,7 +45,7 @@ export async function searchMovies(
  * @returns Promise<UserMovieDto>
  */
 export async function addUserMovie(
-  command: AddUserMovieCommand
+  command: CreateUserMovieCommand
 ): Promise<UserMovieDto> {
   const response = await http.post<UserMovieDto>("/user-movies/", command);
   return response.data;

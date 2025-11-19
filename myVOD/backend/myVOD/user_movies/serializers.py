@@ -82,28 +82,12 @@ class OnVODMovieSerializer(serializers.Serializer):
     - watchlisted_at, watched_at, user_rating: always null (no user context)
     """
 
-    id = serializers.SerializerMethodField()
+    id = serializers.IntegerField(source="user_movie_id", read_only=True, allow_null=True)
     movie = MovieSerializer(source='*')
     availability = serializers.SerializerMethodField()
-    watchlisted_at = serializers.SerializerMethodField()
-    watched_at = serializers.SerializerMethodField()
-    user_rating = serializers.SerializerMethodField()
-
-    def get_id(self, obj):
-        """Always return null for on-vod movies."""
-        return None
-
-    def get_watchlisted_at(self, obj):
-        """Always return null for on-vod movies."""
-        return None
-
-    def get_watched_at(self, obj):
-        """Always return null for on-vod movies."""
-        return None
-
-    def get_user_rating(self, obj):
-        """Always return null for on-vod movies."""
-        return None
+    watchlisted_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    watched_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    user_rating = serializers.IntegerField(read_only=True, allow_null=True)
 
     def get_availability(self, obj):
         """Get availability data from prefetched attribute."""
@@ -227,11 +211,12 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
             )
 
 
-class AddUserMovieCommandSerializer(serializers.Serializer):
-    """Command serializer for adding a movie to user's watchlist.
+class CreateUserMovieCommandSerializer(serializers.Serializer):
+    """Command serializer for adding a movie to user's lists.
 
-    Corresponds to AddUserMovieCommand type in TypeScript.
+    Corresponds to CreateUserMovieCommand type in TypeScript.
     Validates that tconst is provided and has valid format.
+    Accepts optional action and rating.
     """
     tconst = serializers.RegexField(
         regex=r'^tt\d{7,8}$',
@@ -241,7 +226,11 @@ class AddUserMovieCommandSerializer(serializers.Serializer):
             'invalid': 'Invalid tconst format. Expected format: tt followed by 7-8 digits (e.g., tt0816692)'
         }
     )
-    mark_as_watched = serializers.BooleanField(required=False, default=False)
+    action = serializers.ChoiceField(
+        choices=['mark_as_watched'],
+        required=False
+    )
+    rating = serializers.IntegerField(min_value=1, max_value=10, required=False)
     added_from_ai_suggestion = serializers.BooleanField(required=False, default=False)
 
 

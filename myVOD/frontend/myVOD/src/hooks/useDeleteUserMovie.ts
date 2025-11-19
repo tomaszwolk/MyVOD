@@ -17,6 +17,7 @@ export function useDeleteUserMovie() {
     onSuccess: () => {
       // Invalidate user movies queries to refresh watchlist
       queryClient.invalidateQueries({ queryKey: ["user-movies"] });
+      queryClient.invalidateQueries({ queryKey: ["on-vod-movies"] });
     },
   });
 }

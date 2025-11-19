@@ -132,10 +132,10 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
     3.  🔄 **Przetestować funkcjonalność**: Sprawdzić czy wszystkie opcje sortowania działają poprawnie i czy kolejność filmów jest prawidłowa.
     4.  🔄 **Optymalizować UI**: Rozważyć czy niektóre opcje nie powinny być usunięte lub dodane dla lepszego UX.
 
-### 3.8. Krok 8: Interakcje z Filmem na Stronie OnVOD 🔄
+### 3.8. Krok 8: Interakcje z Filmem na Stronie OnVOD ✅
 
 -   **Cel**: Rozbudowanie strony `/app/onvod` o trzy kluczowe akcje:
-    1.  Ocenianie filmu, które automatycznie dodaje go do listy "Obejrzane".
+    1.  ✅ Ocenianie filmu, które automatycznie dodaje go do listy "Obejrzane".
     2.  Dodawanie filmu bezpośrednio do "Watchlisty".
     3.  Dodawanie filmu bezpośrednio do "Obejrzanych" (bez oceny).
 
@@ -257,13 +257,6 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
 ### 🔄 Następne kroki:
 - **Refaktoryzacja sortowania**: Przejrzeć dostępne opcje sortowania, usunąć duplikaty, sprawdzić konsystencję i poprawność działania na wszystkich stronach
 - **Aktualizacja README**
-- **OnVOD**: 
-    - Poprawić tooltip - powinien pokazywać również tytuł filmu, IMDB rating i User rating a nie tylko rok i gatunek
-    - Rok i gatunek powinny zajmować tylko jedną linię, jeśli się nie mieszczą powinny zostać ucięte (Jak na Watchlist)
-- **Karty z filmami na OnVOD, Watchlist i Watched**:
-    - Nazwa jest linikiem do filmu na IMDB.com
-    - 
-
 
 ## Przyszłe usprawnienia (Future Enhancements)
 
@@ -295,6 +288,15 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
 |  │   ---------------------------------------------------------------------------------------   │  |
 |  │   [x] Akcja     [ ] Dramat    [x] Komedia    [ ] Romans     [ ] Thriller   [ ] Sci-Fi        │  |
 |  │   [ ] Horror    [x] Kryminał  [ ] Animacja   [ ] Fantasy    [ ] Familijny  [ ] Przygodowy    │  |
+|  │                                                                                             │  |
+|  │   Lata produkcji                                                                            │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   od: 1920 ‹———————•—————————————————————————————————•———————› 2025                       │  |
+|  │                                                                                             │  |
+|  │   Twórcy                                                                                    │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   Reżyser:  [ Wpisz nazwisko...                                                    ]        │  |
+|  │   Aktor:    [ Wpisz nazwisko...                                                    ]        │  |
 |  │                                                                                             │  |
 |  │   Status                                                                                    │  |
 |  │   ---------------------------------------------------------------------------------------   │  |

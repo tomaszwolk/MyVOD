@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { UserMovieDto, PlatformDto } from "@/types/api.types";
+import { MovieRating } from "../watched/MovieRating";
+import { Button } from "@/components/ui/button";
+import { Bookmark, Check, Eye } from "lucide-react";
+import { useAddUserMovie } from "@/hooks/useAddUserMovie";
+import { usePatchUserMovie } from "@/hooks/usePatchUserMovie";
 
 /**
  * Props for OnVODMovieRow component.
@@ -16,6 +21,7 @@ import type { UserMovieDto, PlatformDto } from "@/types/api.types";
 type OnVODMovieRowProps = {
   movie: UserMovieDto;
   platforms: PlatformDto[];
+  onRate: (tconst: string, title: string, rating: number | null) => void;
 };
 
 /**
@@ -26,6 +32,7 @@ type OnVODMovieRowProps = {
 export const OnVODMovieRow = memo<OnVODMovieRowProps>(function OnVODMovieRow({
   movie,
   platforms,
+  onRate,
 }) {
   const hasGenres = movie.movie.genres && movie.movie.genres.length > 0;
   const displayGenres = hasGenres
@@ -34,6 +41,41 @@ export const OnVODMovieRow = memo<OnVODMovieRowProps>(function OnVODMovieRow({
   const tooltipMeta = [movie.movie.start_year, displayGenres]
     .filter(Boolean)
     .join(" • ");
+
+  const isMovieOnUserLists = movie.watchlisted_at || movie.watched_at;
+  const addUserMovieMutation = useAddUserMovie();
+  const patchUserMovieMutation = usePatchUserMovie();
+
+  const handleAddToWatchlist = () => {
+    addUserMovieMutation.mutate({ tconst: movie.movie.tconst });
+  };
+
+  const handleAddToWatched = () => {
+    addUserMovieMutation.mutate({
+      tconst: movie.movie.tconst,
+      action: "mark_as_watched",
+    });
+  };
+
+  const handleMarkAsWatched = () => {
+    if (!movie.id) return;
+    patchUserMovieMutation.mutate({
+        id: movie.id,
+        command: { action: "mark_as_watched" },
+    });
+  };
+
+  const handleRestoreToWatchlist = () => {
+    if (!movie.id) return;
+    patchUserMovieMutation.mutate({
+        id: movie.id,
+        command: { action: "restore_to_watchlist" },
+    });
+  };
+
+  const handleRate = () => {
+    onRate(movie.movie.tconst, movie.movie.primary_title, movie.user_rating);
+  };
 
   return (
     <article
@@ -79,18 +121,25 @@ export const OnVODMovieRow = memo<OnVODMovieRowProps>(function OnVODMovieRow({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <h3
-                    id={`movie-title-${movie.movie.tconst}`}
-                    className="font-semibold text-base line-clamp-1 mb-1"
+                  <a
+                    href={`https://www.imdb.com/title/${movie.movie.tconst}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-base line-clamp-1 mb-1 hover:underline"
                   >
-                    {movie.movie.primary_title}
-                  </h3>
+                    <h3 id={`movie-title-${movie.movie.tconst}`}>
+                      {movie.movie.primary_title}
+                    </h3>
+                  </a>
                 </TooltipTrigger>
-                {tooltipMeta && (
-                  <TooltipContent>
-                    <p>{tooltipMeta}</p>
-                  </TooltipContent>
-                )}
+                <TooltipContent>
+                  <p className="font-bold">{movie.movie.primary_title}</p>
+                  {tooltipMeta && <p className="text-sm">{tooltipMeta}</p>}
+                  <div className="mt-2 pt-2 border-t border-border">
+                    <p>Twoja ocena: {movie.user_rating ? `${movie.user_rating}/10` : "-"}</p>
+                    <p>Ocena IMDb: {movie.movie.avg_rating || "-"}</p>
+                  </div>
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
@@ -107,27 +156,94 @@ export const OnVODMovieRow = memo<OnVODMovieRowProps>(function OnVODMovieRow({
 
             {/* Rating */}
             {movie.movie.avg_rating && (
-              <div className="flex items-center gap-1 mt-1">
-                <svg
-                  className="w-4 h-4 text-yellow-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-sm font-medium">
-                  {movie.movie.avg_rating}
-                </span>
-              </div>
+                <div className="mt-1">
+                    <MovieRating
+                        imdbRating={movie.movie.avg_rating}
+                        userRating={movie.user_rating}
+                        onRateClick={handleRate}
+                        tconst={movie.movie.tconst}
+                    />
+                </div>
             )}
           </div>
 
-          {/* Availability */}
-          <div className="flex-shrink-0">
+          {/* Availability & Actions */}
+          <div className="flex-shrink-0 flex items-center gap-4">
             <AvailabilityIcons
               availability={movie.availability}
               platforms={platforms}
             />
+            
+            {!isMovieOnUserLists ? (
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleAddToWatchlist}
+                        disabled={addUserMovieMutation.isPending}
+                      >
+                        <Bookmark className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Dodaj do Watchlisty</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleAddToWatched}
+                        disabled={addUserMovieMutation.isPending}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Dodaj do Obejrzanych</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            ) : (
+                <div className="flex items-center gap-2">
+                    {movie.watched_at ? (
+                        <>
+                            <TooltipProvider>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" onClick={handleRestoreToWatchlist} disabled={patchUserMovieMutation.isPending}>
+                                    <Bookmark className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Przywróć do Watchlisty</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <span className="text-sm text-muted-foreground w-24 text-center flex-1">Obejrzany</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-sm text-muted-foreground w-24 text-center flex-1">Na watchliście</span>
+                            <TooltipProvider>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" onClick={handleMarkAsWatched} disabled={patchUserMovieMutation.isPending}>
+                                    <Check className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Oznacz jako obejrzany</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </>
+                    )}
+                </div>
+            )}
           </div>
         </div>
       </div>

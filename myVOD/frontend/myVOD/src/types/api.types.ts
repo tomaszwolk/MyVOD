@@ -101,9 +101,10 @@ export type UserMovieDto = {
   availability: MovieAvailabilityDto[];
 };
 
-export type AddUserMovieCommand = {
+export type CreateUserMovieCommand = {
   tconst: string;
-  mark_as_watched?: boolean;
+  action?: 'mark_as_watched';
+  rating?: number;
   added_from_ai_suggestion?: boolean;
 };
 

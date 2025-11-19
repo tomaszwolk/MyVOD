@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { useSessionPreferences } from "@/hooks/useSessionPreferences";
 import { useAISuggestions } from "@/hooks/useAISuggestions";
+import { useRateMovie } from "@/hooks/useRateMovie";
 
 // Components
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
@@ -21,6 +22,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
+import { RatingModal } from "@/components/watched/RatingModal";
 
 /**
  * OnVOD page component - displays all movies available on VOD platforms.
@@ -30,6 +32,11 @@ export function OnVODPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [ratingModalState, setRatingModalState] = useState<{
+    tconst: string;
+    title: string;
+    currentRating: number | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -45,6 +52,7 @@ export function OnVODPage() {
   const userProfileQuery = useUserProfile(isAuthenticated);
   const platformsQuery = usePlatforms(isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
+  const rateMovieMutation = useRateMovie();
 
   // AI suggestions query for checking rate limit status
   const suggestionsQuery = useAISuggestions({
@@ -75,6 +83,37 @@ export function OnVODPage() {
   }, [inView, onVODQuery]);
 
   // Handlers
+  const handleOpenRatingModal = useCallback(
+    (tconst: string, title: string, currentRating: number | null) => {
+      setRatingModalState({ tconst, title, currentRating });
+    },
+    []
+  );
+
+  const handleCloseRatingModal = useCallback(() => {
+    setRatingModalState(null);
+  }, []);
+
+  const handleSaveRating = useCallback(
+    (newRating: number) => {
+      if (!ratingModalState) return;
+
+      rateMovieMutation.mutate(
+        {
+          command: {
+            tconst: ratingModalState.tconst,
+            rating: newRating,
+            action: "mark_as_watched",
+          },
+        },
+        {
+          onSuccess: handleCloseRatingModal,
+        }
+      );
+    },
+    [ratingModalState, rateMovieMutation, handleCloseRatingModal]
+  );
+
   const handleSuggest = useCallback(() => {
     // Open modal by adding URL param
     const newSearchParams = new URLSearchParams(searchParams);
@@ -211,6 +250,7 @@ export function OnVODPage() {
                       key={movie.movie.tconst}
                       movie={movie}
                       platforms={platformsQuery.data || []}
+                      onRate={handleOpenRatingModal}
                     />
                   ))}
                 </div>
@@ -221,6 +261,7 @@ export function OnVODPage() {
                       key={movie.movie.tconst}
                       movie={movie}
                       platforms={platformsQuery.data || []}
+                      onRate={handleOpenRatingModal}
                     />
                   ))}
                 </div>
@@ -251,6 +292,17 @@ export function OnVODPage() {
         onClose={handleCloseSuggestionsModal}
         watchlistTconstSet={new Set()} // Empty set for onVOD page
       />
+
+      {ratingModalState && (
+        <RatingModal
+          movieTitle={ratingModalState.title}
+          currentRating={ratingModalState.currentRating}
+          isOpen={!!ratingModalState}
+          onClose={handleCloseRatingModal}
+          onSubmit={handleSaveRating}
+          isSaving={rateMovieMutation.isPending}
+        />
+      )}
     </>
   );
 }

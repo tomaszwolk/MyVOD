@@ -80,12 +80,16 @@ export const MovieRow = memo<MovieRowProps>(function MovieRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     {/* Title */}
-                    <h3
-                      id={`movie-title-${item.id}`}
-                      className="font-medium text-base line-clamp-1 mb-1 text-foreground"
+                    <a
+                      href={`https://www.imdb.com/title/${item.movie.tconst}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-base line-clamp-1 mb-1 text-foreground hover:underline"
                     >
-                      {item.movie.primary_title}
-                    </h3>
+                      <h3 id={`movie-title-${item.id}`}>
+                        {item.movie.primary_title}
+                      </h3>
+                    </a>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="start">
                     <p className="font-bold">{item.movie.primary_title}</p>

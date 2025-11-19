@@ -82,12 +82,16 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({
           <Tooltip>
             <TooltipTrigger asChild>
               {/* Title */}
-              <h3
-                id={`movie-title-${item.id}`}
-                className="font-medium text-sm line-clamp-2 mb-1 text-foreground"
+              <a
+                href={`https://www.imdb.com/title/${item.movie.tconst}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-sm line-clamp-2 mb-1 text-foreground hover:underline"
               >
-                {item.movie.primary_title}
-              </h3>
+                <h3 id={`movie-title-${item.id}`}>
+                  {item.movie.primary_title}
+                </h3>
+              </a>
             </TooltipTrigger>
 
             {/* Year, Genres, Rating */}

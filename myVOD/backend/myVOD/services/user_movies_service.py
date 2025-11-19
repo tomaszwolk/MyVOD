@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, Max
+from django.db.models import Exists, OuterRef, Prefetch, Max, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -140,160 +140,65 @@ def build_user_movies_queryset(
 
 
 @transaction.atomic
-def add_movie_to_watchlist(*, user, tconst: str, added_from_ai_suggestion: bool = False):
-    """Adds a movie to user's watchlist or restores a soft-deleted entry.
+def add_user_movie(*, user, tconst: str, action: str | None, rating: int | None, added_from_ai_suggestion: bool = False):
+    """Adds or updates a user-movie entry based on provided action.
 
     Business Logic:
-    - Validates that the movie exists in the database
-    - Checks for duplicate active watchlist entries (raises ValueError if found)
-    - Restores soft-deleted entries if they exist
-    - Creates new entries with watchlisted_at set to current timestamp
-    - Returns the created/restored UserMovie instance with prefetched data
-
-    Args:
-        user: The authenticated user object with `email` attribute
-        tconst: The IMDb movie identifier (e.g., 'tt0816692')
-        added_from_ai_suggestion: Whether the movie was added from an AI suggestion (default: False)
-
-    Returns:
-        UserMovie: The created or restored user_movie instance with:
-            - tconst (Movie) prefetched via select_related
-            - availability_filtered prefetched for user's platforms
-
-    Raises:
-        Movie.DoesNotExist: If the movie with given tconst doesn't exist
-        ValueError: If the movie is already on user's active watchlist
-        Exception: If Supabase user not found
+    - Validates that the movie exists.
+    - Finds or creates a UserMovie entry.
+    - If rating is provided, marks as watched and sets the rating.
+    - If action is 'mark_as_watched', marks as watched.
+    - Otherwise, adds to watchlist (or restores a soft-deleted entry).
+    - Returns the final UserMovie instance with prefetched data.
     """
-    # Resolve canonical user UUID for the user
     supabase_user_uuid = _resolve_user_uuid(user)
+    logger.info(f"Adding/updating movie: user_id={supabase_user_uuid}, tconst={tconst}, action={action}, rating={rating}")
 
-    logger.info(f"Adding movie to watchlist: user_id={supabase_user_uuid}, tconst={tconst}")
-
-    # Guard clause: Validate movie exists
     if not Movie.objects.filter(tconst=tconst).exists():
         raise Movie.DoesNotExist(f"Movie with tconst '{tconst}' does not exist in database")
 
-    # Guard clause: Check for ANY existing entry (active OR soft-deleted)
-    # This prevents IntegrityError on unique constraint (user_id, tconst)
-    existing_entry = UserMovie.objects.filter(
+    user_movie, created = UserMovie.objects.get_or_create(
         user_id=supabase_user_uuid,
-        tconst=tconst
-    ).first()
+        tconst_id=tconst,
+        defaults={
+            'added_from_ai_suggestion': added_from_ai_suggestion
+        }
+    )
 
-    if existing_entry:
-        # Check if it's an active watchlist entry
-        is_active = (
-            existing_entry.watchlisted_at is not None and
-            existing_entry.watchlist_deleted_at is None
-        )
+    update_fields = []
+    
+    if rating is not None:
+        if user_movie.watched_at is None:
+            user_movie.watched_at = timezone.now()
+            update_fields.append('watched_at')
+        user_movie.user_rating = rating
+        update_fields.append('user_rating')
 
-        logger.info(f"Found existing user_movie id={existing_entry.id}, is_active={is_active}")
-
-        if is_active:
-            raise ValueError("Movie is already on the watchlist")
-
-        # Entry exists but is soft-deleted or incomplete - restore it
-        if existing_entry.watchlist_deleted_at is not None:
-            logger.info(f"Restoring soft-deleted user_movie id={existing_entry.id}")
-            existing_entry.watchlisted_at = timezone.now()
-            existing_entry.watchlist_deleted_at = None
-            if added_from_ai_suggestion:
-                existing_entry.added_from_ai_suggestion = True
-            existing_entry.save(update_fields=['watchlisted_at', 'watchlist_deleted_at', 'added_from_ai_suggestion'] if added_from_ai_suggestion else ['watchlisted_at', 'watchlist_deleted_at'])
-            user_movie = existing_entry
+    elif action == 'mark_as_watched':
+        if user_movie.watched_at is not None:
+            # Movie is already watched, do nothing or return a specific status
+            pass
         else:
-            # Entry exists but watchlisted_at is NULL - set it now
-            logger.info(f"Updating incomplete user_movie id={existing_entry.id}")
-            existing_entry.watchlisted_at = timezone.now()
-            if added_from_ai_suggestion:
-                existing_entry.added_from_ai_suggestion = True
-            existing_entry.save(update_fields=['watchlisted_at', 'added_from_ai_suggestion'] if added_from_ai_suggestion else ['watchlisted_at'])
-            user_movie = existing_entry
-    else:
-        # No existing entry - create new one
-        logger.info(f"Creating new user_movie for user_id={supabase_user_uuid}, tconst={tconst}")
-        user_movie = UserMovie.objects.create(
-            user_id=supabase_user_uuid,
-            tconst_id=tconst,
-            watchlisted_at=timezone.now(),
-            watchlist_deleted_at=None,
-            watched_at=None,
-            added_from_ai_suggestion=added_from_ai_suggestion
-        )
-        logger.info(f"Created new user_movie with id={user_movie.id}")
+            user_movie.watched_at = timezone.now()
+            update_fields.append('watched_at')
+
+    else:  # Default action: add to watchlist
+        if user_movie.watchlisted_at is not None and user_movie.watchlist_deleted_at is None:
+            raise ValueError("Movie is already on the watchlist")
+        
+        user_movie.watchlisted_at = timezone.now()
+        user_movie.watchlist_deleted_at = None
+        update_fields.extend(['watchlisted_at', 'watchlist_deleted_at'])
+
+    if added_from_ai_suggestion and not created:
+        user_movie.added_from_ai_suggestion = True
+        update_fields.append('added_from_ai_suggestion')
+
+    if update_fields:
+        user_movie.save(update_fields=update_fields)
 
     # Fetch with related data for response
     platform_ids = _get_user_platform_ids(supabase_user_uuid)
-
-    availability_prefetch = Prefetch(
-        'tconst__availability_entries',
-        queryset=MovieAvailability.objects.filter(
-            platform_id__in=platform_ids
-        ).select_related('platform'),
-        to_attr='availability_filtered'
-    )
-
-    # Re-fetch the instance with all required prefetch/select_related
-    user_movie = (
-        UserMovie.objects
-        .filter(id=user_movie.id)
-        .select_related('tconst')
-        .prefetch_related(availability_prefetch)
-        .first()
-    )
-
-    return user_movie
-
-
-@transaction.atomic
-def add_movie_as_watched(*, user, tconst: str, added_from_ai_suggestion: bool = False):
-    """Add or update a movie as watched without affecting watchlisted_at when not needed."""
-
-    supabase_user_uuid = _resolve_user_uuid(user)
-
-    logger.info(f"Marking movie as watched: user_id={supabase_user_uuid}, tconst={tconst}")
-
-    if not Movie.objects.filter(tconst=tconst).exists():
-        raise Movie.DoesNotExist(f"Movie with tconst '{tconst}' does not exist in database")
-
-    existing_entry = UserMovie.objects.filter(
-        user_id=supabase_user_uuid,
-        tconst=tconst
-    ).first()
-
-    created = False
-
-    if existing_entry:
-        if existing_entry.watched_at is not None:
-            raise ValueError("Movie is already marked as watched")
-
-        update_fields = ['watched_at']
-        existing_entry.watched_at = timezone.now()
-
-        if existing_entry.watchlist_deleted_at is not None:
-            existing_entry.watchlist_deleted_at = None
-            update_fields.append('watchlist_deleted_at')
-
-        if added_from_ai_suggestion:
-            existing_entry.added_from_ai_suggestion = True
-            update_fields.append('added_from_ai_suggestion')
-
-        existing_entry.save(update_fields=update_fields)
-        user_movie = existing_entry
-    else:
-        user_movie = UserMovie.objects.create(
-            user_id=supabase_user_uuid,
-            tconst_id=tconst,
-            watchlisted_at=None,
-            watchlist_deleted_at=None,
-            watched_at=timezone.now(),
-            added_from_ai_suggestion=added_from_ai_suggestion
-        )
-        created = True
-
-    platform_ids = _get_user_platform_ids(supabase_user_uuid)
-
     availability_prefetch = Prefetch(
         'tconst__availability_entries',
         queryset=MovieAvailability.objects.filter(
@@ -309,7 +214,7 @@ def add_movie_as_watched(*, user, tconst: str, added_from_ai_suggestion: bool = 
         .prefetch_related(availability_prefetch)
         .first()
     )
-
+    
     return user_movie, created
 
 
@@ -433,9 +338,10 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
     is_watched = user_movie.watched_at is not None
     
     if is_watched:
-        # Hard delete from watched: set watched_at to NULL
+        # Hard delete from watched: set watched_at and user_rating to NULL
         user_movie.watched_at = None
-        user_movie.save(update_fields=['watched_at'])
+        user_movie.user_rating = None
+        user_movie.save(update_fields=['watched_at', 'user_rating'])
     else:
         # Guard clause: Check if already soft-deleted (only for watchlist)
         if user_movie.watchlist_deleted_at is not None:
@@ -451,19 +357,43 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
     return user_movie
 
 
-def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None, ordering: str = "added_desc"):
+def build_on_vod_movies_queryset(*, user, platform_ids: list[int] | None = None, ordering: str = "added_desc"):
     """Builds the queryset for listing movies available on VOD platforms.
 
     Returns unique movies that are available on at least one VOD platform,
-    optionally filtered by specific platform IDs.
+    optionally filtered by specific platform IDs. It also annotates user-specific
+    data like watchlist status and rating.
 
     Args:
+        user: The authenticated user object.
         platform_ids: Optional list of platform IDs to filter by. If None, includes all platforms.
         ordering: Sort order for movies. Defaults to "added_desc".
 
     Returns:
-        QuerySet of Movie objects with prefetched availability data, ordered by specified criteria.
+        QuerySet of Movie objects with prefetched availability data and user data,
+        ordered by specified criteria.
     """
+    supabase_user_uuid = _resolve_user_uuid(user)
+
+    # Subquery to get user-specific data for each movie
+    user_movie_subquery = UserMovie.objects.filter(
+        user_id=supabase_user_uuid,
+        tconst=OuterRef('tconst')
+    )
+
+    # Subquery for active watchlist entries only
+    active_watchlist_subquery = user_movie_subquery.filter(
+        watchlist_deleted_at__isnull=True
+    )
+
+    # Base queryset: movies annotated with user data
+    queryset = Movie.objects.annotate(
+        user_movie_id=Subquery(user_movie_subquery.values('id')[:1]),
+        watchlisted_at=Subquery(active_watchlist_subquery.values('watchlisted_at')[:1]),
+        watched_at=Subquery(user_movie_subquery.values('watched_at')[:1]),
+        user_rating=Subquery(user_movie_subquery.values('user_rating')[:1]),
+    )
+
     # Base queryset: movies that have at least one availability record
     filter_platforms = platform_ids if platform_ids is not None else None
 
@@ -482,7 +412,7 @@ def build_on_vod_movies_queryset(*, platform_ids: list[int] | None = None, order
         )
 
     # Get movies that have availability on selected platforms
-    queryset = Movie.objects.filter(Exists(availability_filter))
+    queryset = queryset.filter(Exists(availability_filter))
 
     # Prefetch availability data for the selected platforms
     if filter_platforms:

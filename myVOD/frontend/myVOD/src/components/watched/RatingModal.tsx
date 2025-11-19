@@ -17,6 +17,7 @@ interface RatingModalProps {
   onSubmit: (rating: number) => void;
   currentRating: number | null;
   movieTitle: string;
+  isSaving?: boolean;
 }
 
 export const RatingModal = ({
@@ -25,6 +26,7 @@ export const RatingModal = ({
   onSubmit,
   currentRating,
   movieTitle,
+  isSaving,
 }: RatingModalProps) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(currentRating || 0);
@@ -64,8 +66,8 @@ export const RatingModal = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={selectedRating === 0}>
-            Save Rating
+          <Button onClick={handleSubmit} disabled={selectedRating === 0 || isSaving}>
+            {isSaving ? "Saving..." : "Save Rating"}
           </Button>
         </DialogFooter>
       </DialogContent>

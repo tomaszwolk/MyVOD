@@ -10,14 +10,13 @@ from .serializers import (
     UserMovieQueryParamsSerializer,
     OnVODMovieSerializer,
     OnVODMoviesQueryParamsSerializer,
-    AddUserMovieCommandSerializer,
+    CreateUserMovieCommandSerializer,
     UpdateUserMovieCommandSerializer
 )
 from services.user_movies_service import (  # type: ignore
     build_user_movies_queryset,
     build_on_vod_movies_queryset,
-    add_movie_to_watchlist,
-    add_movie_as_watched,
+    add_user_movie,
     update_user_movie,
     delete_user_movie_soft
 )
@@ -25,6 +24,7 @@ from services.user_movies_service import (  # type: ignore
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 20
@@ -125,7 +125,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Add a movie to user's watchlist.
+        Add a movie to user's watchlist or mark as watched.
 
         Implements business logic:
         - Validates tconst format and movie existence
@@ -141,7 +141,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
             500: Internal Server Error - Unexpected error
         """
         # Validate request body
-        command_serializer = AddUserMovieCommandSerializer(data=request.data)
+        command_serializer = CreateUserMovieCommandSerializer(data=request.data)
         if not command_serializer.is_valid():
             logger.warning(
                 f"Invalid request body for POST user-movies (user {request.user.id}): {command_serializer.errors}"
@@ -149,26 +149,20 @@ class UserMovieViewSet(viewsets.ModelViewSet):
             return Response(command_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         tconst = command_serializer.validated_data['tconst']
-        mark_as_watched = command_serializer.validated_data.get('mark_as_watched', False)
+        action = command_serializer.validated_data.get('action')
+        rating = command_serializer.validated_data.get('rating')
         added_from_ai_suggestion = command_serializer.validated_data.get('added_from_ai_suggestion', False)
 
         try:
-            # Use service layer for business logic
-            if mark_as_watched:
-                user_movie, created = add_movie_as_watched(
-                    user=request.user,
-                    tconst=tconst,
-                    added_from_ai_suggestion=added_from_ai_suggestion
-                )
-                status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-            else:
-                user_movie = add_movie_to_watchlist(
-                    user=request.user,
-                    tconst=tconst,
-                    added_from_ai_suggestion=added_from_ai_suggestion
-                )
-                status_code = status.HTTP_201_CREATED
-
+            user_movie, created = add_user_movie(
+                user=request.user,
+                tconst=tconst,
+                action=action,
+                rating=rating,
+                added_from_ai_suggestion=added_from_ai_suggestion
+            )
+            status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+            
             # Serialize and return response
             serializer = self.get_serializer(user_movie)
             return Response(serializer.data, status=status_code)
@@ -420,6 +414,7 @@ class OnVODMoviesView(APIView):
         try:
             # Use service layer for queryset building
             queryset = build_on_vod_movies_queryset(
+                user=request.user,
                 platform_ids=params.validated_data.get('platform_ids'),
                 ordering=params.validated_data.get('ordering', 'added_desc')
             )
