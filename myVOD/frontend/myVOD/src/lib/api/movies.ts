@@ -93,6 +93,7 @@ type ListUserMoviesParams = {
   ordering?: string;
   page?: number;
   platformIds?: number[];
+  genres?: string[];
 };
 
 export async function listUserMovies({
@@ -100,12 +101,16 @@ export async function listUserMovies({
   ordering,
   page = 1,
   platformIds,
+  genres,
 }: ListUserMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
   const params: Record<string, string | number> = { page };
   if (status) params.status = status;
   if (ordering) params.ordering = ordering;
   if (platformIds && platformIds.length > 0) {
     params.platform_ids = platformIds.join(",");
+  }
+  if (genres && genres.length > 0) {
+    params.genres = genres.join(",");
   }
 
   const response = await http.get<PaginatedResponse<UserMovieDto>>(
@@ -176,19 +181,34 @@ type ListOnVODMoviesParams = {
   platformIds?: number[];
   page?: number;
   ordering?: string;
+  genres?: string[];
+  excludeWatched?: boolean;
+  excludeWatchlisted?: boolean;
 };
 
 export async function listOnVODMovies({
   platformIds,
   page = 1,
   ordering,
+  genres,
+  excludeWatched,
+  excludeWatchlisted,
 }: ListOnVODMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
-  const params: Record<string, string | number> = { page };
+  const params: Record<string, string | number | boolean> = { page };
   if (platformIds && platformIds.length > 0) {
     params.platform_ids = platformIds.join(",");
   }
   if (ordering) {
     params.ordering = ordering;
+  }
+  if (genres && genres.length > 0) {
+    params.genres = genres.join(",");
+  }
+  if (excludeWatched) {
+    params.exclude_watched = true;
+  }
+  if (excludeWatchlisted) {
+    params.exclude_watchlisted = true;
   }
 
   const response = await http.get<PaginatedResponse<UserMovieDto>>(

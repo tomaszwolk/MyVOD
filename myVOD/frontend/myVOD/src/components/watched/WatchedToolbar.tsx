@@ -4,7 +4,12 @@ import { SearchCombobox } from "../watchlist/SearchCombobox";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SuggestAIButton } from "@/components/watchlist/SuggestAIButton";
 import { WatchedFiltersBar } from "./WatchedFiltersBar";
-import type { WatchedViewMode, WatchedSortKey } from "@/types/view/watched.types";
+import type {
+  WatchedViewMode,
+  WatchedSortKey,
+} from "@/types/view/watched.types";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * Props for WatchedToolbar component.
@@ -26,6 +31,8 @@ type WatchedToolbarProps = {
   visibleCount: number;
   totalCount: number;
   hasUserPlatforms: boolean;
+  isFiltersOpen: boolean;
+  onToggleFilters: () => void;
 };
 
 /**
@@ -49,6 +56,8 @@ export function WatchedToolbar({
   visibleCount,
   totalCount,
   hasUserPlatforms,
+  isFiltersOpen,
+  onToggleFilters,
 }: WatchedToolbarProps) {
   return (
     <MediaToolbar
@@ -69,14 +78,16 @@ export function WatchedToolbar({
       }
       viewControlsSlot={
         <>
-          <WatchedViewToggle
-            value={viewMode}
-            onChange={onViewModeChange}
-          />
-          <WatchedSortDropdown
-            value={sortKey}
-            onChange={onSortKeyChange}
-          />
+          <WatchedViewToggle value={viewMode} onChange={onViewModeChange} />
+          <WatchedSortDropdown value={sortKey} onChange={onSortKeyChange} />
+          <Button variant="outline" onClick={onToggleFilters} className="gap-1">
+            Filtry
+            {isFiltersOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </>
       }
       secondaryControlsSlot={

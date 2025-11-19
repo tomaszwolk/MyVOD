@@ -8,6 +8,9 @@ If the sets are identical, it confirms that everything is up to date.
 If there are differences, it prints the added/removed genres and provides
 a new, complete set declaration that can be copied into the
 ai_suggestions_service.py to keep it synchronized.
+
+With implementing filters new table in database was added: genre table with unique genres.
+With changing AI suggestions, we should use this table to get all available genres.
 """
 
 import os

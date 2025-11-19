@@ -289,15 +289,6 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
 |  │   [x] Akcja     [ ] Dramat    [x] Komedia    [ ] Romans     [ ] Thriller   [ ] Sci-Fi        │  |
 |  │   [ ] Horror    [x] Kryminał  [ ] Animacja   [ ] Fantasy    [ ] Familijny  [ ] Przygodowy    │  |
 |  │                                                                                             │  |
-|  │   Lata produkcji                                                                            │  |
-|  │   ---------------------------------------------------------------------------------------   │  |
-|  │   od: 1920 ‹———————•—————————————————————————————————•———————› 2025                       │  |
-|  │                                                                                             │  |
-|  │   Twórcy                                                                                    │  |
-|  │   ---------------------------------------------------------------------------------------   │  |
-|  │   Reżyser:  [ Wpisz nazwisko...                                                    ]        │  |
-|  │   Aktor:    [ Wpisz nazwisko...                                                    ]        │  |
-|  │                                                                                             │  |
 |  │   Status                                                                                    │  |
 |  │   ---------------------------------------------------------------------------------------   │  |
 |  │   Pokaż obejrzane                                                         (•)-----          │  |

@@ -9,6 +9,8 @@ import type {
   SortOption,
   FiltersState,
 } from "@/types/view/watchlist.types";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * Props for WatchlistControlsBar component.
@@ -30,6 +32,8 @@ type WatchlistControlsBarProps = {
   onAddToWatched: (tconst: string) => Promise<void> | void;
   existingTconsts: string[];
   existingWatchedTconsts: string[];
+  isFiltersOpen: boolean;
+  onToggleFilters: () => void;
 };
 
 /**
@@ -53,6 +57,8 @@ export function WatchlistControlsBar({
   onAddToWatched,
   existingTconsts,
   existingWatchedTconsts,
+  isFiltersOpen,
+  onToggleFilters,
 }: WatchlistControlsBarProps) {
   return (
     <MediaToolbar
@@ -75,6 +81,14 @@ export function WatchlistControlsBar({
         <>
           <ViewToggle value={viewMode} onChange={onViewModeChange} />
           <SortDropdown value={sort} onChange={onSortChange} />
+          <Button variant="outline" onClick={onToggleFilters} className="gap-1">
+            Filtry
+            {isFiltersOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </>
       }
       secondaryControlsSlot={

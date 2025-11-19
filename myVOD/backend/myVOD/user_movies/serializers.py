@@ -111,6 +111,7 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
     - ordering: optional, allow-listed fields
     - is_available: optional boolean (None if not provided)
     - platform_ids: optional, comma-separated list of platform IDs to filter by
+    - genres: optional, comma-separated list of genres to filter by
     """
 
     status = serializers.ChoiceField(choices=["watchlist", "watched"], required=False)
@@ -128,6 +129,7 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
     )
     is_available = serializers.BooleanField(required=False, allow_null=True, default=None)
     platform_ids = serializers.CharField(required=False, allow_blank=True)
+    genres = serializers.CharField(required=False, allow_blank=True)
 
     def validate_platform_ids(self, value):
         """Validate and parse platform_ids parameter.
@@ -160,6 +162,22 @@ class UserMovieQueryParamsSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 f"Invalid platform_ids format. Expected comma-separated integers, got: {value}"
             )
+            
+    def validate_genres(self, value):
+        """Validate and parse genres parameter."""
+        if not value or value.strip() == "":
+            return None
+        
+        genres_list = [genre.strip() for genre in value.split(',') if genre.strip()]
+        
+        from movies.models import Genre
+        existing_genres = set(Genre.objects.values_list('name', flat=True))
+        invalid_genres = [genre for genre in genres_list if genre not in existing_genres]
+
+        if invalid_genres:
+            raise serializers.ValidationError(f"Invalid genres: {', '.join(invalid_genres)}")
+
+        return genres_list
 
 
 class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
@@ -168,6 +186,9 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
     - page: optional, pagination page number
     - platform_ids: optional, comma-separated list of platform IDs to filter by
     - ordering: optional, sort order for movies
+    - genres: optional, comma-separated list of genres to filter by
+    - exclude_watched: optional, boolean to exclude watched movies
+    - exclude_watchlisted: optional, boolean to exclude watchlisted movies
     """
 
     page = serializers.IntegerField(min_value=1, required=False)
@@ -177,6 +198,9 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
         required=False,
         default="added_desc"
     )
+    genres = serializers.CharField(required=False, allow_blank=True)
+    exclude_watched = serializers.BooleanField(required=False, default=False)
+    exclude_watchlisted = serializers.BooleanField(required=False, default=False)
 
     def validate_platform_ids(self, value):
         """Validate and parse platform_ids parameter.
@@ -209,6 +233,22 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 f"Invalid platform_ids format. Expected comma-separated integers, got: {value}"
             )
+
+    def validate_genres(self, value):
+        """Validate and parse genres parameter."""
+        if not value or value.strip() == "":
+            return None
+        
+        genres_list = [genre.strip() for genre in value.split(',') if genre.strip()]
+        
+        from movies.models import Genre
+        existing_genres = set(Genre.objects.values_list('name', flat=True))
+        invalid_genres = [genre for genre in genres_list if genre not in existing_genres]
+
+        if invalid_genres:
+            raise serializers.ValidationError(f"Invalid genres: {', '.join(invalid_genres)}")
+
+        return genres_list
 
 
 class CreateUserMovieCommandSerializer(serializers.Serializer):

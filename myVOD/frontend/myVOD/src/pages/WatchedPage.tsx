@@ -31,6 +31,7 @@ import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersToolbar";
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 import { RatingModal } from "@/components/watched/RatingModal";
+import { FiltersPanel } from "@/components/library/FiltersPanel";
 
 type MovieMutationErrorResponse = {
   detail?: string;
@@ -50,6 +51,7 @@ export function WatchedPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Check if suggestions modal should be open (from URL param)
   const isSuggestionsModalOpen = searchParams.get("suggestions") === "true";
@@ -494,9 +496,20 @@ export function WatchedPage() {
             visibleCount={visibleCount}
             totalCount={totalCount}
             hasUserPlatforms={hasUserPlatforms}
+            isFiltersOpen={isFiltersOpen}
+            onToggleFilters={() => setIsFiltersOpen((prev) => !prev)}
           />
         }
       >
+        {isFiltersOpen && (
+          <FiltersPanel
+            pageType="watched"
+            onApplyFilters={() => {
+              watchedQuery.refetch();
+              setIsFiltersOpen(false);
+            }}
+          />
+        )}
         <div className="p-4">
           <WatchedContent
             items={filteredItems}

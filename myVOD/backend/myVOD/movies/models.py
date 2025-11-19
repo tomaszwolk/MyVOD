@@ -123,3 +123,12 @@ class IntegrationErrorLog(models.Model):
         managed = False
         db_table = 'integration_error_log'
         unique_together = (('id', 'occurred_at'),)
+
+
+class Genre(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.TextField(unique=True)
+
+    class Meta:
+        managed = True
+        db_table = 'genre'

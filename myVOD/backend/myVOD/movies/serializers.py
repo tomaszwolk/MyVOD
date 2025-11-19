@@ -4,7 +4,7 @@ Serializers for movies app.
 This module contains serializers for movie-related API endpoints.
 """
 from rest_framework import serializers
-from .models import Movie, MovieAvailability, Platform
+from .models import Movie, MovieAvailability, Platform, Genre
 from datetime import timedelta
 from django.utils import timezone
 from tasks.movie_tasks import update_movie_poster
@@ -96,3 +96,12 @@ class MovieSearchResultSerializer(serializers.ModelSerializer):
             update_movie_poster.delay(instance.tconst)
             
         return representation
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Genre model.
+    """
+    class Meta:
+        model = Genre
+        fields = ['name']

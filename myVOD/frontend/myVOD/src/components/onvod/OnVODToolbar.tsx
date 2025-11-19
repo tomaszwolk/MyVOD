@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SuggestAIButton } from "@/components/watchlist/SuggestAIButton";
 import type { ViewMode, SortOption } from "@/types/view/watchlist.types";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * Props for OnVODToolbar component.
@@ -19,6 +21,8 @@ type OnVODToolbarProps = {
   nextAvailableAt?: Date | string | null;
   visibleCount: number;
   totalCount: number;
+  isFiltersOpen: boolean;
+  onToggleFilters: () => void;
 };
 
 /**
@@ -35,6 +39,8 @@ export function OnVODToolbar({
   nextAvailableAt,
   visibleCount,
   totalCount,
+  isFiltersOpen,
+  onToggleFilters,
 }: OnVODToolbarProps) {
   return (
     <MediaToolbar
@@ -57,6 +63,14 @@ export function OnVODToolbar({
         <>
           <ViewToggle value={viewMode} onChange={onViewModeChange} />
           <SortDropdown value={sort} onChange={onSortChange} />
+          <Button variant="outline" onClick={onToggleFilters} className="gap-1">
+            Filtry
+            {isFiltersOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </>
       }
       secondaryControlsSlot={

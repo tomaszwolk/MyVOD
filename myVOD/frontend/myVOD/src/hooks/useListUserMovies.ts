@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { listUserMovies } from "@/lib/api/movies";
 import { usePlatformFilterStore } from "@/stores/platformFilterStore";
+import { useFiltersStore } from "@/stores/filtersStore";
 
 /**
  * Custom hook for fetching user movies with optional status filter.
@@ -15,15 +16,23 @@ export function useListUserMovies(
   enabled: boolean = true,
   ordering?: string
 ) {
-  const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
-  const totalPlatforms = usePlatformFilterStore((state) => state.platforms.length);
+  const selectedPlatformIds = usePlatformFilterStore((state) =>
+    state.getSelectedPlatformIdsArray()
+  );
+  const totalPlatforms = usePlatformFilterStore(
+    (state) => state.platforms.length
+  );
+  const { selectedGenres } = useFiltersStore();
+  const genresArray = Array.from(selectedGenres);
 
   const shouldApplyPlatformFilter =
     totalPlatforms > 0 &&
     selectedPlatformIds.length > 0 &&
     selectedPlatformIds.length !== totalPlatforms;
 
-  const platformIdsForQuery = shouldApplyPlatformFilter ? selectedPlatformIds : undefined;
+  const platformIdsForQuery = shouldApplyPlatformFilter
+    ? selectedPlatformIds
+    : undefined;
 
   // Debug: log platform changes and whether we actually filter
   console.log(
@@ -37,13 +46,20 @@ export function useListUserMovies(
   );
 
   return useInfiniteQuery({
-    queryKey: ["user-movies", status ?? "all", ordering, platformIdsForQuery],
+    queryKey: [
+      "user-movies",
+      status ?? "all",
+      ordering,
+      platformIdsForQuery,
+      genresArray,
+    ],
     queryFn: ({ pageParam = 1 }) =>
       listUserMovies({
         status,
         page: pageParam,
         ordering,
         platformIds: platformIdsForQuery,
+        genres: genresArray.length > 0 ? genresArray : undefined,
       }),
     enabled,
     staleTime: 0, // Don't cache data when platform filters change

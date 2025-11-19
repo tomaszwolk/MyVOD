@@ -219,6 +219,20 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     ```
 
 
+#### `GET /api/movies/genres/`
+
+-   **Description**: Retrieves a list of all available movie genres, sorted alphabetically.
+-   **Authentication**: None (public endpoint).
+-   **Success Response** (200 OK):
+    ```json
+    [
+      { "name": "Action" },
+      { "name": "Adventure" },
+      { "name": "Comedy" }
+    ]
+    ```
+
+
 ### 3.3. Watchlist & Watched History (`UserMovies`)
 
 #### `GET /api/user-movies/`
@@ -230,6 +244,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     -   `ordering` (string, optional): Allow-listed values: `-watchlisted_at`, `-tconst__avg_rating`.
     -   `is_available` (boolean, optional): If `true`, filter to movies available on at least one of the user's platforms; if `false`, filter to movies explicitly unavailable on all of the user's platforms (and with no `true` availability records). When omitted, no availability filter is applied.
     -   `platform_ids` (string, optional): Comma-separated list of platform IDs to filter by (e.g., `?platform_ids=1,3`). This filter works in conjunction with other filters.
+    -   `genres` (string, optional): Comma-separated list of genre names to filter by (e.g., `?genres=Action,Drama`).
 -   **Success Response** (200 OK for `?status=watchlist`):
     ```json
     [
@@ -262,6 +277,9 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 -   **Query Parameters**:
     -   `page` (int, optional): Page number for pagination.
     -   `platform_ids` (string, optional): Comma-separated list of platform IDs to filter by (e.g., `?platform_ids=1,3`). If omitted, returns movies available on any platform.
+    -   `genres` (string, optional): Comma-separated list of genre names to filter by.
+    -   `exclude_watched` (boolean, optional): If `true`, excludes movies the user has watched.
+    -   `exclude_watchlisted` (boolean, optional): If `true`, excludes movies on the user's watchlist.
 -   **Sorting**: Results are sorted by the latest availability date (`movie_availability.id` descending) to show newest additions first.
 -   **Logic**:
     1.  Returns **unique** movies (`DISTINCT ON (movie.tconst)`).

@@ -14,10 +14,45 @@ from drf_spectacular.types import OpenApiTypes
 from .serializers import (
     MovieSearchQueryParamsSerializer,
     MovieSearchResultSerializer,
+    GenreSerializer,
 )
 from services.movie_search_service import search_movies  # type: ignore
+from .models import Genre
 
 logger = logging.getLogger(__name__)
+
+
+class GenresView(APIView):
+    """
+    API view for retrieving a list of all movie genres.
+
+    GET /api/genres/
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary="Get all movie genres",
+        description="Retrieves a list of all unique movie genres, sorted alphabetically.",
+        responses={
+            200: GenreSerializer(many=True),
+            500: OpenApiTypes.OBJECT,
+        },
+        tags=['Movies'],
+    )
+    def get(self, request):
+        """
+        Handle GET request for genres.
+        """
+        try:
+            genres = Genre.objects.order_by('name')
+            serializer = GenreSerializer(genres, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error retrieving genres: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An error occurred while retrieving genres."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class MovieSearchView(APIView):

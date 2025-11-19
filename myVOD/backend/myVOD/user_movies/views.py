@@ -92,6 +92,7 @@ class UserMovieViewSet(viewsets.ModelViewSet):
                 ordering_param=params.validated_data.get('ordering'),
                 is_available=params.validated_data.get('is_available'),
                 platform_ids=params.validated_data.get('platform_ids'),
+                genres=params.validated_data.get('genres')
             )
 
             # Handle pagination
@@ -416,7 +417,10 @@ class OnVODMoviesView(APIView):
             queryset = build_on_vod_movies_queryset(
                 user=request.user,
                 platform_ids=params.validated_data.get('platform_ids'),
-                ordering=params.validated_data.get('ordering', 'added_desc')
+                ordering=params.validated_data.get('ordering', 'added_desc'),
+                genres=params.validated_data.get('genres'),
+                exclude_watched=params.validated_data.get('exclude_watched'),
+                exclude_watchlisted=params.validated_data.get('exclude_watchlisted')
             )
 
             # Handle pagination

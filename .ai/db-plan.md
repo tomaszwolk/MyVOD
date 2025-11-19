@@ -25,6 +25,16 @@ Stores VOD platforms.
 
 ---
 
+### `genre`
+Stores unique movie genres. This table is populated via a Django management command.
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| `id` | `serial` | **Primary Key** | Unique identifier for the genre. |
+| `name` | `text` | **Unique**, Not Null | The name of the genre (e.g., "Action"). |
+
+---
+
 ### `user_platform`
 Links users to their subscribed VOD platforms (M:N relationship).
 

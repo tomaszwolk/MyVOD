@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { listOnVODMovies } from "@/lib/api/movies";
 import { usePlatformFilterStore } from "@/stores/platformFilterStore";
+import { useFiltersStore } from "@/stores/filtersStore";
 
 /**
  * Custom hook for fetching movies available on VOD platforms with platform filtering.
@@ -11,16 +12,34 @@ import { usePlatformFilterStore } from "@/stores/platformFilterStore";
  * @param enabled - Whether the query should run (default: true)
  * @returns Query object with data, isLoading, error, etc.
  */
-export function useOnVODMoviesQuery(ordering: string = "added_desc", enabled: boolean = true) {
-  const selectedPlatformIds = usePlatformFilterStore((state) => state.getSelectedPlatformIdsArray());
+export function useOnVODMoviesQuery(
+  ordering: string = "added_desc",
+  enabled: boolean = true
+) {
+  const selectedPlatformIds = usePlatformFilterStore((state) =>
+    state.getSelectedPlatformIdsArray()
+  );
+  const { selectedGenres, showWatched, showOnWatchlist } = useFiltersStore();
+  const genresArray = Array.from(selectedGenres);
 
   return useInfiniteQuery({
-    queryKey: ["on-vod-movies", selectedPlatformIds, ordering],
+    queryKey: [
+      "on-vod-movies",
+      selectedPlatformIds,
+      ordering,
+      genresArray,
+      !showWatched,
+      !showOnWatchlist,
+    ],
     queryFn: ({ pageParam = 1 }) =>
       listOnVODMovies({
-        platformIds: selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined,
+        platformIds:
+          selectedPlatformIds.length > 0 ? selectedPlatformIds : undefined,
         page: pageParam,
         ordering,
+        genres: genresArray.length > 0 ? genresArray : undefined,
+        excludeWatched: !showWatched,
+        excludeWatchlisted: !showOnWatchlist,
       }),
     enabled,
     staleTime: 30_000, // Consider data fresh for 30 seconds

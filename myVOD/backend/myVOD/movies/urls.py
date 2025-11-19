@@ -6,4 +6,5 @@ from . import views
 
 urlpatterns = [
     path('', views.MovieSearchView.as_view(), name='movie-search'),
+    path('genres/', views.GenresView.as_view(), name='genres-list'),
 ]

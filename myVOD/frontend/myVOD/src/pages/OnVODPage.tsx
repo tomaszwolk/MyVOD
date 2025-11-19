@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 import { RatingModal } from "@/components/watched/RatingModal";
+import { FiltersPanel } from "@/components/library/FiltersPanel";
 
 /**
  * OnVOD page component - displays all movies available on VOD platforms.
@@ -32,6 +33,7 @@ export function OnVODPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [ratingModalState, setRatingModalState] = useState<{
     tconst: string;
     title: string;
@@ -216,9 +218,20 @@ export function OnVODPage() {
             nextAvailableAt={nextAvailableAt}
             visibleCount={visibleCount}
             totalCount={totalCount}
+            isFiltersOpen={isFiltersOpen}
+            onToggleFilters={() => setIsFiltersOpen((prev) => !prev)}
           />
         }
       >
+        {isFiltersOpen && (
+          <FiltersPanel
+            pageType="onvod"
+            onApplyFilters={() => {
+              onVODQuery.refetch();
+              setIsFiltersOpen(false);
+            }}
+          />
+        )}
         <div className="p-4">
           {isInitialLoad ? (
             // Loading skeleton

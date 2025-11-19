@@ -31,6 +31,7 @@ import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersToolbar";
 import { WatchlistItemVM } from "@/types/view/watchlist.types";
+import { FiltersPanel } from "@/components/library/FiltersPanel";
 
 type MovieMutationErrorResponse = {
   detail?: string;
@@ -50,6 +51,7 @@ export function WatchlistPage() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Check if suggestions modal should be open (from URL param)
   const isSuggestionsModalOpen = searchParams.get("suggestions") === "true";
@@ -390,9 +392,20 @@ export function WatchlistPage() {
             onAddToWatched={handleAddToWatched}
             existingTconsts={existingTconsts}
             existingWatchedTconsts={existingWatchedTconsts}
+            isFiltersOpen={isFiltersOpen}
+            onToggleFilters={() => setIsFiltersOpen((prev) => !prev)}
           />
         }
       >
+        {isFiltersOpen && (
+          <FiltersPanel
+            pageType="watchlist"
+            onApplyFilters={() => {
+              watchlistQuery.refetch();
+              setIsFiltersOpen(false);
+            }}
+          />
+        )}
         <div className="p-4">
           <WatchlistContent
             items={items}

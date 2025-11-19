@@ -206,8 +206,12 @@ Nawigacja kluczowych akcji:
 - MediaLibraryLayout & MediaToolbar: wspólny kontener i belka sterująca dla widoków biblioteki (onVOD, watchlista, obejrzane oraz przyszłe ekrany). Zapewnia jednolite nagłówki, zakładki i sloty na kontrolki (w tym na globalne filtry).
 - FiltersBar: checkbox „Tylko dostępne”, przycisk „Ukryj niedostępne”, selektor sortowania („Data dodania”, „Ocena IMDb”, „Rok”).
 - WatchedFiltersBar: toolbar obejrzanych z przyciskiem „Ukryj/Pokaż niedostępne” i licznikiem.
-- PlatformFiltersToolbar: Reużywalny pasek narzędzi z ikonami platform VOD do globalnego filtrowania, zarządzany przez centralny store (Zustand).
-- ViewToggle: przełącznik kafelki/lista (zapamiętanie preferencji w sesji).
+- `FiltersPanel`: Nowy, rozwijany panel filtrów zawierający:
+  - Listę gatunków do wyboru (checkboxy).
+  - Przyciski "Zaznacz/Odznacz wszystkie".
+  - Warunkowo wyświetlane przełączniki statusu ("Pokaż obejrzane", "Pokaż na watchlist") dla strony OnVOD.
+  - Przyciski "Zastosuj" i "Wyczyść".
+- `ViewToggle`: przełącznik kafelki/lista (zapamiętanie preferencji w sesji).
 - `AISuggestionsDialog`: modal do wyświetlania sugestii AI z focus trap, routing przez URL params (`?suggestions=true`).
 - `SuggestionCard`: karta pojedynczej sugestii AI (plakat, tytuł, uzasadnienie, dostępność, CTA „Dodaj”).
 - `SuggestionList`: lista kart sugestii w responsywnym gridzie.
