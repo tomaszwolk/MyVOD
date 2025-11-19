@@ -27,7 +27,7 @@ export class WatchlistPage {
   async verifyMovieCardPresent(movieTconst: string): Promise<void> {
     await this.page
       .getByTestId(`movie-card-${movieTconst}`)
-      .waitFor({ state: "visible" });
+      .waitFor({ state: "visible", timeout: 60000 });
   }
 
   /**

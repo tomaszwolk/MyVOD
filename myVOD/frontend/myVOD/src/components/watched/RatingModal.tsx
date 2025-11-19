@@ -41,8 +41,8 @@ export const RatingModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rate "{movieTitle}"</DialogTitle>
-          <DialogDescription>Select a rating from 1 to 10.</DialogDescription>
+          <DialogTitle>Oceń "{movieTitle}"</DialogTitle>
+          <DialogDescription>Wybierz ocenę od 1 do 10.</DialogDescription>
         </DialogHeader>
         <div className="flex justify-center py-4">
           {[...Array(10)].map((_, i) => {
@@ -50,6 +50,8 @@ export const RatingModal = ({
             return (
               <Star
                 key={ratingValue}
+                aria-label={`Rating ${ratingValue}`}
+                role="button"
                 className={cn(
                   "h-8 w-8 cursor-pointer text-gray-300 transition-colors",
                   ratingValue <= (hoverRating || selectedRating) &&
@@ -64,10 +66,13 @@ export const RatingModal = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Anuluj
           </Button>
-          <Button onClick={handleSubmit} disabled={selectedRating === 0 || isSaving}>
-            {isSaving ? "Saving..." : "Save Rating"}
+          <Button
+            onClick={handleSubmit}
+            disabled={selectedRating === 0 || isSaving}
+          >
+            {isSaving ? "Zapisywanie..." : "Oceń"}
           </Button>
         </DialogFooter>
       </DialogContent>

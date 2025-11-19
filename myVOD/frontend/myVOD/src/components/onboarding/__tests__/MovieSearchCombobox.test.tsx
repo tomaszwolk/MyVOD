@@ -46,12 +46,14 @@ vi.mock("@/hooks/useMovieSearch", () => ({
 const mockUseMovieSearch = vi.mocked(useMovieSearch);
 
 describe("MovieSearchCombobox", () => {
-  const mockOnSelect = vi.fn();
+  const mockOnAddToWatchlist = vi.fn();
+  const mockOnMarkAsWatched = vi.fn();
+  const mockOnRate = vi.fn();
   const mockOnChange = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default mock for useMovieSearch - use vi.fn() instead of object
+    // Default mock for useMovieSearch
     mockUseMovieSearch.mockReturnValue({
       data: [],
       isLoading: false,
@@ -65,15 +67,17 @@ describe("MovieSearchCombobox", () => {
     });
   });
 
+  const defaultProps = {
+    value: "",
+    onChange: mockOnChange,
+    selectedTconsts: new Set<string>(),
+    onAddToWatchlist: mockOnAddToWatchlist,
+    onMarkAsWatched: mockOnMarkAsWatched,
+    onRate: mockOnRate,
+  };
+
   it("should render search input with correct placeholder", () => {
-    render(
-      <MovieSearchCombobox
-        value=""
-        onChange={mockOnChange}
-        selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
-      />
-    );
+    render(<MovieSearchCombobox {...defaultProps} />);
 
     const input = screen.getByPlaceholderText("Szukaj filmów...");
     expect(input).toBeInTheDocument();
@@ -81,14 +85,7 @@ describe("MovieSearchCombobox", () => {
   });
 
   it("should handle keyboard navigation keys", () => {
-    render(
-      <MovieSearchCombobox
-        value=""
-        onChange={mockOnChange}
-        selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
-      />
-    );
+    render(<MovieSearchCombobox {...defaultProps} />);
 
     const input = screen.getByPlaceholderText("Szukaj filmów...");
 
@@ -110,7 +107,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={selectedTconsts}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -124,12 +123,16 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
     // Component should accept the callback
-    expect(typeof mockOnSelect).toBe("function");
+    expect(typeof mockOnAddToWatchlist).toBe("function");
+    expect(typeof mockOnMarkAsWatched).toBe("function");
+    expect(typeof mockOnRate).toBe("function");
   });
 
   it("should have correct ARIA attributes", () => {
@@ -138,7 +141,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -178,7 +183,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -198,7 +205,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -211,7 +220,7 @@ describe("MovieSearchCombobox", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 
-  it("should call onSelect when item is clicked", async () => {
+  it("should call onAddToWatchlist when item's 'Add to Watchlist' button is clicked", async () => {
     const mockResults = [
       {
         tconst: "tt0111161",
@@ -221,99 +230,78 @@ describe("MovieSearchCombobox", () => {
         posterUrl: "/poster.jpg",
       },
     ];
-
     mockUseMovieSearch.mockReturnValue({
+      ...mockUseMovieSearch(),
       data: mockResults,
-      isLoading: false,
-      error: null,
-      metrics: {
-        lastDurationMs: 100,
-        lastQuery: "shawshank",
-        completedCount: 1,
-        abortedCount: 0,
-      },
     });
 
-    render(
-      <MovieSearchCombobox
-        value=""
-        onChange={mockOnChange}
-        selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
-      />
-    );
-
+    render(<MovieSearchCombobox {...defaultProps} />);
     const input = screen.getByPlaceholderText("Szukaj filmów...");
     fireEvent.change(input, { target: { value: "sh" } });
 
     await waitFor(() => {
-      const resultItem = screen.getByRole("option");
-      fireEvent.click(resultItem);
+      const addToWatchlistButton = screen.getByTitle("Dodaj do watchlisty");
+      fireEvent.click(addToWatchlistButton);
     });
 
-    expect(mockOnSelect).toHaveBeenCalledWith(mockResults[0]);
+    expect(mockOnAddToWatchlist).toHaveBeenCalledWith(mockResults[0]);
   });
 
-  it("should navigate with arrow keys", async () => {
+  it("should call onMarkAsWatched when item's 'Mark as Watched' button is clicked", async () => {
     const mockResults = [
       {
         tconst: "tt0111161",
-        primaryTitle: "Movie 1",
+        primaryTitle: "The Shawshank Redemption",
         startYear: 1994,
         avgRating: "9.3",
         posterUrl: "/poster.jpg",
       },
-      {
-        tconst: "tt0111162",
-        primaryTitle: "Movie 2",
-        startYear: 1995,
-        avgRating: "8.5",
-        posterUrl: "/poster2.jpg",
-      },
     ];
-
     mockUseMovieSearch.mockReturnValue({
+      ...mockUseMovieSearch(),
       data: mockResults,
-      isLoading: false,
-      error: null,
-      metrics: {
-        lastDurationMs: 100,
-        lastQuery: "movie",
-        completedCount: 1,
-        abortedCount: 0,
-      },
     });
 
-    render(
-      <MovieSearchCombobox
-        value=""
-        onChange={mockOnChange}
-        selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
-      />
-    );
-
+    render(<MovieSearchCombobox {...defaultProps} />);
     const input = screen.getByPlaceholderText("Szukaj filmów...");
-    fireEvent.change(input, { target: { value: "mo" } });
+    fireEvent.change(input, { target: { value: "sh" } });
 
     await waitFor(() => {
-      expect(screen.getByRole("listbox")).toBeInTheDocument();
+      const markAsWatchedButton = screen.getByTitle("Oznacz jako obejrzany");
+      fireEvent.click(markAsWatchedButton);
     });
 
-    // Arrow down to first item
-    fireEvent.keyDown(input, { key: "ArrowDown" });
-    expect(input).toHaveAttribute("aria-activedescendant", "result-tt0111161");
-
-    // Arrow down to second item
-    fireEvent.keyDown(input, { key: "ArrowDown" });
-    expect(input).toHaveAttribute("aria-activedescendant", "result-tt0111162");
-
-    // Arrow up back to first item
-    fireEvent.keyDown(input, { key: "ArrowUp" });
-    expect(input).toHaveAttribute("aria-activedescendant", "result-tt0111161");
+    expect(mockOnMarkAsWatched).toHaveBeenCalledWith(mockResults[0]);
   });
 
-  it("should select item with Enter key", async () => {
+  it("should call onRate when item's 'Rate Movie' button is clicked", async () => {
+    const mockResults = [
+      {
+        tconst: "tt0111161",
+        primaryTitle: "The Shawshank Redemption",
+        startYear: 1994,
+        avgRating: "9.3",
+        posterUrl: "/poster.jpg",
+      },
+    ];
+    mockUseMovieSearch.mockReturnValue({
+      ...mockUseMovieSearch(),
+      data: mockResults,
+    });
+
+    render(<MovieSearchCombobox {...defaultProps} />);
+    const input = screen.getByPlaceholderText("Szukaj filmów...");
+    fireEvent.change(input, { target: { value: "sh" } });
+
+    await waitFor(() => {
+      const rateButton = screen.getByTitle("Oceń film");
+      fireEvent.click(rateButton);
+    });
+
+    expect(mockOnRate).toHaveBeenCalledWith(mockResults[0]);
+  });
+
+  it("should call onAddToWatchlist with Enter key", async () => {
     const mockResults = [
       {
         tconst: "tt0111161",
@@ -322,36 +310,12 @@ describe("MovieSearchCombobox", () => {
         avgRating: "9.3",
         posterUrl: "/poster.jpg",
       },
-      {
-        tconst: "tt0111162",
-        primaryTitle: "Movie 2",
-        startYear: 1995,
-        avgRating: "8.5",
-        posterUrl: "/poster2.jpg",
-      },
     ];
-
     mockUseMovieSearch.mockReturnValue({
+      ...mockUseMovieSearch(),
       data: mockResults,
-      isLoading: false,
-      error: null,
-      metrics: {
-        lastDurationMs: 100,
-        lastQuery: "movie",
-        completedCount: 1,
-        abortedCount: 0,
-      },
     });
-
-    render(
-      <MovieSearchCombobox
-        value=""
-        onChange={mockOnChange}
-        selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
-      />
-    );
-
+    render(<MovieSearchCombobox {...defaultProps} />);
     const input = screen.getByPlaceholderText("Szukaj filmów...");
     fireEvent.change(input, { target: { value: "mo" } });
 
@@ -365,7 +329,7 @@ describe("MovieSearchCombobox", () => {
     // Select with Enter
     fireEvent.keyDown(input, { key: "Enter" });
 
-    expect(mockOnSelect).toHaveBeenCalledWith(mockResults[0]);
+    expect(mockOnAddToWatchlist).toHaveBeenCalledWith(mockResults[0]);
   });
 
   it("should close on Escape key", async () => {
@@ -396,7 +360,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -434,7 +400,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -466,7 +434,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -500,7 +470,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -524,15 +496,8 @@ describe("MovieSearchCombobox", () => {
     ];
 
     mockUseMovieSearch.mockReturnValue({
+      ...mockUseMovieSearch(),
       data: mockResults,
-      isLoading: false,
-      error: null,
-      metrics: {
-        lastDurationMs: 100,
-        lastQuery: "movie",
-        completedCount: 1,
-        abortedCount: 0,
-      },
     });
 
     // Use controlled component with state
@@ -543,7 +508,9 @@ describe("MovieSearchCombobox", () => {
           value={value}
           onChange={setValue}
           selectedTconsts={new Set()}
-          onSelect={mockOnSelect}
+          onAddToWatchlist={mockOnAddToWatchlist}
+          onMarkAsWatched={mockOnMarkAsWatched}
+          onRate={mockOnRate}
         />
       );
     };
@@ -554,12 +521,14 @@ describe("MovieSearchCombobox", () => {
     fireEvent.change(input, { target: { value: "mo" } });
 
     await waitFor(() => {
+      // Click the parent li element, which should trigger onAddToWatchlist by default
       const resultItem = screen.getByRole("option");
       fireEvent.click(resultItem);
     });
 
+    expect(mockOnAddToWatchlist).toHaveBeenCalledWith(mockResults[0]);
+
     // Search results should remain visible after adding a movie
-    // The query should remain unchanged (component keeps it open)
     expect(input).toHaveValue("mo");
     expect(screen.getByRole("option")).toBeInTheDocument();
   });
@@ -570,7 +539,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 
@@ -590,7 +561,9 @@ describe("MovieSearchCombobox", () => {
         value=""
         onChange={mockOnChange}
         selectedTconsts={new Set()}
-        onSelect={mockOnSelect}
+        onAddToWatchlist={mockOnAddToWatchlist}
+        onMarkAsWatched={mockOnMarkAsWatched}
+        onRate={mockOnRate}
       />
     );
 

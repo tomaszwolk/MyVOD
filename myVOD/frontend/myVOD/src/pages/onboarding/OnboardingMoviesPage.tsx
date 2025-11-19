@@ -106,6 +106,7 @@ export function OnboardingMoviesPage() {
       ...searchOption,
       userMovieId: null,
       status: "watchlisted",
+      genres: [], // Assuming genres might be added later or are not available in search
     };
     setAdded((prev) => [...prev, optimisticMovie]);
     setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
@@ -116,8 +117,13 @@ export function OnboardingMoviesPage() {
       });
       setAdded((prev) =>
         prev.map((m) =>
-          m.tconst === savedMovie.tconst
-            ? { ...savedMovie, status: "watchlisted" }
+          m.tconst === savedMovie.movie.tconst
+            ? {
+                ...m,
+                userMovieId: savedMovie.id,
+                status: "watchlisted",
+                ...savedMovie.movie,
+              }
             : m
         )
       );
@@ -134,6 +140,7 @@ export function OnboardingMoviesPage() {
       ...searchOption,
       userMovieId: null,
       status: "watched",
+      genres: [], // Assuming genres might be added later or are not available in search
     };
     setAdded((prev) => [...prev, optimisticMovie]);
     setAddedSet((prev) => new Set(prev).add(searchOption.tconst));
@@ -145,8 +152,13 @@ export function OnboardingMoviesPage() {
       });
       setAdded((prev) =>
         prev.map((m) =>
-          m.tconst === savedMovie.tconst
-            ? { ...savedMovie, status: "watched" }
+          m.tconst === savedMovie.movie.tconst
+            ? {
+                ...m,
+                userMovieId: savedMovie.id,
+                status: "watched",
+                ...savedMovie.movie,
+              }
             : m
         )
       );
@@ -174,6 +186,7 @@ export function OnboardingMoviesPage() {
       userMovieId: null,
       status: "watched",
       user_rating: rating,
+      genres: [], // Assuming genres might be added later or are not available in search
     };
     setAdded((prev) => [...prev, optimisticMovie]);
     setAddedSet((prev) => new Set(prev).add(movieToRate.tconst));
@@ -187,11 +200,13 @@ export function OnboardingMoviesPage() {
       });
       setAdded((prev) =>
         prev.map((m) =>
-          m.tconst === savedMovie.tconst
+          m.tconst === savedMovie.movie.tconst
             ? {
-                ...savedMovie,
+                ...m,
+                userMovieId: savedMovie.id,
                 status: "watched",
                 user_rating: savedMovie.user_rating,
+                ...savedMovie.movie,
               }
             : m
         )
@@ -253,7 +268,7 @@ export function OnboardingMoviesPage() {
 
   const handleSkip = () => {
     // Skip to the next incomplete onboarding step (or main app if finished)
-    const nextPath = getNextOnboardingPath(progress, { fromStep: "add" });
+    const nextPath = getNextOnboardingPath(progress, { fromStep: "movies" });
     setValidationError(null);
     navigate(nextPath, { replace: true });
   };
@@ -267,7 +282,7 @@ export function OnboardingMoviesPage() {
       return;
     }
 
-    const nextPath = getNextOnboardingPath(progress, { fromStep: "add" });
+    const nextPath = getNextOnboardingPath(progress, { fromStep: "movies" });
     navigate(nextPath, { replace: true });
   };
 
@@ -275,7 +290,7 @@ export function OnboardingMoviesPage() {
 
   return (
     <OnboardingLayout
-      title="Dodaj filmy do watchlisty"
+      title="Dodaj lub oznacz filmy"
       headerActions={headerActions}
     >
       <div data-testid="onboarding-step-2">
@@ -297,8 +312,7 @@ export function OnboardingMoviesPage() {
               onMarkAsWatched={handleMarkAsWatched}
               onRate={handleRate}
               selectedTconsts={addedSet}
-              placeholder="Szukaj filmów..."
-              ariaLabel="Dodaj lub oznacz film"
+              testId="onboarding-movie-search"
             />
           </div>
 

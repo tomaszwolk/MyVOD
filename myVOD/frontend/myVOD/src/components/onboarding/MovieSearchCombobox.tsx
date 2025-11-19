@@ -88,7 +88,6 @@ type MovieSearchComboboxProps = {
   disabled?: boolean;
   selectedTconsts: Set<string>;
   placeholder?: string;
-  ariaLabel?: string;
   testId?: string;
 };
 
@@ -105,7 +104,6 @@ export function MovieSearchCombobox({
   disabled = false,
   selectedTconsts,
   placeholder = "Szukaj filmów...",
-  ariaLabel = "Wyszukaj film",
   testId = "movie-search-combobox",
 }: MovieSearchComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);

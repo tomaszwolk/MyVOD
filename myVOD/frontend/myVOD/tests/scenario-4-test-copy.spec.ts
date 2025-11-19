@@ -3,6 +3,8 @@ import { RegisterPage } from "./page-objects/RegisterPage";
 import { LoginPage } from "./page-objects/LoginPage";
 import { OnboardingPage } from "./page-objects/OnboardingPage";
 import { WatchlistPage } from "./page-objects/WatchlistPage";
+import { HeaderComponent } from "./page-objects/HeaderComponent";
+import { WatchedPage } from "./page-objects/WatchedPage";
 import { setupApiMocks } from "./setup/api-mocks";
 
 /**
@@ -72,9 +74,21 @@ test.describe("Scenariusz 1: Pełny cykl nowego użytkownika", () => {
     await watchlistPage.verifyWatchlistGridVisible();
 
     // Verify movies are present in watchlist
+    // We need to wait for the grid to populate
+    await watchlistPage.verifyWatchlistGridVisible();
+
     await watchlistPage.verifyMovieCardPresent("tt11564570"); // Glass Onion
-    await watchlistPage.verifyMovieCardPresent("tt0068646"); // The Godfather
-    await watchlistPage.verifyMovieCardPresent("tt0816692"); // Interstellar
+
+    // Verify other movies are in the watched list
+    const headerComponent = new HeaderComponent(page);
+    await headerComponent.navigateToWatched();
+
+    const watchedPage = new WatchedPage(page);
+    await watchedPage.waitForPageLoad();
+    await watchedPage.verifyWatchedGridVisible();
+
+    await watchedPage.verifyWatchedMoviePresent("tt0068646"); // The Godfather
+    await watchedPage.verifyWatchedMoviePresent("tt0816692"); // Interstellar
 
     // Verify streaming provider icons are visible
     await watchlistPage.verifyStreamingProviderIconVisible("netflix");

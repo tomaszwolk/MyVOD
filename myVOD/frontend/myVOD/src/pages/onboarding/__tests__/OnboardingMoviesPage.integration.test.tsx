@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@/test/utils";
-import { OnboardingAddPage } from "../OnboardingAddPage";
+import { OnboardingMoviesPage } from "../OnboardingMoviesPage";
 import { toast } from "sonner";
 
 // Mock Popover components to avoid Floating UI issues in tests
@@ -104,26 +104,25 @@ const mockUseAddUserMovie = vi.mocked(useAddUserMovie);
 const mockDeleteUserMovie = vi.mocked(deleteUserMovie);
 const mockToast = vi.mocked(toast);
 
-describe("OnboardingAddPage Integration Tests", () => {
+describe("OnboardingMoviesPage Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default mocks
+    // Default mocks for a user at step 2 of 2
     mockUseOnboardingStatus.mockReturnValue({
       isLoading: false,
       isOnboardingComplete: false,
       requiredStep: null,
       progress: {
         hasPlatforms: true,
-        hasWatchlistMovies: false,
-        hasWatchedMovies: false,
+        hasWatchlistMovies: false, // No movies added yet
       },
       profile: { platforms: [1] },
       watchlistMovies: [],
-      watchedMovies: [],
     });
 
-    mockGetNextOnboardingPath.mockReturnValue("/onboarding/watched");
+    // After this step, onboarding should be complete, navigating to the app
+    mockGetNextOnboardingPath.mockReturnValue("/app/onvod");
 
     mockUseAddUserMovie.mockReturnValue({
       mutateAsync: vi.fn(),
@@ -141,31 +140,33 @@ describe("OnboardingAddPage Integration Tests", () => {
     vi.restoreAllMocks();
   });
 
-  it("should render onboarding page correctly", async () => {
-    render(<OnboardingAddPage />);
+  it("should render the final onboarding step correctly", async () => {
+    render(<OnboardingMoviesPage />);
 
     // Check main title in header
     await waitFor(() => {
       expect(
         screen.getByRole("heading", {
           level: 2,
-          name: "Dodaj przynajmniej 3 filmy do watchlisty",
+          name: "Dodaj lub oznacz filmy",
         })
       ).toBeInTheDocument();
     });
 
-    // Check step indicator (localized copy)
-    expect(screen.getByText(/Krok\s*2\s*z\s*3/i)).toBeInTheDocument();
-    expect(screen.getByText(/67\s*% ukończony/i)).toBeInTheDocument();
+    // Check step indicator for 2 of 2
+    expect(screen.getByText(/Krok\s*2\s*z\s*2/i)).toBeInTheDocument();
+    expect(screen.getByText(/100\s*% ukończony/i)).toBeInTheDocument();
 
     // Check hint text
     expect(
-      screen.getByText("Większa ilość filmów poprawi rekomendacje")
+      screen.getByText(
+        "Dodaj filmy do watchlisty, oznacz jako obejrzane lub oceń, abyśmy mogli lepiej dopasować rekomendacje."
+      )
     ).toBeInTheDocument();
 
-    // Check search input
+    // Check search input with the correct placeholder
     expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
+      screen.getByPlaceholderText("Szukaj filmów...")
     ).toBeInTheDocument();
 
     // Check empty state
@@ -179,11 +180,11 @@ describe("OnboardingAddPage Integration Tests", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Continue to next onboarding step" })
-    ).toBeInTheDocument();
+    ).toHaveTextContent("Zakończ");
   });
 
-  it("should handle skip navigation", async () => {
-    render(<OnboardingAddPage />);
+  it("should handle skip navigation to the main app", async () => {
+    render(<OnboardingMoviesPage />);
 
     const skipButton = screen.getByRole("button", {
       name: "Skip adding movies and continue to next step",
@@ -192,22 +193,21 @@ describe("OnboardingAddPage Integration Tests", () => {
     // Click skip button
     fireEvent.click(skipButton);
 
-    // Verify navigation was called
-    expect(mockNavigate).toHaveBeenCalledWith("/onboarding/watched", {
+    // Verify navigation was called to the main app
+    expect(mockNavigate).toHaveBeenCalledWith("/app/onvod", {
       replace: true,
     });
     expect(mockGetNextOnboardingPath).toHaveBeenCalledWith(
       {
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: false,
       },
       { fromStep: "add" }
     );
   });
 
-  it("should show validation error when trying to continue without 3 movies", async () => {
-    render(<OnboardingAddPage />);
+  it("should show validation error when trying to finish without 3 movies", async () => {
+    render(<OnboardingMoviesPage />);
 
     const nextButton = screen.getByRole("button", {
       name: "Continue to next onboarding step",
@@ -233,7 +233,6 @@ describe("OnboardingAddPage Integration Tests", () => {
       progress: {
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: false,
       },
       profile: { platforms: [1] },
       watchlistMovies: [
@@ -247,6 +246,7 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
         {
           id: 2,
@@ -258,26 +258,23 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
       ],
-      watchedMovies: [],
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Component should handle prefilled movies correctly
-    // Since the grid component is mocked, we just verify the component renders
-    expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Szukaj filmów...")).toBeInTheDocument();
   });
 
-  it("should show progress bar with correct values", () => {
-    render(<OnboardingAddPage />);
+  it("should show progress bar with correct values for the final step", () => {
+    render(<OnboardingMoviesPage />);
 
-    // Check progress bar shows localized step information
-    expect(screen.getByText(/Krok\s*2\s*z\s*3/i)).toBeInTheDocument();
-    expect(screen.getByText(/67\s*% ukończony/i)).toBeInTheDocument();
+    // Check progress bar shows localized step information for step 2 of 2
+    expect(screen.getByText(/Krok\s*2\s*z\s*2/i)).toBeInTheDocument();
+    expect(screen.getByText(/100\s*% ukończony/i)).toBeInTheDocument();
   });
 
   it("should add movie to watchlist successfully", async () => {
@@ -299,9 +296,9 @@ describe("OnboardingAddPage Integration Tests", () => {
       isSuccess: false,
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
-    const input = screen.getByPlaceholderText("Szukaj filmów do dodania...");
+    const input = screen.getByPlaceholderText("Szukaj filmów...");
 
     // Mock the search combobox behavior - simulate adding a movie
     // Since MovieSearchCombobox is mocked, we'll simulate the onSelectOption call
@@ -338,18 +335,17 @@ describe("OnboardingAddPage Integration Tests", () => {
       isSuccess: false,
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Test that duplicate handling works
     // The actual logic is in the component, so we verify the component renders
-    expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Szukaj filmów...")).toBeInTheDocument();
     expect(screen.getByText("Brak dodanych filmów")).toBeInTheDocument();
   });
 
   it("should prevent adding more than 3 movies", async () => {
-    // Mock having 3 movies already added
+    // This test is less relevant now as the 3-movie limit is for proceeding, not a hard cap.
+    // We will check if the "Finish" button is enabled.
     mockUseOnboardingStatus.mockReturnValue({
       isLoading: false,
       isOnboardingComplete: false,
@@ -357,7 +353,6 @@ describe("OnboardingAddPage Integration Tests", () => {
       progress: {
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: false,
       },
       profile: { platforms: [1] },
       watchlistMovies: [
@@ -371,6 +366,7 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
         {
           id: 2,
@@ -382,6 +378,7 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
         {
           id: 3,
@@ -393,17 +390,15 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
       ],
-      watchedMovies: [],
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Component should handle 3 movies limit
-    expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Szukaj filmów...")).toBeInTheDocument();
 
     // Check that Next button should be enabled when 3 movies are present
     const nextButton = screen.getByRole("button", {
@@ -421,7 +416,6 @@ describe("OnboardingAddPage Integration Tests", () => {
       progress: {
         hasPlatforms: true,
         hasWatchlistMovies: false,
-        hasWatchedMovies: false,
       },
       profile: { platforms: [1] },
       watchlistMovies: [
@@ -435,31 +429,29 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
       ],
-      watchedMovies: [],
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Component should prevent adding duplicates
-    expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Szukaj filmów...")).toBeInTheDocument();
   });
 
   it("should handle undo operations", async () => {
     // Mock successful movie deletion
     mockDeleteUserMovie.mockResolvedValue(undefined);
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Test that undo operations work
     // The actual undo logic is in AddedMoviesGrid component
     expect(screen.getByText("Brak dodanych filmów")).toBeInTheDocument();
   });
 
-  it("should navigate to next step on Next button when 3 movies added", () => {
+  it("should navigate to the app on Finish button when 3 movies added", () => {
     // Mock having 3 movies
     mockUseOnboardingStatus.mockReturnValue({
       isLoading: false,
@@ -468,7 +460,6 @@ describe("OnboardingAddPage Integration Tests", () => {
       progress: {
         hasPlatforms: true,
         hasWatchlistMovies: true, // Has movies
-        hasWatchedMovies: false,
       },
       profile: { platforms: [1] },
       watchlistMovies: [
@@ -482,6 +473,7 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
         {
           id: 2,
@@ -493,6 +485,7 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
         {
           id: 3,
@@ -504,12 +497,12 @@ describe("OnboardingAddPage Integration Tests", () => {
           availability: [],
           watchlisted_at: "2024-01-01T00:00:00Z",
           watched_at: null,
+          status: "watchlisted",
         },
       ],
-      watchedMovies: [],
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     const nextButton = screen.getByRole("button", {
       name: "Continue to next onboarding step",
@@ -519,18 +512,17 @@ describe("OnboardingAddPage Integration Tests", () => {
     fireEvent.click(nextButton);
 
     // Should navigate to next step
-    expect(mockNavigate).toHaveBeenCalledWith("/onboarding/watched", {
+    expect(mockNavigate).toHaveBeenCalledWith("/app/onvod", {
       replace: true,
     });
   });
 
   it("should handle network errors during search", () => {
     // Test that network errors during search are handled
-    // This would be handled by the MovieSearchCombobox component
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
+      screen.getByPlaceholderText("Szukaj filmów...")
     ).toBeInTheDocument();
   });
 
@@ -550,11 +542,11 @@ describe("OnboardingAddPage Integration Tests", () => {
       isSuccess: false,
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Component should handle API errors gracefully
     expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
+      screen.getByPlaceholderText("Szukaj filmów...")
     ).toBeInTheDocument();
   });
 
@@ -569,18 +561,18 @@ describe("OnboardingAddPage Integration Tests", () => {
       isSuccess: false,
     });
 
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
     // Component should handle loading states
     expect(
-      screen.getByPlaceholderText("Szukaj filmów do dodania...")
+      screen.getByPlaceholderText("Szukaj filmów...")
     ).toBeInTheDocument();
   });
 
   it("should validate search input", () => {
-    render(<OnboardingAddPage />);
+    render(<OnboardingMoviesPage />);
 
-    const input = screen.getByPlaceholderText("Szukaj filmów do dodania...");
+    const input = screen.getByPlaceholderText("Szukaj filmów...");
 
     // Test that search input works
     fireEvent.change(input, { target: { value: "test search" } });

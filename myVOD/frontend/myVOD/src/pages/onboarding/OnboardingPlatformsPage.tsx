@@ -209,7 +209,7 @@ export function OnboardingPlatformsPage() {
   if (isLoading) {
     return (
       <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
-        <ProgressBar current={1} total={3} />
+        <ProgressBar current={1} total={2} />
         <div className="space-y-6">
           <OnboardingHeader
             title="Wybierz swoje platformy VOD"
@@ -231,7 +231,7 @@ export function OnboardingPlatformsPage() {
   if (platformsError) {
     return (
       <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
-        <ProgressBar current={1} total={3} />
+        <ProgressBar current={1} total={2} />
         <div className="space-y-6">
           <OnboardingHeader
             title="Wybierz swoje platformy VOD"
@@ -258,7 +258,7 @@ export function OnboardingPlatformsPage() {
   return (
     <OnboardingLayout title="Witaj w MyVOD" headerActions={headerActions}>
       <div data-testid="onboarding-step-1">
-        <ProgressBar current={1} total={3} className="mt-2" />
+        <ProgressBar current={1} total={2} className="mt-2" />
 
         <OnboardingHeader
           title="Wybierz swoje platformy VOD"

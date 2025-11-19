@@ -70,7 +70,7 @@ test.describe("Scenariusz 1: Pełny cykl nowego użytkownika", () => {
     // Ensure we're on the platforms page before starting onboarding
     await page.waitForURL("**/onboarding/platforms**", { timeout: 10000 });
 
-    // 1.3-1.5 Onboarding (3 kroki)
+    // 1.3-1.4 Onboarding (2 kroki)
     await onboardingPage.completeOnboarding();
 
     // Update API mocks (no-op for new users, kept for consistency)

@@ -109,3 +109,20 @@ Po dokonaniu refaktoryzacji, następujące pliki testowe będą wymagały aktual
 -   `myVOD/frontend/myVOD/src/components/onboarding/__tests__/MovieSearchCombobox.test.tsx`
 -   `myVOD/frontend/myVOD/srcs/components/onboarding/__tests__/ActionBar.test.tsx`
 -   `myVOD/frontend/myVOD/src/pages/onboarding/__tests__/OnboardingWatchedPage.test.tsx` (ten plik testowy zostanie usunięty wraz z komponentem)
+
+### Krok 6: Aktualizacja testów E2E (Playwright)
+
+Na podstawie analizy dostarczonej dokumentacji testów E2E, głównym plikiem wymagającym modyfikacji jest ten, który testuje pełny cykl onboardingu nowego użytkownika.
+
+-   **Test do aktualizacji:** Scenariusz 1 - "Pełny cykl nowego użytkownika"
+    -   **Plik testu:** `tests/e2e/scenario-1-full-user-cycle.spec.ts`
+    -   **Page Object:** `tests/e2e/page-objects/OnboardingPage.ts`
+
+-   **Kluczowe zmiany:**
+    1.  Uproszczenie flow testu z 3 do 2 kroków.
+    2.  Usunięcie kroków i selektorów związanych z nieistniejącą stroną `/onboarding/watched`.
+    3.  Przebudowa logiki w `OnboardingPage.ts` w celu odzwierciedlenia nowych interakcji (klikanie w ikony akcji zamiast jednego przycisku).
+    4.  Weryfikacja i aktualizacja `data-testid` dla nowej strony `/onboarding/movies`.
+
+-   **Testy, które prawdopodobnie nie wymagają zmian:**
+    -   Scenariusz 2, 3 i 4, ponieważ omijają onboarding dla istniejących lub pre-konfigurowanych użytkowników.

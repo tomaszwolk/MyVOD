@@ -3,6 +3,8 @@ import { RegisterPage } from "../page-objects/RegisterPage";
 import { LoginPage } from "../page-objects/LoginPage";
 import { OnboardingPage } from "../page-objects/OnboardingPage";
 import { WatchlistPage } from "../page-objects/WatchlistPage";
+import { HeaderComponent } from "../page-objects/HeaderComponent";
+import { WatchedPage } from "../page-objects/WatchedPage";
 import { setupApiMocks } from "./api-mocks";
 
 /**
@@ -59,9 +61,7 @@ test.describe("Scenario 4 User Setup", () => {
     console.log("Completing onboarding...");
     await onboardingPage.selectPlatforms(); // Selects Netflix
 
-    await onboardingPage.addMoviesToWatchlist(); // Adds: Glass Onion, The Godfather, Interstellar
-
-    await onboardingPage.markMoviesAsWatched(); // Marks: The Dark Knight, All Quiet on the Western Front, Schindler's List
+    await onboardingPage.manageMovies(); // Adds: Glass Onion, The Godfather (watched), Interstellar (rated)
 
     // Wait for redirect to OnVOD page (new default after onboarding)
     await page.waitForURL("**/app/onvod**", { timeout: 60000 });
@@ -74,8 +74,17 @@ test.describe("Scenario 4 User Setup", () => {
 
     // Verify expected movies are present
     await watchlistPage.verifyMovieCardPresent("tt11564570"); // Glass Onion
-    await watchlistPage.verifyMovieCardPresent("tt0068646"); // The Godfather
-    await watchlistPage.verifyMovieCardPresent("tt0816692"); // Interstellar
+
+    // Check watched movies
+    const headerComponent = new HeaderComponent(page);
+    await headerComponent.navigateToWatched();
+
+    const watchedPage = new WatchedPage(page);
+    await watchedPage.waitForPageLoad();
+    await watchedPage.verifyWatchedGridVisible();
+
+    await watchedPage.verifyWatchedMoviePresent("tt0068646"); // The Godfather
+    await watchedPage.verifyWatchedMoviePresent("tt0816692"); // Interstellar
 
     console.log("User created and onboarding completed. Saving auth state...");
 

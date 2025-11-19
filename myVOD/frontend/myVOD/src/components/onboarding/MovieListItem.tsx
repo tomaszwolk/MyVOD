@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { X, Eye, Bookmark, Star } from "lucide-react";
 import { TMDBPoster } from "@/components/TMDBPoster";
-import { MovieRating } from "@/components/watched/MovieRating";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -11,10 +10,8 @@ type MovieListItemProps = {
   startYear: number | null;
   genres: string[] | null;
   posterUrl: string | null;
-  avgRating?: string | null;
   userRating?: number | null;
   status: "watchlisted" | "watched";
-  onRateClick?: () => void;
   onRemove: () => void;
   isRemoving?: boolean;
 };
@@ -25,7 +22,6 @@ export function MovieListItem({
   startYear,
   genres,
   posterUrl,
-  avgRating,
   userRating,
   status,
   onRemove,
