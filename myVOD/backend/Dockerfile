@@ -39,4 +39,8 @@ WORKDIR /app/myVOD
 
 # Uruchomienie aplikacji
 EXPOSE 8000
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["gunicorn", "myVOD.wsgi:application", "--bind", "0.0.0.0:8000"]
