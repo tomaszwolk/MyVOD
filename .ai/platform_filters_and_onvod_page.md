@@ -132,6 +132,58 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
     3.  🔄 **Przetestować funkcjonalność**: Sprawdzić czy wszystkie opcje sortowania działają poprawnie i czy kolejność filmów jest prawidłowa.
     4.  🔄 **Optymalizować UI**: Rozważyć czy niektóre opcje nie powinny być usunięte lub dodane dla lepszego UX.
 
+### 3.8. Krok 8: Interakcje z Filmem na Stronie OnVOD 🔄
+
+-   **Cel**: Rozbudowanie strony `/app/onvod` o trzy kluczowe akcje:
+    1.  Ocenianie filmu, które automatycznie dodaje go do listy "Obejrzane".
+    2.  Dodawanie filmu bezpośrednio do "Watchlisty".
+    3.  Dodawanie filmu bezpośrednio do "Obejrzanych" (bez oceny).
+
+#### 1. Backend (API) - Kluczowa Optymalizacja
+
+-   **Rekomendacja**: Rozszerzenie `POST /api/user-movies/` o dodatkowe akcje.
+-   **Cel**: Umożliwienie dodawania filmu do bazy `user_movie` wraz z jednoczesnym wykonaniem akcji (oznaczenie jako obejrzany, dodanie oceny) w jednym zapytaniu.
+-   **Endpoint**: `POST /api/user-movies/`
+-   **Proponowane zmiany w ciele żądania**:
+    -   Serializator powinien akceptować dwa nowe, opcjonalne pola: `action` i `rating`.
+        ```json
+        {
+          "tconst": "tt0816692",
+          "action": "mark_as_watched", // Opcjonalne. Jeśli brak, domyślnie dodaje do watchlisty.
+          "rating": 8                 // Opcjonalne. Wysłanie oceny implikuje 'mark_as_watched'.
+        }
+        ```
+-   **Logika w serwisie backendowym**:
+    1.  Implementacja logiki "znajdź lub utwórz" (`get_or_create`) dla rekordu `user_movie` na podstawie `user_id` i `tconst`.
+    2.  **Jeśli `rating` jest podany**: Ustawia `user_rating` oraz `watched_at` na aktualny czas (ocena jest równoznaczna z obejrzeniem).
+    3.  **Jeśli `action` to `mark_as_watched`**: Ustawia `watched_at` na aktualny czas.
+    4.  **Domyślnie (gdy brak `action` i `rating`)**: Ustawia `watchlisted_at`.
+    5.  Endpoint powinien zawsze zwracać zaktualizowany obiekt `UserMovieDto` ze statusem `200 OK` (jeśli rekord istniał) lub `201 Created` (jeśli został utworzony).
+
+#### 2. Frontend (UI/UX)
+
+-   **Krok 1: Modyfikacja komponentów `OnVODMovieCard` i `OnVODMovieRow`**:
+    -   **Logika warunkowa**: Nowe kontrolki (gwiazdka, przyciski) powinny być widoczne **tylko wtedy, gdy film nie jest jeszcze na żadnej z list użytkownika** (`watchlisted_at` i `watched_at` mają wartość `null`). Jeśli film jest już na liście, w miejscu przycisków powinien pojawić się odpowiedni status (np. "Na Twojej watchliście" lub "Obejrzany").
+    -   **Gwiazdka Oceny (`MovieRating`)**:
+        -   Tooltip po najechaniu: **"Oceń i dodaj do Obejrzanych"**.
+        -   Kliknięcie otwiera `RatingModal`.
+    -   **Nowa sekcja z przyciskami**: Poniżej informacji o dostępności na platformach VOD, należy dodać kontener (`div`) z dwoma przyciskami ikonowymi:
+        -   **Przycisk "Dodaj do Watchlisty" (lewa strona)** z tooltipem **"Dodaj do Watchlisty"**.
+        -   **Przycisk "Dodaj do Obejrzanych" (prawa strona)** z tooltipem **"Dodaj do Obejrzanych"**.
+
+-   **Krok 2: Utworzenie hooków do zarządzania akcjami**:
+    -   **Nowy hook: `useAddUserMovie`**:
+        -   Będzie obsługiwał dodanie do watchlisty (`POST /api/user-movies/` z `{ tconst }`) oraz dodanie do obejrzanych (`POST` z `{ tconst, action: 'mark_as_watched' }`).
+    -   **Modyfikacja hooka: `useRateMovie`**:
+        -   Wywoła `POST /api/user-movies/` z `{ tconst, rating, action: 'mark_as_watched' }`.
+
+#### 3. Zarządzanie Stanem Aplikacji (TanStack Query)
+
+-   **Implementacja w hookach `useAddUserMovie` i `useRateMovie`**:
+    -   **`onMutate`**: Optymistyczna aktualizacja cache'a dla `on-vod-movies`.
+    -   **`onError`**: Przywrócenie stanu sprzed mutacji.
+    -   **`onSettled`**: Unieważnienie zapytań `['on-vod-movies']`, `['user-movies', 'watchlist']` i `['user-movies', 'watched']` w celu synchronizacji.
+
 ## Dodatkowe uwagi do planu
 
 ### Brakujące szczegóły implementacyjne:
@@ -205,37 +257,96 @@ Implementacja na frontendzie zostanie podzielona na logiczne, następujące po s
 ### 🔄 Następne kroki:
 - **Refaktoryzacja sortowania**: Przejrzeć dostępne opcje sortowania, usunąć duplikaty, sprawdzić konsystencję i poprawność działania na wszystkich stronach
 - **Aktualizacja README**
+- **OnVOD**: 
+    - Poprawić tooltip - powinien pokazywać również tytuł filmu, IMDB rating i User rating a nie tylko rok i gatunek
+    - Rok i gatunek powinny zajmować tylko jedną linię, jeśli się nie mieszczą powinny zostać ucięte (Jak na Watchlist)
+- **Karty z filmami na OnVOD, Watchlist i Watched**:
+    - Nazwa jest linikiem do filmu na IMDB.com
+    - 
 
 
 ## Przyszłe usprawnienia (Future Enhancements)
 
-### User Rating na stronie OnVOD
-- **Opis**: Dodanie funkcjonalności oceniania filmów bezpośrednio z strony `/app/onvod`
+### Przycisk "Ukryj obejrzane" na stronach Watchlist i Watched i na OnVOD
+- **Opis**: Zmiana przycisku "Ukryj niedostępne" na stronach Watchlist i Watched na przycisk "Filtry". Dodanie przycisku filtrującego na stronie OnVODD
 - **Szczegóły**:
-  - Niebieska gwiazdka obok oceny IMDB (tak jak na `/app/watched`)
-  - Kliknięcie automatycznie dodaje film do watchlisty (jeśli nie jest już dodany)
-  - Otwiera modal ratingu do oceny filmu (1-10 gwiazdek)
-  - Zapisuje ocenę w bazie danych
-- **Powód odłożenia**: Wymaga zmian w logice biznesowej (dodawanie filmów do watchlisty) i współdzielenia komponentów między stronami
-- **Priorytet**: Niski - funkcjonalność dostępna już na stronie Watched
-
-### Przycisk "Ukryj obejrzane" na stronach Watchlist i Watched
-- **Opis**: Dodanie przycisku filtrującego w miejscu przycisku "Ukryj niedostępne"
-- **Szczegóły**:
-  - Przycisk będzie się przełączał między "Ukryj obejrzane" / "Pokaż obejrzane"
-  - W watchliście: ukrywa filmy które są już oznaczone jako watched
-  - Na stronie watched: ukrywa filmy które nie mają ratingu użytkownika
-  - Stan przycisku będzie zapamiętywany w preferencjach użytkownika
-- **Powód odłożenia**: Wymaga rozszerzenia systemu filtrów i dodania nowej logiki filtrowania
-- **Priorytet**: Średni - użyteczna funkcjonalność dla zarządzania watchlistą
-
-### Filtrowanie po gatunkach
-- **Opis**: Dodanie możliwości filtrowania filmów po gatunkach filmowych
-- **Szczegóły**:
-  - Dropdown lub tagi z dostępnymi gatunkami (Action, Comedy, Drama, etc.)
-  - Możliwość wyboru wielu gatunków jednocześnie
+  - Kliknięcie w przycisk "Filtry" pokazuje panel. Strzałka obok napisu wskazuje, czy panel jest zwinięty czy rozwinięty
+  - Sekcja Gatunki posiada opcję "Zaznacz/Odznacz wszystkie" dla wygody oraz listę gatunków w formie checkboxów ułożonych w siatce, by zaoszczędzić miejsce
+  - Sekcja Status posiada proste i intuicyjne przełączniki (toggle switches) do szybkiego filtrowania filmów.
+  - Na stronach Watchlist i Watched w sekcji Status będzie opcja "Ukryj obejrzane" / "Pokaż obejrzane"
+  - Na stronie OnVOD w sekcji Status będzie opcja "Ukryj obejrzane / Pokaż obejrzane" oraz "Ukryj na Watchlist / Pokaż na Watchlist"
+  - Przyciski akcji: "Zastosuj filtry" aktywuje wybrane opcje, a "wyczyść" resetuje wszystkie wybory do stanu domyślnego
+  - Odznaczenie wszystkich gatunków a następnie kliknięcie Zastosuj filtry spowoduje, że nic się nie zmieni (inaczej żaden film nie został by wybrany)
   - Filtr będzie dostępny na wszystkich stronach (onVOD, Watchlist, Watched)
-  - Integracja z istniejącym systemem filtrów platform
-  - Stan filtrów gatunków będzie zapamiętywany w preferencjach użytkownika
+  - Możliwość wyboru wielu gatunków jednocześnie
+  - Rozważyć zapamiętanie stanu przycisku w preferencjach użytkownika (jako późniejszy etap implementacji)
 - **Powód odłożenia**: Wymaga rozszerzenia API o filtrowanie po gatunkach i dodania UI dla wyboru gatunków
 - **Priorytet**: Wysoki - znacząco poprawi UX przy wyszukiwaniu filmów
+- **Wygląd interfejsu**:
+  ---------------------------------------------------------------------------------------------------
+|                                                                                                 |
+|  OnVOD   Watchlista   [ Obejrzane ]   Profil   Admin                  Platformy: [N] [HBO] [D+] ... |
+|                                                                                                 |
+|  [  magnifying_glass  Szukaj filmu... ]   [ ✨ Zasugeruj filmy ]  [田] [≡] [ Data dodania v ] [ Filtry ^ ]   |
+|                                                                                                 |
+|  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐  |
+|  │                                                                                             │  |
+|  │   Gatunki                                     [ Zaznacz wszystkie ] [ Odznacz wszystkie ]   │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   [x] Akcja     [ ] Dramat    [x] Komedia    [ ] Romans     [ ] Thriller   [ ] Sci-Fi        │  |
+|  │   [ ] Horror    [x] Kryminał  [ ] Animacja   [ ] Fantasy    [ ] Familijny  [ ] Przygodowy    │  |
+|  │                                                                                             │  |
+|  │   Status                                                                                    │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   Pokaż obejrzane                                                         (•)-----          │  |
+|  │   Pokaż na watchlist                                                      ( )-----          │  |
+|  │                                                                                             │  |
+|  │                                                                 [ Zastosuj filtry ] [ Wyczyść ] │  |
+|  └─────────────────────────────────────────────────────────────────────────────────────────────┘  |
+|                                                                                                 |
+|  [ Plakat filmu 1 ]  [ Plakat filmu 2 ]  [ Plakat filmu 3 ]  [ Plakat filmu 4 ] [ Plakat filmu 5 ]  |
+|                                                                                                 |
+---------------------------------------------------------------------------------------------------
+
+### Rozszerzenie Filtrów
+**Opis**: Dodanie opcji filtrowania po roku produkcji, reżyserach i po głównych aktorach.
+**Szczegóły**:
+- Rozbudowa poprzedniej koncepcji. Panel filtrów jest wyższy i może być podzielony na dwie kolumny, by uniknąć długiego przewijania
+- Lata produkcji: Suwak zakresu (range slider) to najbardziej intuicyjny sposób na filtrowanie po dacie.
+- Dwa pola tekstowe z funkcją autouzupełnienia/podpowiedzi, któa po wpisaniu pierwszych liter nazwiska reżysera lub aktora podpowiadałaby poasujące osoby z bazy danych
+- **Powód odłożenia**: Wymaga implementacji podstawowej funkcji filtrowania i dodania do bazy danych informacji o aktorach i reżyserach
+- **Priorytet**: Niski
+- **Wygląd interfejsu**:
+  ---------------------------------------------------------------------------------------------------
+|                                                                                                 |
+|  OnVOD   Watchlista   [ Obejrzane ]   Profil   Admin                  Platformy: [N] [HBO] [D+] ... |
+|                                                                                                 |
+|  [  magnifying_glass  Szukaj filmu... ]   [ ✨ Zasugeruj filmy ]  [田] [≡] [ Data dodania v ] [ Filtry ^ ]   |
+|                                                                                                 |
+|  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐  |
+|  │                                                                                             │  |
+|  │   Gatunki                                     [ Zaznacz wszystkie ] [ Odznacz wszystkie ]   │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   [x] Akcja     [ ] Dramat    [x] Komedia    [ ] Romans     [ ] Thriller   [ ] Sci-Fi        │  |
+|  │   [ ] Horror    [x] Kryminał  [ ] Animacja   [ ] Fantasy    [ ] Familijny  [ ] Przygodowy    │  |
+|  │                                                                                             │  |
+|  │   Lata produkcji                                                                            │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   od: 1920 ‹———————•—————————————————————————————————•———————› 2025                       │  |
+|  │                                                                                             │  |
+|  │   Twórcy                                                                                    │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   Reżyser:  [ Wpisz nazwisko...                                                    ]        │  |
+|  │   Aktor:    [ Wpisz nazwisko...                                                    ]        │  |
+|  │                                                                                             │  |
+|  │   Status                                                                                    │  |
+|  │   ---------------------------------------------------------------------------------------   │  |
+|  │   Pokaż obejrzane                                                         (•)-----          │  |
+|  │   Pokaż na watchlist                                                      ( )-----          │  |
+|  │                                                                                             │  |
+|  │                                                                 [ Zastosuj filtry ] [ Wyczyść ] │  |
+|  └─────────────────────────────────────────────────────────────────────────────────────────────┘  |
+|                                                                                                 |
+|  [ Plakat filmu 1 ]  [ Plakat filmu 2 ]  [ Plakat filmu 3 ]  [ Plakat filmu 4 ] [ Plakat filmu 5 ]  |
+|                                                                                                 |
+---------------------------------------------------------------------------------------------------

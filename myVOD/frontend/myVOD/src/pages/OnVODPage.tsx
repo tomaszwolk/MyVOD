@@ -123,7 +123,7 @@ export function OnVODPage() {
   const tabs = [
     {
       id: "onvod",
-      label: "onVOD",
+      label: "OnVOD",
       isActive: true,
       onSelect: () => {},
     },

@@ -229,6 +229,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     -   `status` (string, required): `watchlist` or `watched`.
     -   `ordering` (string, optional): Allow-listed values: `-watchlisted_at`, `-tconst__avg_rating`.
     -   `is_available` (boolean, optional): If `true`, filter to movies available on at least one of the user's platforms; if `false`, filter to movies explicitly unavailable on all of the user's platforms (and with no `true` availability records). When omitted, no availability filter is applied.
+    -   `platform_ids` (string, optional): Comma-separated list of platform IDs to filter by (e.g., `?platform_ids=1,3`). This filter works in conjunction with other filters.
 -   **Success Response** (200 OK for `?status=watchlist`):
     ```json
     [
@@ -253,6 +254,45 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
 -   **Error Responses**:
     - `400 Bad Request`: Missing/invalid `status`; invalid `ordering`; invalid `is_available` boolean.
     - `401 Unauthorized`: Missing or invalid authentication.
+
+#### `GET /api/on-vod-movies/`
+
+-   **Description**: Retrieves a paginated, unique list of movies available on VOD platforms.
+-   **Authentication**: Required.
+-   **Query Parameters**:
+    -   `page` (int, optional): Page number for pagination.
+    -   `platform_ids` (string, optional): Comma-separated list of platform IDs to filter by (e.g., `?platform_ids=1,3`). If omitted, returns movies available on any platform.
+-   **Sorting**: Results are sorted by the latest availability date (`movie_availability.id` descending) to show newest additions first.
+-   **Logic**:
+    1.  Returns **unique** movies (`DISTINCT ON (movie.tconst)`).
+    2.  The response for each movie contains the same structure as `/api/user-movies/`, including `movie` details, `availability`, and `user_movie_info` (watchlist status, watched status, user rating). This allows reusing frontend components.
+-   **Success Response** (200 OK):
+    ```json
+    {
+      "count": 123,
+      "next": "/api/on-vod-movies/?page=2",
+      "previous": null,
+      "results": [
+        {
+          "id": null,
+          "movie": {
+            "tconst": "tt0111161",
+            "primary_title": "The Shawshank Redemption",
+            "start_year": 1994,
+            "genres": ["Drama"],
+            "avg_rating": "9.3",
+            "poster_path": "..."
+          },
+          "availability": [
+            {"platform_id": 1, "platform_name": "Netflix", "is_available": true}
+          ],
+          "watchlisted_at": "2025-10-12T10:00:00Z",
+          "watched_at": null,
+          "user_rating": null
+        }
+      ]
+    }
+    ```
 
 #### `POST /api/user-movies/`
 

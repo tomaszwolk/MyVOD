@@ -18,7 +18,7 @@ Zasady UX, dostępności i bezpieczeństwa:
 - Bezpieczeństwo: trasy chronione (auth guard), automatyczne odświeżanie JWT (interceptor), bezpieczne obchodzenie 401 (redirect po niepowodzeniu refresh), minimalizacja ujawnianych informacji o błędach logowania.
 - Wydajność: prefetch kluczowych danych, opcjonalna wirtualizacja list przy większych kolekcjach, cache kontrolowany dla sugestii (reset dzienny kalendarzowy po stronie UI).
 
-Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane endpointy: auth (`/api/token/`, `/api/register/`), profil (`/api/me/` GET/PATCH - zwraca również `is_staff`), listy i operacje filmów (`/api/movies/`, `/api/user-movies/` GET/POST/PATCH/DELETE), platformy (`/api/platforms/`), sugestie AI (`/api/suggestions/`), oraz admin analytics (`/admin/analytics/api/*` - wymaga `is_staff = TRUE`).
+Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane endpointy: auth (`/api/token/`, `/api/register/`), profil (`/api/me/` GET/PATCH - zwraca również `is_staff`), listy i operacje filmów (`/api/movies/`, `/api/user-movies/`, `/api/on-vod-movies/` GET/POST/PATCH/DELETE), platformy (`/api/platforms/`), sugestie AI (`/api/suggestions/`), oraz admin analytics (`/admin/analytics/api/*` - wymaga `is_staff = TRUE`).
 
 ## 2. Lista widoków
 
@@ -57,37 +57,44 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - Kluczowe komponenty widoku: Combobox, Kafelki/wiersze wyników z akcją „Oznacz obejrzane”, Buttons (Zakończ, Skip).
 - UX, dostępność i względy bezpieczeństwa: brak wymuszeń (wymagane minimum 3 do przejścia dalej), komunikaty sukcesu/błędu, mechanika: dodanie, jeśli brak, a następnie oznaczenie jako obejrzane w tle, tytuł zmienia się dynamicznie po dodaniu 3 filmów.
 
-6) Widok: Dashboard – Watchlista
-- Ścieżka widoku: `/watchlist`
-- Główny cel: Centralne zarządzanie filmami do obejrzenia, z podglądem dostępności VOD i szybkim dodawaniem.
+6) Widok: Dashboard – onVOD
+- Ścieżka widoku: `/app/onvod`
+- Główny cel: Wyświetlenie wszystkich unikalnych filmów dostępnych na platformach VOD, zintegrowane z globalnym filtrowaniem platform.
+- Kluczowe informacje do wyświetlenia: paginowana lista filmów (kafelki/wiersze), te same dane co w `UserMovie`, globalny pasek filtrów platform.
+- Kluczowe komponenty widoku: `MediaLibraryLayout` z `PlatformFiltersToolbar` w slocie `globalFilters`, `OnVODMovieCard`/`OnVODMovieRow`, pełny `MediaToolbar` (Search, AI, View, Sort), infinite scroll.
+- UX, dostępność i względy bezpieczeństwa: Domyślna strona po zalogowaniu, spójne działanie z resztą biblioteki, stan filtrów globalny (Zustand).
+
+7) Widok: Dashboard – Watchlista
+- Ścieżka widoku: `/app/watchlist`
+- Główny cel: Centralne zarządzanie filmami do obejrzenia, z podglądem dostępności VOD i szybkim dodawaniem, zintegrowane z globalnym filtrowaniem.
 - Kluczowe informacje do wyświetlenia: kafelki/wiersze filmów (plakat/placeholder, tytuł, rok, ocena IMDb, gatunki), ikony dostępności VOD, badge „Niedostępne…”, data „Stan z: [data]”, licznik widocznych.
-- Kluczowe komponenty widoku: App header, `MediaLibraryLayout` + `MediaToolbar` z osadzonymi elementami sterującymi (Search Combobox, Toggle widoków, wspólny SortDropdown, `FiltersBar` z przyciskiem „Ukryj niedostępne” i licznikiem), Karta/Wiersz filmu z akcjami (Oznacz obejrzane, Usuń), Toastery, Paginacja/wirtualizacja (opcjonalnie), Przycisk „Zasugeruj filmy”.
+- Kluczowe komponenty widoku: App header, `MediaLibraryLayout` + `MediaToolbar` z osadzonymi elementami sterującymi (Search Combobox, Toggle widoków, wspólny SortDropdown, `FiltersBar` z przyciskiem „Ukryj niedostępne” i licznikiem), Karta/Wiersz filmu z akcjami (Oznacz obejrzane, Usuń), Toastery, Paginacja/wirtualizacja (opcjonalnie), Przycisk „Zasugeruj filmy”, `PlatformFiltersToolbar` (w `MediaLibraryLayout`).
 - UX, dostępność i względy bezpieczeństwa: szybkie akcje z confirm dla usuwania, optimistic updates z opcją Undo, wyraźne stany filtrów, zapamiętywanie preferencji widoku/sortowania w sesji, focus states, minimalizacja skoków layoutu (lazy image + stałe wymiary).
 
-7) Widok: Zakładka „Obejrzane"
+8) Widok: Zakładka „Obejrzane"
 - Ścieżka widoku: `/app/watched`
 - Główny cel: Przegląd historii obejrzanych filmów, opcja przywrócenia do watchlisty oraz usuwania z historii obejrzanych.
 - Kluczowe informacje do wyświetlenia: lista filmów z datą obejrzenia, te same pola co w watchliście, sort po dacie (najnowsze pierwsze).
-- Kluczowe komponenty widoku: ten sam `MediaLibraryLayout` i `MediaToolbar` co w watchliście (re-użycie Search Combobox, SortDropdown, przycisku „Zasugeruj filmy"), dedykowany `WatchedFiltersBar` (przycisk „Ukryj niedostępne / Pokaż niedostępne" + licznik), Karta/Wiersz filmu z akcjami „Przywróć do watchlisty" i „Usuń", `ConfirmDialog` dla potwierdzenia usunięcia, Empty state.
+- Kluczowe komponenty widoku: ten sam `MediaLibraryLayout` i `MediaToolbar` co w watchliście (re-użycie Search Combobox, SortDropdown, przycisku „Zasugeruj filmy"), dedykowany `WatchedFiltersBar` (przycisk „Ukryj niedostępne / Pokaż niedostępne" + licznik), Karta/Wiersz filmu z akcjami „Przywróć do watchlisty" i „Usuń", `ConfirmDialog` dla potwierdzenia usunięcia, Empty state, `PlatformFiltersToolbar` (w `MediaLibraryLayout`).
 - UX, dostępność i względy bezpieczeństwa: preferencje widoku i sortowania dziedziczone z watchlisty; filtr „Ukryj niedostępne" działa tylko przy skonfigurowanych platformach (profil) i zapamiętuje stan.
 - UX, dostępność i względy bezpieczeństwa: szybkie cofnięcie do listy, spójne skróty klawiaturowe/tabindex, brak ograniczeń na liczbę „Obejrzanych".
 - Usuwanie z historii: przycisk „Usuń" umieszczony w prawym dolnym rogu, z prawej strony przycisku „Przywróć" (widok listy) lub obok przycisku „Przywróć" (widok siatki). Operacja wymaga potwierdzenia przez `ConfirmDialog` z komunikatem o nieodwracalności. Hard delete (ustawienie `watched_at = NULL`) - operacja nieodwracalna, bez możliwości undo. Użytkownik może ponownie oznaczyć film jako watched, jeśli chce go przywrócić do historii.
 
-8) Widok: Sugestie AI (modal)
-- Ścieżka widoku: modal otwierany przez URL param `?suggestions=true` z `/app/watchlist`, `/app/watched` lub `/app/profile`
+9) Widok: Sugestie AI (modal)
+- Ścieżka widoku: modal otwierany przez URL param `?suggestions=true` z `/app/onvod`, `/app/watchlist`, `/app/watched` lub `/app/profile`
 - Główny cel: Wyświetlenie spersonalizowanych sugestii filmowych (tytuł, rok, uzasadnienie, dostępność) i dodanie wybranych do watchlisty.
 - Kluczowe informacje do wyświetlenia: lista kart sugestii, licznik/czas do resetu dziennego, komunikaty o limicie/404.
 - Kluczowe komponenty widoku: `AISuggestionsDialog` (modal z focus trap), `SuggestionList`, `SuggestionCard` (plakat, tytuł, uzasadnienie, ikony VOD), Button „Dodaj do watchlisty” (z blokadą po dodaniu), `RateLimitBadge` z odliczaniem do resetu, `AISuggestionsEmptyState`, Toastery.
 - UX, dostępność i względy bezpieczeństwa: brak nadmiarowych informacji przy błędzie 429, jasny czas do kolejnej próby, nie duplikować filmów już na liście, obsługa klawiatury w modalnym wariancie (Esc do zamknięcia, Tab navigation), routing przez URL params pozwala na bezpośrednie linkowanie.
 
-9) Widok: Profil użytkownika
+10) Widok: Profil użytkownika
 - Ścieżka widoku: `/app/profile`
 - Główny cel: Zarządzanie platformami VOD i ustawieniami konta (w tym RODO – usunięcie konta).
 - Kluczowe informacje do wyświetlenia: email, stan checkboxów platfom, przyciski zapisu, sekcja „Usuń konto” z ostrzeżeniem.
 - Kluczowe komponenty widoku: CheckboxGroup platform z ikonami, Button „Zapisz zmiany”, AlertDialog „Usuń konto”, Toastery.
 - UX, dostępność i względy bezpieczeństwa: confirm z jasnym ostrzeżeniem, odświeżenie ikon dostępności po zapisie, disabled filtr „Tylko dostępne”, gdy brak wybranych platform.
 
-10) Widok: Admin dashboard (MVP – podstawowy)
+11) Widok: Admin dashboard (MVP – podstawowy)
 - Ścieżka widoku: `/app/admin/dashboard`
 - Główny cel: Podgląd metryk produktu (overview, retention, AI adoption, growth) oraz diagnostyka integracji (logi błędów). Dostępny tylko dla użytkowników ze statusem staff (`is_staff = TRUE` w bazie danych).
 - Kluczowe informacje do wyświetlenia:
@@ -114,7 +121,7 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
   - Obsługa błędów z czytelnymi komunikatami
   - Loading states podczas pobierania danych
 
-11) Widoki błędów i fallbacki ✅ **ZAIMPLEMENTOWANE**
+12) Widoki błędów i fallbacki ✅ **ZAIMPLEMENTOWANE**
 - Ścieżki widoków: `*` (404), dedykowane: `/error/unauthorized`, `/error/offline`.
 - Główny cel: Czytelne komunikaty i CTA (np. „Zaloguj ponownie”, „Odśwież”).
 - Kluczowe informacje do wyświetlenia: opis błędu, akcje powrotu/ponów.
@@ -125,38 +132,38 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 
 Główne przepływy i przejścia między widokami:
 
-1) Rejestracja → Logowanie → Onboarding → Dashboard watchlisty
+1) Rejestracja → Logowanie → Onboarding → Dashboard onVOD
 - Rejestracja (`/auth/register`) – 201; przekierowanie do logowania.
-- Logowanie (`/auth/login`) – po sukcesie sprawdzenie stanu onboardingu (pierwsze logowanie) i redirect do `/onboarding/platforms` lub `/watchlist`.
-- Onboarding kroki 1–3 (`/onboarding/*`) – każdy krok pozwala „Skip”; po „Zakończ/Skip” → `/watchlist`.
+- Logowanie (`/auth/login`) – po sukcesie sprawdzenie stanu onboardingu (pierwsze logowanie) i redirect do `/onboarding/platforms` lub `/app/onvod`.
+- Onboarding kroki 1–3 (`/onboarding/*`) – każdy krok pozwala „Skip”; po „Zakończ/Skip” → `/app/onvod`.
 
-1) Główny przypadek użycia – Dodaj film i obejrzyj
-- Start: `/watchlist`.
+2) Główny przypadek użycia – Dodaj film i obejrzyj
+- Start: `/app/onvod` lub `/app/watchlist`.
 - Wyszukiwanie (Combobox) → GET `/api/movies?search=…` → wybór pozycji → POST `/api/user-movies/` → toast „Dodano".
-- Przeglądanie dostępności (Watchmode) i filtr „Tylko dostępne"/„Ukryj niedostępne".
+- Przeglądanie dostępności (Watchmode) i filtr „Tylko dostępne"/„Ukryj niedostępne" oraz globalne filtry platform.
 - Oznacz jako „Obejrzane" → PATCH `/api/user-movies/<id>/ {action: mark_as_watched}` → toast, film znika z watchlisty i pojawia się w `/app/watched`.
 - Usuwanie z historii obejrzanych: `/app/watched` → klik „Usuń" → `ConfirmDialog` z potwierdzeniem → DELETE `/api/user-movies/<id>/` → hard delete (`watched_at = NULL`) → toast sukcesu, film znika z listy watched. Operacja nieodwracalna, bez undo.
 
-1) Sugestie AI – odkrywanie nowych tytułów
-- Z `/app/watchlist`, `/app/watched` lub `/app/profile`: klik „Zasugeruj filmy” → modal otwierany przez URL param `?suggestions=true`.
+3) Sugestie AI – odkrywanie nowych tytułów
+- Z `/app/onvod`, `/app/watchlist`, `/app/watched` lub `/app/profile`: klik „Zasugeruj filmy” → modal otwierany przez URL param `?suggestions=true`.
 - GET `/api/suggestions/`:
   - 200: lista 1–5 sugestii → „Dodaj do watchlisty”: POST `/api/user-movies/` (z flagą `added_from_ai_suggestion=true`) → toast, disable przycisku.
   - 429: pokazanie limitu i czasu do resetu w `RateLimitBadge`.
   - 404: komunikat „Dodaj filmy do watchlisty lub oznacz jako obejrzane…”.
 - Zamknięcie modala usuwa URL param `?suggestions=true` z powrotem do poprzedniej strony.
 
-1) Edycja profilu – platformy i RODO
+4) Edycja profilu – platformy i RODO
 - `/app/profile` → GET `/api/me/` i `/api/platforms/`.
 - Zmiana platform → PATCH `/api/me/` → refresh ikon dostępności w listach.
 - „Usuń konto” → AlertDialog → potwierdzenie → hard delete po stronie backendu → clear tokeny → redirect do `/` lub `/auth/login` z komunikatem.
 
-1) Sesja i bezpieczeństwo
+5) Sesja i bezpieczeństwo
 - Każdy request z access tokenem. Na 401: próba refresh (`/api/token/refresh/`); gdy refresh niepowodzenie → redirect do `/error/unauthorized` z komunikatem „Twoja sesja wygasła…".
 - Ochrona tras: guard dla `/app/*` i `/app/admin/*`. Dodatkowa kontrola uprawnień dla admin dashboard - endpointy backend zwracają 403 dla nie-staff użytkowników.
 - Strony błędów: dedykowane strony dla błędów autoryzacji (`/error/unauthorized`) i offline (`/error/offline`).
 - Sprawdzanie uprawnień staff: frontend sprawdza pole `is_staff` z profilu użytkownika (`/api/me/`) przez hook `useIsStaff()`. Zakładka "Admin" jest wyświetlana warunkowo tylko dla użytkowników ze statusem staff.
 
-1) Admin dashboard – przegląd metryk i diagnostyka
+6) Admin dashboard – przegląd metryk i diagnostyka
 - Z `/app/watchlist`, `/app/watched` lub `/app/profile`: kliknięcie zakładki "Admin" (widoczna tylko dla staff) → `/app/admin/dashboard`.
 - GET `/admin/analytics/api/metrics/` → wyświetlenie kart metryk i wykresów (retention, wzrost użytkowników).
 - GET `/admin/analytics/api/top-movies/?type=watchlist&range=7d` → wyświetlenie top 10 filmów z możliwością filtrowania i eksportu CSV.
@@ -170,16 +177,17 @@ Layouty i nawigacja:
 - OnboardingLayout: nagłówek z progressem (1/3, 2/3, 3/3), główna treść kroku, przyciski „Dalej/Skip/Zakończ”.
 - AppShell (Private):
   - Header: logo, przycisk „Zasugeruj filmy”, link do profilu, „Wyloguj”.
-  - Main nav (Tabs): „Watchlista” (`/app/watchlist`), „Obejrzane” (`/app/watched`), „Profil” (`/app/profile`), „Admin” (`/app/admin/dashboard` - warunkowo, tylko dla staff).
+  - Main nav (Tabs): „onVOD” (`/app/onvod`), „Watchlista” (`/app/watchlist`), „Obejrzane” (`/app/watched`), „Profil” (`/app/profile`), „Admin” (`/app/admin/dashboard` - warunkowo, tylko dla staff).
   - Sub-bar nad listami: wyszukiwarka, sortowanie, filtry, przełącznik widoków.
-  - Content: grid/lista filmów z akcjami (dla watchlisty/obejrzanych) lub sekcje metryk i tabel (dla admin dashboard).
+  - Global filters bar: Pasek `PlatformFiltersToolbar` renderowany nad sub-barem.
+- Content: grid/lista filmów z akcjami (dla watchlisty/obejrzanych) lub sekcje metryk i tabel (dla admin dashboard).
 - AdminLayout: wykorzystuje wspólny `MediaLibraryLayout` z zakładkami nawigacyjnymi. Sekcja metryk i tabel dostępna tylko dla użytkowników ze statusem staff.
 
 Struktura tras (skrót):
-- `/` → redirect na `/app/watchlist` (jeśli zalogowany) albo `/auth/login`.
+- `/` → redirect na `/app/onvod` (jeśli zalogowany) albo `/auth/login`.
 - `/auth/login`, `/auth/register` (publiczne).
 - `/onboarding/platforms`, `/onboarding/add`, `/onboarding/watched` (chronione, tylko przy pierwszym logowaniu).
-- `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
+- `/app/onvod`, `/app/watchlist`, `/app/watched`, `/app/profile` (chronione). Sugestie AI dostępne przez URL param `?suggestions=true` na każdej z tych tras.
 - `/app/admin/dashboard` (chronione, wymaga `is_staff = TRUE`). Admin dashboard z metrykami, wykresami, top filmami i logami błędów.
 - `/error/unauthorized` - strona błędu autoryzacji (JWT wygasł).
 - `/error/offline` - strona błędu offline.
@@ -196,9 +204,10 @@ Nawigacja kluczowych akcji:
 - SearchCombobox: wyszukiwarka z debounce (min. 2 znaki, max 10 wyników, plakat/placeholder, tytuł, rok, ocena).
 - MovieCard / MovieListRow: prezentacja filmu (plakat, tytuł, rok, gatunki, ocena, ikony platform), akcje kontekstowe.
 - AvailabilityBadges: ikony platform VOD w kolorze przy dostępności, badge „Niedostępne…”, znacznik „Stan z: [data]”.
-- MediaLibraryLayout & MediaToolbar: wspólny kontener i belka sterująca dla widoków biblioteki (watchlista, obejrzane oraz przyszłe ekrany). Zapewnia jednolite nagłówki, zakładki i sloty na kontrolki.
+- MediaLibraryLayout & MediaToolbar: wspólny kontener i belka sterująca dla widoków biblioteki (onVOD, watchlista, obejrzane oraz przyszłe ekrany). Zapewnia jednolite nagłówki, zakładki i sloty na kontrolki (w tym na globalne filtry).
 - FiltersBar: checkbox „Tylko dostępne”, przycisk „Ukryj niedostępne”, selektor sortowania („Data dodania”, „Ocena IMDb”, „Rok”).
 - WatchedFiltersBar: toolbar obejrzanych z przyciskiem „Ukryj/Pokaż niedostępne” i licznikiem.
+- PlatformFiltersToolbar: Reużywalny pasek narzędzi z ikonami platform VOD do globalnego filtrowania, zarządzany przez centralny store (Zustand).
 - ViewToggle: przełącznik kafelki/lista (zapamiętanie preferencji w sesji).
 - `AISuggestionsDialog`: modal do wyświetlania sugestii AI z focus trap, routing przez URL params (`?suggestions=true`).
 - `SuggestionCard`: karta pojedynczej sugestii AI (plakat, tytuł, uzasadnienie, dostępność, CTA „Dodaj”).

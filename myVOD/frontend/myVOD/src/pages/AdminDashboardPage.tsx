@@ -61,7 +61,7 @@ export function AdminDashboardPage() {
   const tabs = [
     {
       id: "onvod",
-      label: "onVOD",
+      label: "OnVOD",
       isActive: false,
       onSelect: () => navigate("/app/onvod"),
     },
@@ -133,4 +133,3 @@ export function AdminDashboardPage() {
     </MediaLibraryLayout>
   );
 }
-

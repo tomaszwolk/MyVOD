@@ -46,7 +46,7 @@ export function ProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Check if suggestions modal should be open (from URL param)
-  const isSuggestionsModalOpen = searchParams.get('suggestions') === 'true';
+  const isSuggestionsModalOpen = searchParams.get("suggestions") === "true";
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -57,8 +57,8 @@ export function ProfilePage() {
   // Data fetching
   const userProfileQuery = useUserProfile(isAuthenticated);
   const platformsQuery = usePlatforms(isAuthenticated);
-  const watchlistQuery = useAllUserMovies('watchlist', isAuthenticated);
-  const watchedQuery = useAllUserMovies('watched', isAuthenticated);
+  const watchlistQuery = useAllUserMovies("watchlist", isAuthenticated);
+  const watchedQuery = useAllUserMovies("watched", isAuthenticated);
   const isStaff = userProfileQuery.data?.is_staff === true;
 
   // Mutations
@@ -75,7 +75,9 @@ export function ProfilePage() {
 
   // Local state for platform selection
   const [selectedPlatformIds, setSelectedPlatformIds] = useState<number[]>([]);
-  const [initialSelectedPlatformIds, setInitialSelectedPlatformIds] = useState<number[]>([]);
+  const [initialSelectedPlatformIds, setInitialSelectedPlatformIds] = useState<
+    number[]
+  >([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Initialize selected platforms from user profile
@@ -142,7 +144,7 @@ export function ProfilePage() {
         new_password: newPassword,
       });
     },
-    [changePasswordMutation],
+    [changePasswordMutation]
   );
 
   const handleLogout = useCallback(() => {
@@ -153,78 +155,91 @@ export function ProfilePage() {
   const handleSuggest = useCallback(() => {
     // Open modal by adding URL param
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('suggestions', 'true');
+    newSearchParams.set("suggestions", "true");
     setSearchParams(newSearchParams, { replace: false });
   }, [searchParams, setSearchParams]);
 
   const handleCloseSuggestionsModal = useCallback(() => {
     // Close modal by removing URL param
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('suggestions');
+    newSearchParams.delete("suggestions");
     setSearchParams(newSearchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
   // Handlers for adding movies (from search)
-  const handleAddToWatchlist = useCallback(async (tconst: string) => {
-    const watchedEntries = watchedQuery.data ?? [];
-    const watchedEntriesByTconst = new Map<string, number>();
-    watchedEntries.forEach((entry: UserMovieDto) => {
-      watchedEntriesByTconst.set(entry.movie.tconst, entry.id);
-    });
-    const watchedEntryId = watchedEntriesByTconst.get(tconst);
+  const handleAddToWatchlist = useCallback(
+    async (tconst: string) => {
+      const watchedEntries = watchedQuery.data ?? [];
+      const watchedEntriesByTconst = new Map<string, number>();
+      watchedEntries.forEach((entry: UserMovieDto) => {
+        watchedEntriesByTconst.set(entry.movie.tconst, entry.id);
+      });
+      const watchedEntryId = watchedEntriesByTconst.get(tconst);
 
-    if (watchedEntryId) {
+      if (watchedEntryId) {
+        try {
+          const result = await patchUserMovieMutation.mutateAsync({
+            id: watchedEntryId,
+            command: { action: "restore_to_watchlist" },
+          });
+          toast.success(
+            `"${result.movie.primary_title}" przywrócono do watchlisty`
+          );
+          return;
+        } catch (error) {
+          toast.error("Nie udało się przywrócić filmu do watchlisty");
+          throw error;
+        }
+      }
+
       try {
-        const result = await patchUserMovieMutation.mutateAsync({
-          id: watchedEntryId,
-          command: { action: 'restore_to_watchlist' },
-        });
-        toast.success(`"${result.movie.primary_title}" przywrócono do watchlisty`);
-        return;
+        const result = await addMovieMutation.mutateAsync({ tconst });
+        toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
       } catch (error) {
-        toast.error("Nie udało się przywrócić filmu do watchlisty");
+        if (isAxiosError<MovieMutationErrorResponse>(error)) {
+          const status = error.response?.status;
+          if (status === 409) {
+            toast.info("Ten film jest już na Twojej watchliście");
+          } else {
+            const detail =
+              error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
+            toast.error(detail ?? "Nie udało się dodać filmu do watchlisty");
+          }
+        } else {
+          toast.error("Nie udało się dodać filmu do watchlisty");
+        }
         throw error;
       }
-    }
+    },
+    [addMovieMutation, patchUserMovieMutation, watchedQuery.data]
+  );
 
-    try {
-      const result = await addMovieMutation.mutateAsync({ tconst });
-      toast.success(`"${result.primaryTitle}" dodano do watchlisty`);
-    } catch (error) {
-      if (isAxiosError<MovieMutationErrorResponse>(error)) {
-        const status = error.response?.status;
-        if (status === 409) {
-          toast.info("Ten film jest już na Twojej watchliście");
+  const handleAddToWatched = useCallback(
+    async (tconst: string) => {
+      try {
+        const result = await addMovieMutation.mutateAsync({
+          tconst,
+          mark_as_watched: true,
+        });
+        toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
+      } catch (error) {
+        if (isAxiosError<MovieMutationErrorResponse>(error)) {
+          const status = error.response?.status;
+          if (status === 409) {
+            toast.info("Ten film był już oznaczony jako obejrzany");
+          } else {
+            const detail =
+              error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
+            toast.error(detail ?? "Nie udało się dodać filmu do obejrzanych");
+          }
         } else {
-          const detail = error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
-          toast.error(detail ?? "Nie udało się dodać filmu do watchlisty");
+          toast.error("Nie udało się dodać filmu do obejrzanych");
         }
-      } else {
-        toast.error("Nie udało się dodać filmu do watchlisty");
+        throw error;
       }
-      throw error;
-    }
-  }, [addMovieMutation, patchUserMovieMutation, watchedQuery.data]);
-
-  const handleAddToWatched = useCallback(async (tconst: string) => {
-    try {
-      const result = await addMovieMutation.mutateAsync({ tconst, mark_as_watched: true });
-      toast.success(`"${result.primaryTitle}" dodano do obejrzanych`);
-    } catch (error) {
-      if (isAxiosError<MovieMutationErrorResponse>(error)) {
-        const status = error.response?.status;
-        if (status === 409) {
-          toast.info("Ten film był już oznaczony jako obejrzany");
-        } else {
-          const detail = error.response?.data?.detail ?? error.response?.data?.tconst?.[0];
-          toast.error(detail ?? "Nie udało się dodać filmu do obejrzanych");
-        }
-      } else {
-        toast.error("Nie udało się dodać filmu do obejrzanych");
-      }
-      throw error;
-    }
-  }, [addMovieMutation]);
+    },
+    [addMovieMutation]
+  );
 
   // Get existing tconsts for duplicate checking
   const watchlistEntries = useMemo(
@@ -256,13 +271,16 @@ export function ProfilePage() {
   const hasError = userProfileQuery.isError || platformsQuery.isError;
 
   // Check if suggestions are rate limited for button disabled state
-  const isSuggestDisabled = isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+  const isSuggestDisabled =
+    isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
     suggestionsQuery.error.response?.status === 429;
-  
+
   // Get expires_at for rate limit countdown
   const nextAvailableAt = useMemo(() => {
-    if (isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
-      suggestionsQuery.error.response?.status === 429) {
+    if (
+      isAxiosError<SuggestionsErrorResponse>(suggestionsQuery.error) &&
+      suggestionsQuery.error.response?.status === 429
+    ) {
       const expiresAt = suggestionsQuery.error.response?.data?.expires_at;
       if (expiresAt) {
         return expiresAt;
@@ -279,7 +297,7 @@ export function ProfilePage() {
   const tabs = [
     {
       id: "onvod",
-      label: "onVOD",
+      label: "OnVOD",
       isActive: false,
       onSelect: () => navigate("/app/onvod"),
     },
@@ -371,11 +389,15 @@ export function ProfilePage() {
             </div>
           ) : hasError ? (
             <div className="text-center py-12">
-              <p className="text-destructive mb-4">Nie udało się załadować profilu</p>
-              <Button onClick={() => {
-                userProfileQuery.refetch();
-                platformsQuery.refetch();
-              }}>
+              <p className="text-destructive mb-4">
+                Nie udało się załadować profilu
+              </p>
+              <Button
+                onClick={() => {
+                  userProfileQuery.refetch();
+                  platformsQuery.refetch();
+                }}
+              >
                 Spróbuj ponownie
               </Button>
             </div>
@@ -428,4 +450,3 @@ export function ProfilePage() {
     </>
   );
 }
-

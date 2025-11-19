@@ -98,7 +98,11 @@ export function WatchedPage() {
   };
 
   // Watched movies data - now using the paginated hook with sorting
-  const watchedQuery = useListUserMovies("watched", isAuthenticated, getBackendOrdering(sort));
+  const watchedQuery = useListUserMovies(
+    "watched",
+    isAuthenticated,
+    getBackendOrdering(sort)
+  );
   const watchlistQuery = useAllUserMovies("watchlist", isAuthenticated);
 
   const watchedTotalCount = watchedQuery.data?.pages?.[0]?.count;
@@ -427,7 +431,7 @@ export function WatchedPage() {
   const tabs = [
     {
       id: "onvod",
-      label: "onVOD",
+      label: "OnVOD",
       isActive: false,
       onSelect: () => navigate("/app/onvod"),
     },
