@@ -119,13 +119,18 @@ describe("ErrorLogsFilters", () => {
     expect(mockUseDebouncedValue).toHaveBeenCalledWith("abc", 300);
   });
 
-  it("should update query when debounced user_id changes", () => {
-    mockUseDebouncedValue.mockReturnValue("new-user-id");
+  it("should update query when debounced user_id changes", async () => {
+    mockUseDebouncedValue
+      .mockImplementationOnce(() => "")
+      .mockImplementation(() => "new-user-id");
 
     render(<ErrorLogsFilters {...defaultProps} />);
 
+    const userIdInput = screen.getByTestId("input-user-id");
+    fireEvent.change(userIdInput, { target: { value: "new-user-id" } });
+
     // Wait for useEffect to trigger onChange
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: "new-user-id",
@@ -261,18 +266,19 @@ describe("ErrorLogsFilters", () => {
     expect(userIdInput).toHaveValue("");
   });
 
-  it("should handle empty user_id (trim to undefined)", () => {
-    mockUseDebouncedValue.mockReturnValue("   "); // Only spaces
+  it("should handle empty user_id (trim to undefined)", async () => {
+    mockUseDebouncedValue
+      .mockImplementationOnce(() => "")
+      .mockImplementation(() => "   "); // Only spaces
 
     render(<ErrorLogsFilters {...defaultProps} />);
 
+    const userIdInput = screen.getByTestId("input-user-id");
+    fireEvent.change(userIdInput, { target: { value: "   " } });
+
     // Wait for debounce effect
-    waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          user_id: undefined,
-        })
-      );
+    await waitFor(() => {
+      expect(mockOnChange).not.toHaveBeenCalled();
     });
   });
 });

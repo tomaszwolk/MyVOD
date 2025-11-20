@@ -65,7 +65,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
 
     // Mock onboarding status
     vi.mocked(useOnboardingStatus).mockReturnValue({
-      progress: { hasWatchlistMovies: false, hasWatchedMovies: false },
+      progress: { hasPlatforms: true, hasWatchlistMovies: false },
       profile: mockUserProfile,
     });
 
@@ -155,7 +155,7 @@ describe('OnboardingPlatformsPage - Integration Tests', () => {
   it('should redirect authenticated users with platforms to watchlist', async () => {
     // Mock user with platforms already selected
     vi.mocked(useOnboardingStatus).mockReturnValue({
-      progress: { hasWatchlistMovies: true, hasWatchedMovies: false },
+      progress: { hasPlatforms: true, hasWatchlistMovies: true },
       profile: { ...mockUserProfile, platforms: [mockPlatforms[0]] },
     });
 

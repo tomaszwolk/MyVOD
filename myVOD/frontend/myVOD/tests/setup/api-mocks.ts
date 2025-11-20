@@ -35,7 +35,6 @@ export async function setupApiMocks(
         body: JSON.stringify({
           hasPlatforms: true, // User has selected platforms
           hasWatchlistMovies: true, // User has movies in watchlist
-          hasWatchedMovies: true, // User has watched movies
         }),
       });
     });

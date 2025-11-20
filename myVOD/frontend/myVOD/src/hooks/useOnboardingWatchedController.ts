@@ -309,7 +309,7 @@ export function useOnboardingWatchedController() {
     // Show success message
     toast.success("Onboarding zakończony!");
     // Navigate to next step based on completion
-    const nextPath = getNextOnboardingPath(progress, { fromStep: "watched" });
+    const nextPath = getNextOnboardingPath(progress);
     navigate(nextPath, { replace: true });
   };
 
@@ -317,7 +317,7 @@ export function useOnboardingWatchedController() {
   const skip = async () => {
     setIsSubmitting(true);
     // Navigate to next step based on current progress
-    const nextPath = getNextOnboardingPath(progress, { fromStep: "watched" });
+    const nextPath = getNextOnboardingPath(progress);
     navigate(nextPath, { replace: true });
   };
 

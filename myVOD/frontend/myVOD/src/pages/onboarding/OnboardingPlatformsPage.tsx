@@ -65,7 +65,6 @@ export function OnboardingPlatformsPage() {
         {
           hasPlatforms: true,
           hasWatchlistMovies: progress.hasWatchlistMovies,
-          hasWatchedMovies: progress.hasWatchedMovies,
         },
         { fromStep: "platforms" }
       );

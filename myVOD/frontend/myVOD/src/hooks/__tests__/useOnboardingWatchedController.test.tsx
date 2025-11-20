@@ -118,7 +118,6 @@ describe("useOnboardingWatchedController", () => {
       progress: {
         hasPlatforms: true,
         hasWatchlistMovies: true,
-        hasWatchedMovies: false,
       },
       profile: null,
       watchlistMovies: [],
@@ -143,7 +142,6 @@ describe("useOnboardingWatchedController", () => {
         progress: {
           hasPlatforms: true,
           hasWatchlistMovies: true,
-          hasWatchedMovies: false,
         },
         profile: null,
         watchlistMovies: [],
@@ -202,7 +200,6 @@ describe("useOnboardingWatchedController", () => {
         progress: {
           hasPlatforms: true,
           hasWatchlistMovies: true,
-          hasWatchedMovies: true,
         },
         profile: null,
         watchlistMovies: [],
@@ -268,7 +265,6 @@ describe("useOnboardingWatchedController", () => {
         progress: {
           hasPlatforms: true,
           hasWatchlistMovies: true,
-          hasWatchedMovies: true,
         },
         profile: null,
         watchlistMovies: [],
@@ -530,9 +526,7 @@ describe("useOnboardingWatchedController", () => {
         expect.objectContaining({
           hasPlatforms: true,
           hasWatchlistMovies: true,
-          hasWatchedMovies: false,
-        }),
-        { fromStep: "watched" }
+        })
       );
       expect(navigateSpy).toHaveBeenCalledWith("/app", { replace: true });
     });
@@ -554,9 +548,7 @@ describe("useOnboardingWatchedController", () => {
         expect.objectContaining({
           hasPlatforms: true,
           hasWatchlistMovies: true,
-          hasWatchedMovies: false,
-        }),
-        { fromStep: "watched" }
+        })
       );
       expect(navigateSpy).toHaveBeenCalledWith("/app", { replace: true });
     });

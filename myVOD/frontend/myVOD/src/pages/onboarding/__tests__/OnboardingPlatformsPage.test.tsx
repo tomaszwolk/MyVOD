@@ -11,7 +11,7 @@ vi.mock('@/lib/api/platforms');
 vi.mock('@/hooks/useOnboardingStatus', () => {
   return {
     useOnboardingStatus: vi.fn(() => ({
-      progress: { hasWatchlistMovies: false, hasWatchedMovies: false },
+      progress: { hasPlatforms: true, hasWatchlistMovies: false },
       profile: { email: 'test@example.com', platforms: [{ id: 1, platform_slug: 'netflix', platform_name: 'Netflix' }] },
     })),
     getNextOnboardingPath: vi.fn(() => '/watchlist'),
