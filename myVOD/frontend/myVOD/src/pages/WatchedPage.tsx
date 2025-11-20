@@ -71,6 +71,9 @@ export function WatchedPage() {
     setSort,
     setHideUnavailable,
   } = useWatchedPreferences();
+  
+  const { showOnlyAvailable } = useFiltersStore();
+  const filters = { showOnlyAvailable }; // Create a filters object for consistency
 
   // User profile for platform availability
   const userProfileQuery = useUserProfile(isAuthenticated);
@@ -192,6 +195,17 @@ export function WatchedPage() {
 
   const filteredItems = useMemo(() => {
     if (!hideUnavailable || !hasUserPlatforms) {
+      if (filters.showOnlyAvailable) {
+        return allWatchedItems.filter((item) => {
+          return item.availability.some(
+            (a) =>
+              a.is_available &&
+              userProfileQuery.data?.platforms.some(
+                (p) => p.id === a.platform_id
+              )
+          );
+        });
+      }
       return allWatchedItems;
     }
     return allWatchedItems.filter((item) => {
@@ -506,7 +520,6 @@ export function WatchedPage() {
             pageType="watched"
             onApplyFilters={() => {
               watchedQuery.refetch();
-              setIsFiltersOpen(false);
             }}
           />
         )}
