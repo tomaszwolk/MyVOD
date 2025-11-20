@@ -8,6 +8,8 @@ interface FiltersState {
   // Toggles for OnVOD page status filters
   showWatched: boolean;
   showOnWatchlist: boolean;
+  showUnassigned: boolean;
+  showOnlyAvailable: boolean;
 
   // Actions
   setGenres: (genres: string[]) => void;
@@ -16,6 +18,8 @@ interface FiltersState {
   deselectAllGenres: () => void;
   setShowWatched: (value: boolean) => void;
   setShowOnWatchlist: (value: boolean) => void;
+  setShowUnassigned: (value: boolean) => void;
+  setShowOnlyAvailable: (value: boolean) => void;
   clearFilters: () => void;
 }
 
@@ -24,6 +28,8 @@ export const useFiltersStore = create<FiltersState>((set) => ({
   selectedGenres: new Set(),
   showWatched: true,
   showOnWatchlist: true,
+  showUnassigned: true,
+  showOnlyAvailable: false,
 
   setGenres: (genres) => set({ genres }),
 
@@ -53,11 +59,17 @@ export const useFiltersStore = create<FiltersState>((set) => ({
 
   setShowOnWatchlist: (value) => set({ showOnWatchlist: value }),
 
+  setShowUnassigned: (value) => set({ showUnassigned: value }),
+
+  setShowOnlyAvailable: (value) => set({ showOnlyAvailable: value }),
+
   clearFilters: () => {
     set({
       selectedGenres: new Set(),
       showWatched: true,
       showOnWatchlist: true,
+      showUnassigned: true,
+      showOnlyAvailable: false,
     });
   },
 }));

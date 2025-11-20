@@ -1,12 +1,15 @@
 // Watchlist View Model Types
 
-export type ViewMode = 'grid' | 'list';
+export type ViewMode = "grid" | "list";
 
-export type SortOption = 'added_desc' | 'imdb_desc' | 'year_desc' | 'year_asc';
+export type SortOption = "added_desc" | "imdb_desc" | "year_desc" | "year_asc";
 
 export type FiltersState = {
-  onlyAvailable: boolean;
-  hideUnavailable: boolean;
+  showOnlyAvailable: boolean;
+  /** @deprecated Use showOnlyAvailable instead */
+  onlyAvailable?: boolean;
+  /** @deprecated Use showOnlyAvailable instead */
+  hideUnavailable?: boolean;
 };
 
 export type AvailabilitySummary = {

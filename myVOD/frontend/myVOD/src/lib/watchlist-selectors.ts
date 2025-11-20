@@ -1,19 +1,26 @@
 import type { UserMovieDto, PlatformDto } from "@/types/api.types";
-import type { WatchlistItemVM, SortOption, FiltersState } from "@/types/view/watchlist.types";
+import type {
+  WatchlistItemVM,
+  SortOption,
+  FiltersState,
+} from "@/types/view/watchlist.types";
 
 /**
  * Maps UserMovieDto to WatchlistItemVM with availability summary.
  */
-function mapToWatchlistItemVM(dto: UserMovieDto, userPlatforms: PlatformDto[]): WatchlistItemVM {
+function mapToWatchlistItemVM(
+  dto: UserMovieDto,
+  userPlatforms: PlatformDto[]
+): WatchlistItemVM {
   // Calculate availability summary
-  const userPlatformIds = new Set(userPlatforms.map(p => p.id));
-  const availablePlatforms = dto.availability.filter(a =>
-    a.is_available === true && userPlatformIds.has(a.platform_id)
+  const userPlatformIds = new Set(userPlatforms.map((p) => p.id));
+  const availablePlatforms = dto.availability.filter(
+    (a) => a.is_available === true && userPlatformIds.has(a.platform_id)
   );
 
   const availabilitySummary = {
     isAvailableOnAny: availablePlatforms.length > 0,
-    availablePlatformIds: availablePlatforms.map(a => a.platform_id),
+    availablePlatformIds: availablePlatforms.map((a) => a.platform_id),
   };
 
   return {
@@ -30,32 +37,39 @@ function mapToWatchlistItemVM(dto: UserMovieDto, userPlatforms: PlatformDto[]): 
  * Sorts watchlist items by the specified option.
  * Null values are handled appropriately for each sort option.
  */
-function sortWatchlistItems(items: WatchlistItemVM[], sortOption: SortOption): WatchlistItemVM[] {
+function sortWatchlistItems(
+  items: WatchlistItemVM[],
+  sortOption: SortOption
+): WatchlistItemVM[] {
   const sorted = [...items];
 
   switch (sortOption) {
-    case 'added_desc':
+    case "added_desc":
       return sorted.sort((a, b) => {
-        const aDate = a.watchlisted_at ? new Date(a.watchlisted_at).getTime() : 0;
-        const bDate = b.watchlisted_at ? new Date(b.watchlisted_at).getTime() : 0;
+        const aDate = a.watchlisted_at
+          ? new Date(a.watchlisted_at).getTime()
+          : 0;
+        const bDate = b.watchlisted_at
+          ? new Date(b.watchlisted_at).getTime()
+          : 0;
         return bDate - aDate; // Newest first
       });
 
-    case 'imdb_desc':
+    case "imdb_desc":
       return sorted.sort((a, b) => {
         const aRating = a.movie.avg_rating ? parseFloat(a.movie.avg_rating) : 0;
         const bRating = b.movie.avg_rating ? parseFloat(b.movie.avg_rating) : 0;
         return bRating - aRating; // Highest rating first
       });
 
-    case 'year_desc':
+    case "year_desc":
       return sorted.sort((a, b) => {
         const aYear = a.movie.start_year || 0;
         const bYear = b.movie.start_year || 0;
         return bYear - aYear; // Newest year first
       });
 
-    case 'year_asc':
+    case "year_asc":
       return sorted.sort((a, b) => {
         const aYear = a.movie.start_year || 0;
         const bYear = b.movie.start_year || 0;
@@ -70,9 +84,15 @@ function sortWatchlistItems(items: WatchlistItemVM[], sortOption: SortOption): W
 /**
  * Filters watchlist items based on the provided filters.
  */
-function filterWatchlistItems(items: WatchlistItemVM[], filters: FiltersState): WatchlistItemVM[] {
-  return items.filter(item => {
-    if (filters.onlyAvailable && !item.availabilitySummary.isAvailableOnAny) {
+function filterWatchlistItems(
+  items: WatchlistItemVM[],
+  filters: FiltersState | { showOnlyAvailable: boolean }
+): WatchlistItemVM[] {
+  return items.filter((item) => {
+    // Handle both legacy filters structure and new store structure
+    const showOnlyAvailable = filters.showOnlyAvailable;
+
+    if (showOnlyAvailable && !item.availabilitySummary.isAvailableOnAny) {
       return false;
     }
 
@@ -88,7 +108,7 @@ export function processWatchlistData(
   data: UserMovieDto[] | undefined,
   userPlatforms: PlatformDto[],
   sortOption: SortOption,
-  filters: FiltersState,
+  filters: FiltersState | { showOnlyAvailable: boolean },
   totalAvailableCount?: number
 ) {
   if (!data) {
@@ -100,7 +120,7 @@ export function processWatchlistData(
   }
 
   // Map to view models
-  const items = data.map(dto => mapToWatchlistItemVM(dto, userPlatforms));
+  const items = data.map((dto) => mapToWatchlistItemVM(dto, userPlatforms));
 
   // Apply filters
   const filteredItems = filterWatchlistItems(items, filters);

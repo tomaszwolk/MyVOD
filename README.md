@@ -214,7 +214,7 @@ The project is actively developed. Key features planned for future releases incl
 - **Initial Recommendations**: A carousel of popular movies for new users to get started.
 - **OnVOD Page**: A dedicated page showing all movies available on VOD platforms, with full interactivity (adding to lists, rating) - Implemented 19.11.2025.
 - **Global Platform Filters**: A unified filtering system by VOD platform, available across all movie lists (OnVOD, Watchlist, Watched) - Implemented 19.11.2025.
-- **Genre and Status Filters**: Advanced filtering by genre and user status (watched/on watchlist) on all movie pages - Implemented [dzisiejsza data].
+- **Genre and Status Filters**: Advanced filtering by genre and user status (watched/on watchlist) on all movie pages - Implemented 20.11.2025.
 - **Add more info about movies** - country, director, actors, length.
 
 ---
@@ -242,5 +242,3 @@ In the future, this process should be automated to run after every movie databas
 ### License
 
 TBD. If you intend to use this code, please review the repository for an eventual `LICENSE` file and update this section accordingly.
-
-

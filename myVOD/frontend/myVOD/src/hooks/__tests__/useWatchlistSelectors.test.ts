@@ -84,7 +84,7 @@ describe('useWatchlistSelectors', () => {
         data: undefined,
         userPlatforms: mockPlatforms,
         sortOption: 'added_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -99,7 +99,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'added_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -116,7 +116,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'imdb_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -131,7 +131,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'year_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -146,7 +146,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'year_asc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -162,7 +162,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'added_desc',
-        filters: { onlyAvailable: true, hideUnavailable: false },
+        filters: { showOnlyAvailable: true },
       })
     );
 
@@ -198,7 +198,7 @@ describe('useWatchlistSelectors', () => {
         data: moviesWithNullRating,
         userPlatforms: mockPlatforms,
         sortOption: 'imdb_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -225,7 +225,7 @@ describe('useWatchlistSelectors', () => {
         data: moviesWithNullYear,
         userPlatforms: mockPlatforms,
         sortOption: 'year_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 
@@ -238,7 +238,7 @@ describe('useWatchlistSelectors', () => {
         data: mockMovies,
         userPlatforms: mockPlatforms,
         sortOption: 'added_desc',
-        filters: { onlyAvailable: false, hideUnavailable: false },
+        filters: { showOnlyAvailable: false },
       })
     );
 

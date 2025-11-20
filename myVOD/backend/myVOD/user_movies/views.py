@@ -420,7 +420,8 @@ class OnVODMoviesView(APIView):
                 ordering=params.validated_data.get('ordering', 'added_desc'),
                 genres=params.validated_data.get('genres'),
                 exclude_watched=params.validated_data.get('exclude_watched'),
-                exclude_watchlisted=params.validated_data.get('exclude_watchlisted')
+                exclude_watchlisted=params.validated_data.get('exclude_watchlisted'),
+                exclude_unassigned=params.validated_data.get('exclude_unassigned')
             )
 
             # Handle pagination

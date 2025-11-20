@@ -1,9 +1,9 @@
 import { WatchedViewToggle } from "./WatchedViewToggle";
 import { WatchedSortDropdown } from "./WatchedSortDropdown";
+import { Badge } from "@/components/ui/badge";
 import { SearchCombobox } from "../watchlist/SearchCombobox";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import { SuggestAIButton } from "@/components/watchlist/SuggestAIButton";
-import { WatchedFiltersBar } from "./WatchedFiltersBar";
 import type {
   WatchedViewMode,
   WatchedSortKey,
@@ -51,11 +51,11 @@ export function WatchedToolbar({
   onSuggest,
   isSuggestDisabled,
   nextAvailableAt,
-  hideUnavailable,
-  onToggleHideUnavailable,
+  hideUnavailable: _hideUnavailable, // Unused but kept for prop compatibility if needed, prefixed with _
+  onToggleHideUnavailable: _onToggleHideUnavailable, // Unused but kept for prop compatibility if needed, prefixed with _
   visibleCount,
   totalCount,
-  hasUserPlatforms,
+  hasUserPlatforms: _hasUserPlatforms, // Unused but kept for prop compatibility if needed, prefixed with _
   isFiltersOpen,
   onToggleFilters,
 }: WatchedToolbarProps) {
@@ -91,13 +91,9 @@ export function WatchedToolbar({
         </>
       }
       secondaryControlsSlot={
-        <WatchedFiltersBar
-          hideUnavailable={hideUnavailable}
-          onToggle={onToggleHideUnavailable}
-          visibleCount={visibleCount}
-          totalCount={totalCount}
-          hasUserPlatforms={hasUserPlatforms}
-        />
+        <Badge variant="secondary" className="text-xs">
+          Wyświetlane: {visibleCount}/{totalCount}
+        </Badge>
       }
     />
   );

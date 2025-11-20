@@ -32,6 +32,7 @@ import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersTool
 import { ConfirmDialog } from "@/components/watchlist/ConfirmDialog";
 import { RatingModal } from "@/components/watched/RatingModal";
 import { FiltersPanel } from "@/components/library/FiltersPanel";
+import { useFiltersStore } from "@/stores/filtersStore";
 
 type MovieMutationErrorResponse = {
   detail?: string;
@@ -71,9 +72,9 @@ export function WatchedPage() {
     setSort,
     setHideUnavailable,
   } = useWatchedPreferences();
-  
+
   const { showOnlyAvailable } = useFiltersStore();
-  const filters = { showOnlyAvailable }; // Create a filters object for consistency
+  // Removed filters variable declaration as it was unused
 
   // User profile for platform availability
   const userProfileQuery = useUserProfile(isAuthenticated);
@@ -125,6 +126,7 @@ export function WatchedPage() {
     userPlatforms: userProfileQuery.data?.platforms ?? [],
     sortKey: sort,
     hideUnavailable,
+    filters: { showOnlyAvailable },
     totalAvailableCount: watchedTotalCount,
   });
 
@@ -194,33 +196,9 @@ export function WatchedPage() {
   const hasUserPlatforms = (userProfileQuery.data?.platforms?.length ?? 0) > 0;
 
   const filteredItems = useMemo(() => {
-    if (!hideUnavailable || !hasUserPlatforms) {
-      if (filters.showOnlyAvailable) {
-        return allWatchedItems.filter((item) => {
-          return item.availability.some(
-            (a) =>
-              a.is_available &&
-              userProfileQuery.data?.platforms.some(
-                (p) => p.id === a.platform_id
-              )
-          );
-        });
-      }
-      return allWatchedItems;
-    }
-    return allWatchedItems.filter((item) => {
-      return item.availability.some(
-        (a) =>
-          a.is_available &&
-          userProfileQuery.data?.platforms.some((p) => p.id === a.platform_id)
-      );
-    });
-  }, [
-    hideUnavailable,
-    hasUserPlatforms,
-    allWatchedItems,
-    userProfileQuery.data?.platforms,
-  ]);
+    // Use filtering logic from hook/selector to keep consistent
+    return allWatchedItems;
+  }, [allWatchedItems]);
 
   const isFilteredEmpty = filteredItems.length === 0;
 

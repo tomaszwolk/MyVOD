@@ -88,6 +88,7 @@ export function processWatchedData(
   userPlatforms: PlatformDto[],
   sortKey: WatchedSortKey,
   hideUnavailable: boolean,
+  filters: { showOnlyAvailable: boolean },
   totalAvailableCount?: number
 ) {
   if (!data) {
@@ -105,9 +106,13 @@ export function processWatchedData(
   const sortedItems = sortWatchedMovieItems(items, sortKey);
 
   // Apply filtering
-  const filteredItems = hideUnavailable
-    ? sortedItems.filter((item) => item.isAvailableOnAnyPlatform)
-    : sortedItems;
+  const filteredItems = sortedItems.filter((item) => {
+    // Legacy hideUnavailable logic OR new filters logic
+    if ((hideUnavailable || filters.showOnlyAvailable) && !item.isAvailableOnAnyPlatform) {
+      return false;
+    }
+    return true;
+  });
 
   const totalCount =
     typeof totalAvailableCount === "number" && totalAvailableCount > 0

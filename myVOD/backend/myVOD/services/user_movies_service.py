@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, Max, Subquery
+from django.db.models import Exists, OuterRef, Prefetch, Max, Subquery, Q
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -132,15 +132,15 @@ def build_user_movies_queryset(
     if ordering_param:
         # Handle user rating sorting with NULL handling
         if ordering_param == '-user_rating':
-            queryset = queryset.order_by(Coalesce('user_rating', -1).desc())
+            queryset = queryset.order_by(Coalesce('user_rating', -1).desc(), '-id')
         else:
-            queryset = queryset.order_by(ordering_param)
+            queryset = queryset.order_by(ordering_param, '-id')
     else:
         # Default ordering to ensure consistent pagination results
         if status_param == 'watchlist':
-            queryset = queryset.order_by('-watchlisted_at')
+            queryset = queryset.order_by('-watchlisted_at', '-id')
         elif status_param == 'watched':
-            queryset = queryset.order_by('-watched_at')
+            queryset = queryset.order_by('-watched_at', '-id')
 
     return queryset
 
@@ -363,7 +363,7 @@ def delete_user_movie_soft(*, user, user_movie_id: int):
     return user_movie
 
 
-def build_on_vod_movies_queryset(*, user, platform_ids: list[int] | None = None, ordering: str = "added_desc", genres: list[str] | None = None, exclude_watched: bool = False, exclude_watchlisted: bool = False):
+def build_on_vod_movies_queryset(*, user, platform_ids: list[int] | None = None, ordering: str = "added_desc", genres: list[str] | None = None, exclude_watched: bool = False, exclude_watchlisted: bool = False, exclude_unassigned: bool = False):
     """Builds the queryset for listing movies available on VOD platforms.
 
     Returns unique movies that are available on at least one VOD platform,
@@ -377,6 +377,7 @@ def build_on_vod_movies_queryset(*, user, platform_ids: list[int] | None = None,
         genres: Optional list of genres to filter by.
         exclude_watched: Optional boolean to exclude watched movies.
         exclude_watchlisted: Optional boolean to exclude watchlisted movies.
+        exclude_unassigned: Optional boolean to exclude movies not on watchlist and not watched.
 
     Returns:
         QuerySet of Movie objects with prefetched availability data and user data,
@@ -429,12 +430,16 @@ def build_on_vod_movies_queryset(*, user, platform_ids: list[int] | None = None,
 
     # Apply exclusion filters
     if exclude_watched:
-        queryset = queryset.exclude(watched_at__isnull=False)
+        queryset = queryset.filter(watched_at__isnull=True)
     
     if exclude_watchlisted:
-        queryset = queryset.exclude(
-            watchlisted_at__isnull=False,
-            watchlist_deleted_at__isnull=True
+        queryset = queryset.filter(watchlisted_at__isnull=True)
+    
+    if exclude_unassigned:
+        # Show only movies that are either watchlisted OR watched
+        # (i.e., exclude those that are neither watchlisted nor watched)
+        queryset = queryset.filter(
+            Q(watchlisted_at__isnull=False) | Q(watched_at__isnull=False)
         )
 
     # Prefetch availability data for the selected platforms

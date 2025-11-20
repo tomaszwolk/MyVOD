@@ -39,11 +39,12 @@ export function useUserMoviesWatched({
 
   const query = useQuery({
     queryKey: ["user-movies-watched", sortKey],
-    queryFn: () => listUserMovies({
-      status: "watched",
-      ordering: getOrdering(sortKey),
-      page: 1
-    }),
+    queryFn: () =>
+      listUserMovies({
+        status: "watched",
+        ordering: getOrdering(sortKey),
+        page: 1,
+      }),
     staleTime: 30_000, // Consider data fresh for 30 seconds
   });
 
@@ -52,6 +53,7 @@ export function useUserMoviesWatched({
     userPlatforms,
     sortKey,
     false, // hideUnavailable - not used in this hook
+    { showOnlyAvailable: false }
   );
 
   return {

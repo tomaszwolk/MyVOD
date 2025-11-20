@@ -12,6 +12,7 @@ const MEDIA_LIBRARY_VIEW_MODE_KEY = "mediaLibrary:viewMode";
 const DEFAULT_VIEW_MODE: ViewMode = "grid";
 const DEFAULT_SORT: SortOption = "added_desc";
 const DEFAULT_FILTERS: FiltersState = {
+  showOnlyAvailable: false,
   onlyAvailable: false,
   hideUnavailable: false,
 };
@@ -90,11 +91,13 @@ export function useSessionPreferences() {
         if (typeof window === "undefined") {
           return DEFAULT_FILTERS;
         }
+        const onlyAvailable = window.sessionStorage.getItem(WATCHLIST_ONLY_AVAILABLE_KEY) === "true" || DEFAULT_FILTERS.onlyAvailable;
+        
         return {
-          onlyAvailable:
-            window.sessionStorage.getItem(WATCHLIST_ONLY_AVAILABLE_KEY) === "true" || DEFAULT_FILTERS.onlyAvailable,
+          onlyAvailable,
           hideUnavailable:
             window.sessionStorage.getItem(WATCHLIST_HIDE_UNAVAILABLE_KEY) === "true" || DEFAULT_FILTERS.hideUnavailable,
+          showOnlyAvailable: onlyAvailable || DEFAULT_FILTERS.showOnlyAvailable,
         };
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {

@@ -46,7 +46,7 @@ export const UserMovieCard = memo<UserMovieCardProps>(function UserMovieCard({
   onRate,
 }) {
   const hasGenres = item.genres && item.genres.length > 0;
-  const displayGenres = hasGenres ? item.genres!.slice(0, 2).join(", ") : null;
+  const displayGenres = hasGenres ? item.genres!.join(", ") : null;
   const tooltipMeta = [item.year, displayGenres].filter(Boolean).join(" • ");
 
   const handleRestore = () => {

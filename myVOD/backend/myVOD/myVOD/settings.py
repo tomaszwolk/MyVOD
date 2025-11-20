@@ -144,9 +144,14 @@ else:
             'PASSWORD': os.getenv('SUPABASE_DB_PASSWORD'),
             'HOST': os.getenv('SUPABASE_DB_HOST'),
             'PORT': os.getenv('SUPABASE_DB_PORT'),
+            'OPTIONS': {
+                'options': '-c search_path=public',
+            },
         }
     }
 
+# Disable server side cursors for Supabase transaction pooler compatibility
+DISABLE_SERVER_SIDE_CURSORS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

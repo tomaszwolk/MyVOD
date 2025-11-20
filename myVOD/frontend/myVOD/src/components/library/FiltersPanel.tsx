@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 
 type FiltersPanelProps = {
   pageType: "onvod" | "watchlist" | "watched";
-  onApplyFilters: () => void;
+  onApplyFilters?: () => void;
 };
 
 // Custom hook to fetch genres
@@ -34,12 +34,16 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
     selectedGenres,
     showWatched,
     showOnWatchlist,
+    showUnassigned,
+    showOnlyAvailable,
     setGenres,
     toggleGenre,
     selectAllGenres,
     deselectAllGenres,
     setShowWatched,
     setShowOnWatchlist,
+    setShowUnassigned,
+    setShowOnlyAvailable,
     clearFilters,
   } = useFiltersStore();
 
@@ -51,7 +55,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
 
   const handleClear = () => {
     clearFilters();
-    onApplyFilters();
+    onApplyFilters?.();
   };
 
   return (
@@ -110,6 +114,31 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 onCheckedChange={setShowOnWatchlist}
               />
             </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="show-unassigned">Pokaż pozostałe</Label>
+              <Switch
+                id="show-unassigned"
+                checked={showUnassigned}
+                onCheckedChange={setShowUnassigned}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(pageType === "watchlist" || pageType === "watched") && (
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">Status</h3>
+          <Separator />
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="show-only-available">Pokaż tylko dostępne</Label>
+              <Switch
+                id="show-only-available"
+                checked={showOnlyAvailable}
+                onCheckedChange={setShowOnlyAvailable}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -120,7 +149,6 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
         <Button variant="outline" onClick={handleClear}>
           Wyczyść
         </Button>
-        <Button onClick={onApplyFilters}>Zastosuj filtry</Button>
       </div>
     </div>
   );

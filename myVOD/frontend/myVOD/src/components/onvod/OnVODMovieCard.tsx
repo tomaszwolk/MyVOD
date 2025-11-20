@@ -32,9 +32,7 @@ type OnVODMovieCardProps = {
 export const OnVODMovieCard = memo<OnVODMovieCardProps>(
   function OnVODMovieCard({ movie, platforms, onRate }) {
     const hasGenres = movie.movie.genres && movie.movie.genres.length > 0;
-    const displayGenres = hasGenres
-      ? movie.movie.genres!.slice(0, 2).join(", ")
-      : null;
+    const displayGenres = hasGenres ? movie.movie.genres!.join(", ") : null;
     const tooltipMeta = [movie.movie.start_year, displayGenres]
       .filter(Boolean)
       .join(" • ");

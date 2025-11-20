@@ -228,7 +228,6 @@ export function OnVODPage() {
             pageType="onvod"
             onApplyFilters={() => {
               onVODQuery.refetch();
-              setIsFiltersOpen(false);
             }}
           />
         )}

@@ -31,6 +31,7 @@ import { LogOut } from "lucide-react";
 import { MediaLibraryLayout } from "@/components/library/MediaLibraryLayout";
 import { PlatformFiltersToolbar } from "@/components/library/PlatformFiltersToolbar";
 import { WatchlistItemVM } from "@/types/view/watchlist.types";
+import { useFiltersStore } from "@/stores/filtersStore";
 import { FiltersPanel } from "@/components/library/FiltersPanel";
 
 type MovieMutationErrorResponse = {
@@ -62,15 +63,16 @@ export function WatchlistPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  // Session preferences (view mode, sort, filters)
+  // Session preferences (view mode, sort)
   const {
     viewMode,
     sort: sortOption,
-    filters,
     setViewMode,
     setSort,
-    updateFilters,
   } = useSessionPreferences();
+
+  const { showOnlyAvailable } = useFiltersStore();
+  const filters = useMemo(() => ({ showOnlyAvailable: showOnlyAvailable }), [showOnlyAvailable]); // Memoize filters object
 
   // Data fetching
   const watchlistQuery = useWatchlistQuery(isAuthenticated);
@@ -91,7 +93,7 @@ export function WatchlistPage() {
       undefined,
     userPlatforms: userProfileQuery.data?.platforms || [],
     sortOption,
-    filters,
+    filters, // Now correctly memoized
     totalAvailableCount: watchlistTotalCount,
   });
 
@@ -198,10 +200,10 @@ export function WatchlistPage() {
   );
 
   const handleFiltersChange = useCallback(
-    (newFilters: typeof filters) => {
-      updateFilters(newFilters);
+    (_newFilters: typeof filters) => {
+      // updateFilters(newFilters); // Removed as we use store now
     },
-    [updateFilters]
+    []
   );
 
   const handleAddToWatchlist = useCallback(
@@ -402,7 +404,6 @@ export function WatchlistPage() {
             pageType="watchlist"
             onApplyFilters={() => {
               watchlistQuery.refetch();
-              setIsFiltersOpen(false);
             }}
           />
         )}

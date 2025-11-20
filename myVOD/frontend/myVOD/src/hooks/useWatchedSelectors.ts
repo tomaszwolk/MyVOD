@@ -11,6 +11,7 @@ type UseWatchedSelectorsProps = {
   userPlatforms: PlatformDto[];
   sortKey: WatchedSortKey;
   hideUnavailable: boolean;
+  filters: { showOnlyAvailable: boolean };
   totalAvailableCount?: number;
 };
 
@@ -26,6 +27,7 @@ export function useWatchedSelectors({
   userPlatforms,
   sortKey,
   hideUnavailable,
+  filters,
   totalAvailableCount,
 }: UseWatchedSelectorsProps) {
   return useMemo(() => {
@@ -34,7 +36,8 @@ export function useWatchedSelectors({
       userPlatforms,
       sortKey,
       hideUnavailable,
+      filters,
       totalAvailableCount
     );
-  }, [data, userPlatforms, sortKey, hideUnavailable, totalAvailableCount]);
+  }, [data, userPlatforms, sortKey, hideUnavailable, filters, totalAvailableCount]);
 }

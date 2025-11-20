@@ -122,7 +122,7 @@ describe("UserMovieCard", () => {
     });
   });
 
-  it("should limit genres display to 2 items", () => {
+  it("should display all genres", () => {
     const itemWithManyGenres = {
       ...mockItem,
       genres: ["Drama", "Crime", "Thriller", "Action", "Adventure"],
@@ -130,8 +130,9 @@ describe("UserMovieCard", () => {
 
     render(<UserMovieCard {...defaultProps} item={itemWithManyGenres} />);
 
-    expect(screen.getByText("Drama, Crime")).toBeInTheDocument();
-    expect(screen.queryByText("Thriller")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Drama, Crime, Thriller, Action, Adventure")
+    ).toBeInTheDocument();
   });
 
   it("should handle null genres gracefully", () => {

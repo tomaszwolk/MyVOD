@@ -184,6 +184,7 @@ type ListOnVODMoviesParams = {
   genres?: string[];
   excludeWatched?: boolean;
   excludeWatchlisted?: boolean;
+  excludeUnassigned?: boolean;
 };
 
 export async function listOnVODMovies({
@@ -193,6 +194,7 @@ export async function listOnVODMovies({
   genres,
   excludeWatched,
   excludeWatchlisted,
+  excludeUnassigned,
 }: ListOnVODMoviesParams): Promise<PaginatedResponse<UserMovieDto>> {
   const params: Record<string, string | number | boolean> = { page };
   if (platformIds && platformIds.length > 0) {
@@ -209,6 +211,9 @@ export async function listOnVODMovies({
   }
   if (excludeWatchlisted) {
     params.exclude_watchlisted = true;
+  }
+  if (excludeUnassigned) {
+    params.exclude_unassigned = true;
   }
 
   const response = await http.get<PaginatedResponse<UserMovieDto>>(

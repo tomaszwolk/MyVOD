@@ -1,7 +1,7 @@
 import { SearchCombobox } from "./SearchCombobox";
 import { ViewToggle } from "./ViewToggle";
 import { SortDropdown } from "@/components/ui/SortDropdown";
-import { FiltersBar } from "./FiltersBar";
+import { Badge } from "@/components/ui/badge";
 import { SuggestAIButton } from "./SuggestAIButton";
 import { MediaToolbar } from "@/components/library/MediaToolbar";
 import type {
@@ -45,11 +45,11 @@ export function WatchlistControlsBar({
   onViewModeChange,
   sort,
   onSortChange,
-  filters,
-  onFiltersChange,
+  filters: _filters, // Unused but kept for prop compatibility if needed, prefixed with _
+  onFiltersChange: _onFiltersChange, // Unused but kept for prop compatibility if needed, prefixed with _
   visibleCount,
   totalCount,
-  hasUserPlatforms,
+  hasUserPlatforms: _hasUserPlatforms, // Unused but kept for prop compatibility if needed, prefixed with _
   onSuggest,
   isSuggestDisabled,
   nextAvailableAt,
@@ -92,13 +92,9 @@ export function WatchlistControlsBar({
         </>
       }
       secondaryControlsSlot={
-        <FiltersBar
-          filters={filters}
-          onChange={onFiltersChange}
-          visibleCount={visibleCount}
-          totalCount={totalCount}
-          hasUserPlatforms={hasUserPlatforms}
-        />
+        <Badge variant="secondary" className="text-xs">
+          Wyświetlane: {visibleCount}/{totalCount}
+        </Badge>
       }
     />
   );

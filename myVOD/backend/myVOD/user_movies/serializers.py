@@ -201,6 +201,7 @@ class OnVODMoviesQueryParamsSerializer(serializers.Serializer):
     genres = serializers.CharField(required=False, allow_blank=True)
     exclude_watched = serializers.BooleanField(required=False, default=False)
     exclude_watchlisted = serializers.BooleanField(required=False, default=False)
+    exclude_unassigned = serializers.BooleanField(required=False, default=False)
 
     def validate_platform_ids(self, value):
         """Validate and parse platform_ids parameter.

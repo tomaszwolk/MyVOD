@@ -35,7 +35,7 @@ export const MovieCard = memo<MovieCardProps>(function MovieCard({
 }) {
   const hasGenres = item.movie.genres && item.movie.genres.length > 0;
   const displayGenres = hasGenres
-    ? item.movie.genres!.slice(0, 2).join(", ")
+    ? item.movie.genres!.join(", ")
     : null;
   const tooltipMeta = [item.movie.start_year, displayGenres]
     .filter(Boolean)

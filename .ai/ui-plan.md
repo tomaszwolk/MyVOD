@@ -104,7 +104,7 @@ Zgodność z API: wszystkie interakcje użytkownika mapują się na przewidziane
 - Kluczowe komponenty widoku:
   - `AdminDashboardPage`: główny komponent strony wykorzystujący `MediaLibraryLayout` z zakładkami nawigacyjnymi
   - `MetricsCardsGrid`: siatka kart metryk (8 kart) z tooltipami i ikonami
-  - `ChartsRow`: rząd z dwoma wykresami (retention line chart, users growth bar chart) używającymi Chart.js
+  - `ChartsRow`: rząd z dwoma wykresami (retention line chart, users growth bar chart) używające Chart.js
   - `TopMoviesSection`: sekcja z filtrami (`TopMoviesFilters`), tabelą (`TopMoviesTable`) i przyciskiem eksportu CSV
   - `ErrorLogsSection`: sekcja z filtrami (`ErrorLogsFilters`), tabelą (`ErrorLogsTable`) z paginacją i sortowaniem, oraz przyciskiem eksportu CSV
 - Nawigacja: zakładka "Admin" pojawia się warunkowo w nawigacji (`MediaLibraryLayout`) tylko dla użytkowników ze statusem staff. Sprawdzanie uprawnień odbywa się przez hook `useIsStaff()`, który korzysta z pola `is_staff` zwracanego przez endpoint `/api/me/`.
@@ -254,5 +254,3 @@ Nawigacja kluczowych akcji:
 - `date-utils.ts`: funkcje formatowania daty (polski format "15 października 2023") i czasu względnego.
 - Toasts/Alerts: komunikaty o sukcesie/błędach (w tym 401/403/409/429/404 dla odpowiednich scenariuszy).
 - ErrorBoundary / OfflineBoundary: przyjazne ekrany błędów i offline z retry.
-
-

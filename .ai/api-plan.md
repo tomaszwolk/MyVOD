@@ -7,6 +7,7 @@ This document outlines the design for the MyVOD REST API, based on the provided 
 - **Users**: Represents application users. Corresponds to `public.users_user` (custom Django user with UUID PK). User-specific data like preferences is handled via the `/api/me/` endpoint.
 - **Platforms**: Represents VOD streaming platforms. Corresponds to the `platform` table. This is mostly read-only data for the frontend.
 - **Movies**: Represents movie data from the IMDb dataset. Corresponds to the `movie` table. Primarily used for searching.
+- **Genres**: Represents movie genres. Corresponds to the `genre` table.
 - **UserMovies**: Represents the relationship between a user and a movie (watchlist, watched history). Corresponds to the `user_movie` table. This is the main resource for user interactions.
 - **Suggestions**: Represents AI-generated movie suggestions. This is a virtual resource generated on-demand via the `/api/suggestions/` endpoint and backed by the `ai_suggestion_batch` table for caching.
 
@@ -280,6 +281,7 @@ All endpoints requiring authentication must include the `Authorization: Bearer <
     -   `genres` (string, optional): Comma-separated list of genre names to filter by.
     -   `exclude_watched` (boolean, optional): If `true`, excludes movies the user has watched.
     -   `exclude_watchlisted` (boolean, optional): If `true`, excludes movies on the user's watchlist.
+    -   `exclude_unassigned` (boolean, optional): If `true`, excludes movies that are not on watchlist and not watched.
 -   **Sorting**: Results are sorted by the latest availability date (`movie_availability.id` descending) to show newest additions first.
 -   **Logic**:
     1.  Returns **unique** movies (`DISTINCT ON (movie.tconst)`).

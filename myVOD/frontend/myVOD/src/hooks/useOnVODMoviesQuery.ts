@@ -19,7 +19,8 @@ export function useOnVODMoviesQuery(
   const selectedPlatformIds = usePlatformFilterStore((state) =>
     state.getSelectedPlatformIdsArray()
   );
-  const { selectedGenres, showWatched, showOnWatchlist } = useFiltersStore();
+  const { selectedGenres, showWatched, showOnWatchlist, showUnassigned } =
+    useFiltersStore();
   const genresArray = Array.from(selectedGenres);
 
   return useInfiniteQuery({
@@ -30,6 +31,7 @@ export function useOnVODMoviesQuery(
       genresArray,
       !showWatched,
       !showOnWatchlist,
+      !showUnassigned,
     ],
     queryFn: ({ pageParam = 1 }) =>
       listOnVODMovies({
@@ -40,6 +42,7 @@ export function useOnVODMoviesQuery(
         genres: genresArray.length > 0 ? genresArray : undefined,
         excludeWatched: !showWatched,
         excludeWatchlisted: !showOnWatchlist,
+        excludeUnassigned: !showUnassigned,
       }),
     enabled,
     staleTime: 30_000, // Consider data fresh for 30 seconds
