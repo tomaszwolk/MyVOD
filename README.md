@@ -7,11 +7,30 @@ MyVOD is a web application that helps movie enthusiasts manage a personal watchl
 
 For the full product specification, refer to the PRD: [./.ai/prd.md](./.ai/prd.md)
 
+### Screenshots
+
+**Sign in** — email and password authentication.
+
+![Sign in](./screenshots/login.png)
+
+**Onboarding** — short guided setup after registration.
+
+![Onboarding](./screenshots/onboarding.png)
+
+**Watchlist** — personal list with VOD availability for major platforms.
+
+![Watchlist](./screenshots/watchlist.png)
+
+**AI suggestions** — optional personalized picks powered by Gemini.
+
+![AI suggestions](./screenshots/ai-suggestions.png)
+
 ---
 
 ### Table of Contents
 - [MyVOD](#myvod)
   - [Project description](#project-description)
+  - [Screenshots](#screenshots)
   - [Table of Contents](#table-of-contents)
   - [Tech stack](#tech-stack)
   - [Hosting and Deployment](#hosting-and-deployment)

@@ -41,8 +41,8 @@
 
 ## Frontend
 
-### Framework: **React 19** + **Vite**
-- **Wersja**: React 19.1+, Vite 7+
+### Framework: **React 18** + **Vite**
+- **Wersja**: React 18.2+, Vite 7+
 
 ### UI Framework: **Tailwind CSS** + **shadcn/ui**
 - **Komponenty**:

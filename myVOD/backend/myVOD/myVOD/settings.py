@@ -276,7 +276,8 @@ SPECTACULAR_SETTINGS = {
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Watchmode API Configuration
-WATCHMODE_API_KEY = os.getenv('WATCHMODE_API_KEY')
+WATCHMODE_API_KEY = os.environ.get('WATCHMODE_API_KEY')
+WATCHMODE_REGION = 'PL'  # Default region for Watchmode API
 
 # Email Configuration
 # Use console backend for development (emails printed to console)
