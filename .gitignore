@@ -30,5 +30,4 @@ User-Agent
 llm_response_*.json
 llm_response_*.txt
 myVOD/backend/myVOD/services/availability_sync/*
-screenshots/*
 a.py
