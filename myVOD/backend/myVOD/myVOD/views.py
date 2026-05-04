@@ -16,10 +16,11 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.types import OpenApiTypes
+from django.http import StreamingHttpResponse
 from movies.models import Platform
 from .serializers import (
     EmailTokenObtainPairSerializer,
@@ -45,6 +46,8 @@ from services.ai_suggestions_service import (
     InsufficientDataError,
     RateLimitError
 )
+from services.availability_sync_service import AvailabilitySyncService
+
 
 logger = logging.getLogger(__name__)
 
@@ -1004,5 +1007,73 @@ class PasswordResetConfirmView(APIView):
             )
             return Response(
                 {"error": "Wystąpił błąd podczas ustawiania nowego hasła."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TriggerAvailabilitySyncView(APIView):
+    """
+    API view for triggering VOD availability synchronization tasks.
+
+    POST /api/admin/tasks/trigger-availability-sync/
+
+    This is an admin-only endpoint.
+    Triggers a potentially long-running task to synchronize movie availability
+    from an external API (e.g., Watchmode) with the local database.
+    It streams the logs of the operation back to the client in real-time.
+    """
+    permission_classes = [IsAdminUser]
+
+    @extend_schema(
+        summary="Trigger VOD Availability Synchronization",
+        description=(
+            "Triggers a server-side task to synchronize movie availability for a "
+            "specific VOD platform or all platforms. The server streams back "
+            "logs in real-time. This is a long-running, admin-only operation. "
+            "Use '__all__' in platform_slug to sync all platforms."
+        ),
+        request={"application/json": {"schema": {"type": "object", "properties": {"platform_slug": {"type": "string"}}}}},
+        responses={
+            200: {
+                "description": "Log stream of the synchronization process.",
+                "content": {"text/plain": {"schema": {"type": "string"}}}
+            },
+            400: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+        tags=['Admin'],
+    )
+    def post(self, request):
+        """
+        Handle POST request to start the synchronization task.
+        """
+        platform_slug = request.data.get('platform_slug')
+
+        if not platform_slug:
+            return Response(
+                {"error": "platform_slug is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        service = AvailabilitySyncService()
+
+        try:
+            if platform_slug == '__all__':
+                generator = service.sync_all_platforms()
+            else:
+                generator = service.sync_platform(platform_slug)
+
+            response = StreamingHttpResponse(generator, content_type="text/plain")
+            return response
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error while triggering sync for '{platform_slug}': {str(e)}",
+                exc_info=True
+            )
+            # This part might not be sent if headers are already sent,
+            # but it's good practice to have it.
+            return Response(
+                {"error": f"An unexpected server error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

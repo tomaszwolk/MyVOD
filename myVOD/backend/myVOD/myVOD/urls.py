@@ -51,6 +51,13 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 
+    # Admin Tasks
+    path(
+        "api/admin/tasks/trigger-availability-sync/",
+        views.TriggerAvailabilitySyncView.as_view(),
+        name="trigger-availability-sync"
+    ),
+
     # JWT Authentication (uses email instead of username)
     path("api/token/", views.EmailTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

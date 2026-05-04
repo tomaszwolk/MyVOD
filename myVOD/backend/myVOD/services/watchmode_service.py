@@ -9,7 +9,7 @@ class WatchmodeService:
     BASE_URL = "https://api.watchmode.com/v1/"
     API_KEY = settings.WATCHMODE_API_KEY
 
-    def get_title_details(self, title_id: int, regions: str = 'PL'):
+    def get_title_details(self, title_id: int, regions: str = settings.WATCHMODE_REGION):
         """
         Fetches title details from the Watchmode API for a specific region.
         'title_id' is the Watchmode ID, not IMDb ID.
@@ -34,7 +34,7 @@ class WatchmodeService:
             logger.error(f"Error fetching data from Watchmode API for title {title_id}: {e}")
             return None
 
-    def list_titles(self, source_ids: list[int], region: str = 'PL', types: list[str] | None = None, page: int = 1):
+    def list_titles(self, source_ids: list[int], region: str = settings.WATCHMODE_REGION, types: list[str] | None = None, page: int = 1):
         """
         Lists titles available on specific sources for a given region.
         """
@@ -64,7 +64,7 @@ class WatchmodeService:
         self,
         start_date: str,
         end_date: str,
-        regions: str = 'PL',
+        regions: str = settings.WATCHMODE_REGION,
         page: int = 1,
         types: str = 'movie',
     ):

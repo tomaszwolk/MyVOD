@@ -1,3 +1,7 @@
+"""
+Command to update movie availability for titles that have changed in the last 24 hours.
+IMPORTANT: Don't use. It is available only for paid API. Won't work for free API.
+"""
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta

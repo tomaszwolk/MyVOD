@@ -17,6 +17,7 @@ node_modules/
 /playwright/.auth/
 myVOD/frontend/myVOD/playwright-report/*
 myVOD/frontend/myVOD/test-results/*
+availability_sync/*
 
 scenario-4-auth-state.json
 
@@ -28,3 +29,6 @@ Host
 User-Agent
 llm_response_*.json
 llm_response_*.txt
+myVOD/backend/myVOD/services/availability_sync/*
+screenshots/*
+a.py

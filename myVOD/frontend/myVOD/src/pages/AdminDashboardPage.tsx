@@ -10,6 +10,7 @@ import { useAdminMetrics } from "@/hooks/useAdminMetrics";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { AvailabilitySyncSection } from "./admin/AvailabilitySyncSection";
 
 /**
  * AdminDashboardPage component.
@@ -127,6 +128,9 @@ export function AdminDashboardPage() {
 
             {/* Error Logs Section */}
             <ErrorLogsSection />
+
+            {/* Availability Sync Section */}
+            <AvailabilitySyncSection />
           </>
         ) : null}
       </div>
